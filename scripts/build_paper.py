@@ -52,6 +52,7 @@ PAPER_SECTIONS = [
 
 BIBLIOGRAPHY = "paper/references.bib"
 LATEX_PREAMBLE = "paper/latex-preamble.tex"
+METADATA_FILE = "paper/metadata.yaml"
 
 # Supplementary Appendix A files, appended after the main text.
 # Pandoc will receive a raw-LaTeX \appendix marker before these so that
@@ -65,19 +66,10 @@ APPENDIX_SECTIONS = [
     "supplementary/E-conceptual-overview/conceptual-overview.md",
 ]
 
-# Default Pandoc metadata (can be overridden with --metadata or a YAML file)
-DEFAULT_METADATA = {
-    "title": "The Mathematics of Coexistence: A Formal Framework for Universal Ethics",
-    "author": "Keith Lostracco",
-    "documentclass": "article",
-    "geometry": "margin=1in",
-    "fontsize": "11pt",
-    # numbersections is intentionally absent: when unset, Pandoc's LaTeX template
-    # emits \setcounter{secnumdepth}{-\maxdimen}, suppressing all auto-numbering.
-    # Passing numbersections=false (string) is truthy in Mustache and re-enables it.
-    "link-citations": "true",
-    "colorlinks": "true",
-}
+# numbersections is intentionally absent from metadata.yaml: when unset, Pandoc's
+# LaTeX template emits \setcounter{secnumdepth}{-\maxdimen}, suppressing all
+# auto-numbering.  Passing numbersections=false (string) is truthy in Mustache
+# and re-enables it.
 
 
 # ---------------------------------------------------------------------------
@@ -205,8 +197,8 @@ def extract_abstract_text(root: Path) -> str:
     in_body = False
 
     for line in lines:
-        # Skip the section heading and the bold display-title line
-        if line.startswith("# ") or (line.startswith("**") and line.endswith("**")):
+        # Skip the section heading
+        if line.startswith("# "):
             continue
         # Stop at the Keywords line
         if line.startswith("**Keywords:"):
@@ -271,9 +263,13 @@ def build_pandoc_command(
     # Output
     cmd.extend(["-o", str(output)])
 
-    # Default metadata
-    for key, value in DEFAULT_METADATA.items():
-        cmd.extend(["-V", f"{key}={value}"])
+    # Paper metadata (title, author, DOI, formatting) from metadata.yaml
+    metadata_path = root / METADATA_FILE
+    if metadata_path.exists():
+        cmd.extend([f"--metadata-file={metadata_path}"])
+    else:
+        print(f"WARNING: {metadata_path} not found — title page will be empty",
+              file=sys.stderr)
 
     # Abstract metadata (renders before TOC in Pandoc's default LaTeX template)
     if abstract_file and abstract_file.exists():
@@ -382,10 +378,14 @@ def main() -> int:
     abstract_file: Path | None = None
     if abstract_text:
         abstract_file = Path(tmp_dir) / "abstract.yaml"
+        # Replace blank lines (paragraph breaks) with explicit LaTeX \par\medskip
+        # so spacing survives the abstract environment regardless of \parskip.
+        paragraphs = [p.strip() for p in abstract_text.split("\n\n") if p.strip()]
+        joined = "\n\n`\\par\\medskip`{=latex}\n\n".join(paragraphs)
         # YAML literal block scalar preserves LaTeX math and line breaks correctly
         yaml_lines = ["abstract: |"]
-        for line in abstract_text.splitlines():
-            yaml_lines.append(f"  {line}" if line else "")
+        for line in joined.splitlines():
+            yaml_lines.append(f"  {line}" if line.strip() else "  ")
         abstract_file.write_text("\n".join(yaml_lines) + "\n", encoding="utf-8")
 
     # Write a raw-LaTeX appendix marker injected before supplementary sections
