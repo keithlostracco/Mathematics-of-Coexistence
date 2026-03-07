@@ -37,13 +37,6 @@ jobs:
         run: pip install -e .
 
       # ── System: Pandoc + LaTeX ───────────────────────────────────────────
-      - name: Cache apt packages
-        uses: actions/cache@v4
-        with:
-          path: /var/cache/apt/archives
-          key: apt-texlive-${{ runner.os }}-${{ hashFiles('.github/workflows/release.yml') }}
-          restore-keys: apt-texlive-${{ runner.os }}-
-
       - name: Install Pandoc and TeX Live
         run: |
           sudo apt-get update -q
@@ -53,8 +46,6 @@ jobs:
             texlive-latex-extra \
             texlive-fonts-recommended \
             lmodern
-          # Fix permissions so the cache post-step can tar the directory
-          sudo chmod -R a+r /var/cache/apt/archives
 
       # ── Build ────────────────────────────────────────────────────────────
       - name: Create output directories

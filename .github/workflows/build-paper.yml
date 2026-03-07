@@ -30,15 +30,6 @@ jobs:
         run: pip install -e .
 
       # ── System: Pandoc + LaTeX ───────────────────────────────────────────
-      # Cache the downloaded .deb archives so repeated runs skip the
-      # network fetch.  The key rotates monthly so packages stay current.
-      - name: Cache apt packages
-        uses: actions/cache@v4
-        with:
-          path: /var/cache/apt/archives
-          key: apt-texlive-${{ runner.os }}-${{ hashFiles('.github/workflows/build-paper.yml') }}
-          restore-keys: apt-texlive-${{ runner.os }}-
-
       - name: Install Pandoc and TeX Live
         run: |
           sudo apt-get update -q
