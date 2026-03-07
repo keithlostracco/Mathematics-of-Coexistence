@@ -1,0 +1,77 @@
+name: Build Paper
+
+# Triggered on every PR targeting main, every push to main, and manually.
+# Builds the full PDF (verification → figures → pandoc/xelatex) and uploads
+# it as a downloadable artifact for 30 days.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ── Python ──────────────────────────────────────────────────────────
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Python dependencies
+        run: pip install -e .
+
+      # ── System: Pandoc + LaTeX ───────────────────────────────────────────
+      # Cache the downloaded .deb archives so repeated runs skip the
+      # network fetch.  The key rotates monthly so packages stay current.
+      - name: Cache apt packages
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt/archives
+          key: apt-texlive-${{ runner.os }}-${{ hashFiles('.github/workflows/build-paper.yml') }}
+          restore-keys: apt-texlive-${{ runner.os }}-
+
+      - name: Install Pandoc and TeX Live
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends \
+            pandoc \
+            texlive-xetex \
+            texlive-latex-extra \
+            texlive-fonts-recommended \
+            lmodern
+
+      # ── Build ────────────────────────────────────────────────────────────
+      - name: Create output directories
+        run: mkdir -p output/figures output/data
+
+      - name: Build paper (verify → figures → PDF)
+        run: python scripts/build_paper.py
+
+      - name: Build plain-language summary PDF
+        run: python scripts/build_summary.py
+
+      # ── Artifacts ────────────────────────────────────────────────────────
+      - name: Upload paper PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: paper-pdf
+          path: output/paper.pdf
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Upload summary PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: summary-pdf
+          path: output/ethics-theorem-guide.pdf
+          retention-days: 30
+          if-no-files-found: error

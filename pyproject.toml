@@ -1,0 +1,51 @@
+[project]
+name = "ethics-theorem"
+version = "1.0.0"
+description = "The Mathematics of Coexistence: A Formal Framework for Universal Ethics"
+authors = [
+    { name = "Keith Lostracco" },
+]
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.11"
+
+# Core dependencies — required to run verification scripts and generate figures
+dependencies = [
+    "sympy>=1.13",
+    "numpy>=2.0",
+    "scipy>=1.14",
+    "matplotlib>=3.9",
+]
+
+[project.optional-dependencies]
+# Full development environment (notebooks, data analysis)
+dev = [
+    "pandas>=2.2",
+    "ipykernel>=6.29",
+    "notebook>=7.2",
+]
+
+[tool.setuptools.packages.find]
+include = ["modules*"]
+
+[build-system]
+requires = ["setuptools>=75.0"]
+build-backend = "setuptools.build_meta"
+
+# ---------------------------------------------------------------------------
+# Paper build notes (Step 7D)
+# ---------------------------------------------------------------------------
+# The paper is built via Pandoc + citeproc + LaTeX.  These are system-level
+# dependencies, not Python packages:
+#
+#   Pandoc  ≥ 3.0   — https://pandoc.org/installing.html
+#   LaTeX            — TeX Live, MiKTeX, or TinyTeX
+#
+# Build command:
+#   python scripts/build_paper.py
+#
+# This invokes:
+#   pandoc paper/00-abstract.md ... paper/09-conclusion.md \
+#       --citeproc --bibliography=paper/references.bib \
+#       --pdf-engine=xelatex \
+#       -o output/paper.pdf

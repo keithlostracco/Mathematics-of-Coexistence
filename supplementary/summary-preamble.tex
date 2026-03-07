@@ -1,0 +1,38 @@
+% summary-preamble.tex
+% Included in the plain-language summary build via --include-in-header.
+% Intentionally omits \sectionbreak (\clearpage) — the summary is a
+% shorter, reader-friendly document where forced page-breaks per section
+% would be unnecessarily disruptive.
+
+% Unicode character mappings for XeLaTeX
+% The plain-language summary uses Unicode symbols directly in text mode:
+%   - Proof-step marker: ✓
+%   - Comparison operators: ≠ ≡ ≈ ≥ ≤
+%   - Greek letter shorthand: δ
+%   - Unicode superscripts for exponents: ⁰¹²³⁴⁵⁶⁷⁸⁹⁻
+%     (e.g. 10⁻⁷, 10²⁹, 10³⁵ rather than LaTeX math mode)
+% lmroman lacks these glyphs; newunicodechar routes them to proper LaTeX
+% commands so no glyph-missing warnings are emitted.
+\usepackage{amssymb}
+\usepackage{newunicodechar}
+% Proof marker and comparison operators
+\newunicodechar{✓}{$\checkmark$}
+\newunicodechar{≠}{$\neq$}
+\newunicodechar{≡}{$\equiv$}
+\newunicodechar{≈}{$\approx$}
+\newunicodechar{≥}{$\geq$}
+\newunicodechar{≤}{$\leq$}
+% Greek shorthand
+\newunicodechar{δ}{$\delta$}
+% Unicode superscript digits and minus (used for exponents like 10⁻⁷, 10²⁹)
+\newunicodechar{⁰}{$^{0}$}
+\newunicodechar{¹}{$^{1}$}
+\newunicodechar{²}{$^{2}$}
+\newunicodechar{³}{$^{3}$}
+\newunicodechar{⁴}{$^{4}$}
+\newunicodechar{⁵}{$^{5}$}
+\newunicodechar{⁶}{$^{6}$}
+\newunicodechar{⁷}{$^{7}$}
+\newunicodechar{⁸}{$^{8}$}
+\newunicodechar{⁹}{$^{9}$}
+\newunicodechar{⁻}{$^{-}$}

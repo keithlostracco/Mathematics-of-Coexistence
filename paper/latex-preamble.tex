@@ -1,0 +1,19 @@
+% latex-preamble.tex
+% Included in every build via --include-in-header
+
+% New page before each top-level section
+\usepackage{titlesec}
+\newcommand{\sectionbreak}{\clearpage}
+
+% Unicode character mappings for XeLaTeX
+% Several supplementary derivation files use Unicode symbols directly in text
+% mode (✓ as proof-step marker; ≠, ≡, ≈, δ as mathematical shorthand).
+% lmroman lacks these glyphs; newunicodechar routes them to proper LaTeX
+% commands so no glyph-missing warnings are emitted.
+\usepackage{amssymb}          % \checkmark, plus standard AMS math symbols
+\usepackage{newunicodechar}
+\newunicodechar{✓}{$\checkmark$}
+\newunicodechar{≠}{$\neq$}
+\newunicodechar{≡}{$\equiv$}
+\newunicodechar{≈}{$\approx$}
+\newunicodechar{δ}{$\delta$}

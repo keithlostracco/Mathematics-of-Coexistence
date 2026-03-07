@@ -1,0 +1,98 @@
+name: Release Paper
+
+# Triggered by pushing a revision tag (e.g. rev1, rev2, rev3).
+# Builds the PDF and creates a permanent GitHub Release with the PDF
+# attached as a named download asset.
+#
+# Workflow:
+#   1. Export from working repo  →  ethics-theorem/
+#   2. Commit + push to main
+#   3. Tag:  git tag rev1 && git push origin rev1
+#   → This workflow fires, builds, and publishes the release.
+on:
+  push:
+    tags:
+      - "rev*"
+
+permissions:
+  contents: write   # required to create GitHub Releases
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ── Python ──────────────────────────────────────────────────────────
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Python dependencies
+        run: pip install -e .
+
+      # ── System: Pandoc + LaTeX ───────────────────────────────────────────
+      - name: Cache apt packages
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt/archives
+          key: apt-texlive-${{ runner.os }}-${{ hashFiles('.github/workflows/release.yml') }}
+          restore-keys: apt-texlive-${{ runner.os }}-
+
+      - name: Install Pandoc and TeX Live
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends \
+            pandoc \
+            texlive-xetex \
+            texlive-latex-extra \
+            texlive-fonts-recommended \
+            lmodern
+
+      # ── Build ────────────────────────────────────────────────────────────
+      - name: Create output directories
+        run: mkdir -p output/figures output/data
+
+      - name: Build paper (verify → figures → PDF)
+        run: python scripts/build_paper.py
+
+      - name: Build plain-language summary PDF
+        run: python scripts/build_summary.py
+
+      # ── Rename PDFs to include version tag ──────────────────────────────
+      - name: Rename PDFs
+        run: |
+          VERSION="${{ github.ref_name }}"
+          cp output/paper.pdf "output/mathematics-of-coexistence-${VERSION}.pdf"
+          cp output/ethics-theorem-guide.pdf "output/the-ethics-theorem-plain-language-guide-${VERSION}.pdf"
+          echo "PDF_NAME=mathematics-of-coexistence-${VERSION}.pdf" >> "$GITHUB_ENV"
+          echo "SUMMARY_PDF_NAME=the-ethics-theorem-plain-language-guide-${VERSION}.pdf" >> "$GITHUB_ENV"
+
+      # ── GitHub Release ───────────────────────────────────────────────────
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "The Mathematics of Coexistence — ${{ github.ref_name }}"
+          body: |
+            **The Mathematics of Coexistence: A Formal Framework for Universal Ethics**
+            *Keith Lostracco*
+
+            ### Downloads
+
+            | File | Description |
+            |---|---|
+            | `${{ env.PDF_NAME }}` | Full paper with mathematical appendices |
+            | `${{ env.SUMMARY_PDF_NAME }}` | Plain-language guide — no equations required |
+
+            ---
+            Built automatically from source · ${{ github.sha }}
+          files: |
+            output/${{ env.PDF_NAME }}
+            output/${{ env.SUMMARY_PDF_NAME }}
+          fail_on_unmatched_files: true
+          make_latest: true
