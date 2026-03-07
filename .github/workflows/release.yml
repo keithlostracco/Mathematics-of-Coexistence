@@ -53,6 +53,8 @@ jobs:
             texlive-latex-extra \
             texlive-fonts-recommended \
             lmodern
+          # Remove root-owned files so the cache post-step can tar the directory
+          sudo rm -rf /var/cache/apt/archives/lock /var/cache/apt/archives/partial
 
       # ── Build ────────────────────────────────────────────────────────────
       - name: Create output directories
