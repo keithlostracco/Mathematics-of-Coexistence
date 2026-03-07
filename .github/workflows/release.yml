@@ -53,8 +53,8 @@ jobs:
             texlive-latex-extra \
             texlive-fonts-recommended \
             lmodern
-          # Remove root-owned files so the cache post-step can tar the directory
-          sudo rm -rf /var/cache/apt/archives/lock /var/cache/apt/archives/partial
+          # Fix permissions so the cache post-step can tar the directory
+          sudo chmod -R a+r /var/cache/apt/archives
 
       # ── Build ────────────────────────────────────────────────────────────
       - name: Create output directories
@@ -63,17 +63,17 @@ jobs:
       - name: Build paper (verify → figures → PDF)
         run: python scripts/build_paper.py
 
-      - name: Build plain-language summary PDF
-        run: python scripts/build_summary.py
+      # - name: Build plain-language summary PDF
+      #   run: python scripts/build_summary.py
 
       # ── Rename PDFs to include version tag ──────────────────────────────
       - name: Rename PDFs
         run: |
           VERSION="${{ github.ref_name }}"
           cp output/paper.pdf "output/mathematics-of-coexistence-${VERSION}.pdf"
-          cp output/ethics-theorem-guide.pdf "output/the-ethics-theorem-plain-language-guide-${VERSION}.pdf"
+          # cp output/ethics-theorem-guide.pdf "output/the-ethics-theorem-plain-language-guide-${VERSION}.pdf"
           echo "PDF_NAME=mathematics-of-coexistence-${VERSION}.pdf" >> "$GITHUB_ENV"
-          echo "SUMMARY_PDF_NAME=the-ethics-theorem-plain-language-guide-${VERSION}.pdf" >> "$GITHUB_ENV"
+          # echo "SUMMARY_PDF_NAME=the-ethics-theorem-plain-language-guide-${VERSION}.pdf" >> "$GITHUB_ENV"
 
       # ── GitHub Release ───────────────────────────────────────────────────
       - name: Create GitHub Release
@@ -89,12 +89,10 @@ jobs:
             | File | Description |
             |---|---|
             | `${{ env.PDF_NAME }}` | Full paper with mathematical appendices |
-            | `${{ env.SUMMARY_PDF_NAME }}` | Plain-language guide — no equations required |
 
             ---
             Built automatically from source · ${{ github.sha }}
           files: |
             output/${{ env.PDF_NAME }}
-            output/${{ env.SUMMARY_PDF_NAME }}
           fail_on_unmatched_files: true
           make_latest: true
