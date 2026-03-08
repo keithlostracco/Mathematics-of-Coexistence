@@ -6,7 +6,7 @@ authors = [
     { name = "Keith Lostracco" },
 ]
 readme = "README.md"
-license = { text = "MIT" }
+license = { text = "CC-BY-4.0" }
 requires-python = ">=3.11"
 
 # Core dependencies — required to run verification scripts and generate figures

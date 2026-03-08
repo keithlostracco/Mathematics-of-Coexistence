@@ -6,8 +6,8 @@ parses the per-script pass/fail totals, and prints a single summary
 table at the end.
 
 Usage:
-    python scripts/run_verification.py            # run all, show full output
-    python scripts/run_verification.py -q         # quiet mode — summary table only
+    python scripts/run_verification.py            # run all, summary table only
+    python scripts/run_verification.py -v         # verbose — show per-check output
     python scripts/run_verification.py --dry-run  # list scripts that would run
 """
 
@@ -41,14 +41,13 @@ CORE_SCRIPTS = [
     "scripts/simulations/verify_game_theory.py",
     "scripts/simulations/verify_value_dynamics.py",
     "scripts/simulations/verify_accumulated_negentropy.py",
-    # Application verification scripts (7 scripts — also generate figure data)
-    "scripts/simulations/ai-applications/verify_ai_misalignment_friction.py",
-    "scripts/simulations/ai-applications/verify_ai_deception_entropy.py",
-    "scripts/simulations/ai-applications/verify_ai_cooperative_equilibrium.py",
-    "scripts/simulations/ai-applications/verify_ai_resource_constraints.py",
-    "scripts/simulations/ai-applications/verify_ai_biosphere_preservation.py",
-    "scripts/simulations/ai-applications/verify_ai_foundation_collapse.py",
-    "scripts/simulations/human-applications/verify_power_concentration.py",
+    # Application verification scripts (6 scripts — also generate figure data)
+    "scripts/simulations/applications/verify_misalignment_friction.py",
+    "scripts/simulations/applications/verify_deception_entropy.py",
+    "scripts/simulations/applications/verify_cooperative_equilibrium.py",
+    "scripts/simulations/applications/verify_resource_constraints.py",
+    "scripts/simulations/applications/verify_biosphere_preservation.py",
+    "scripts/simulations/applications/verify_foundation_collapse.py",
 ]
 
 # Matches any of the summary formats the scripts use:
@@ -157,9 +156,9 @@ def main() -> int:
         description="Run all verification scripts and print a consolidated report.",
     )
     parser.add_argument(
-        "-q", "--quiet",
+        "-v", "--verbose",
         action="store_true",
-        help="Summary table only — suppress individual script output",
+        help="Show full per-check output for each script (default: summary only)",
     )
     parser.add_argument(
         "--dry-run",
@@ -216,7 +215,7 @@ def main() -> int:
         status = _green("PASS") if ok else _red("FAIL")
         print(f"\r  [{status}]  {name:<48}  {passed:>3}/{total:<3}  ({elapsed:.1f}s)")
 
-        if not args.quiet or not ok:
+        if args.verbose or not ok:
             # Show script's own output (always show on failure)
             for line in output.splitlines():
                 print(f"    {line}")

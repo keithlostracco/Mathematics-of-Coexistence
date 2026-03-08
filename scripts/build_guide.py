@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Build the plain-language summary PDF from Markdown using Pandoc.
+"""Build the plain-language guide PDF from Markdown using Pandoc.
 
-Converts supplementary/plain-language-summary.md into a reader-friendly
+Converts supplementary/ethics-theorem-guide.md into a reader-friendly
 standalone PDF titled:
 
     "The Ethics Theorem: Why Cooperation Is a Law of Physics"
@@ -11,13 +11,13 @@ verification suite or regenerate figures, and it uses a simpler, more
 accessible LaTeX style (larger font, generous margins, tighter ToC).
 
 Images (if any) should be placed in:
-    supplementary/plain-language-summary-images/
+    supplementary/ethics-theorem-guide-images/
 
 Usage:
-    python scripts/build_summary.py                   # defaults
-    python scripts/build_summary.py -o my_summary.pdf
-    python scripts/build_summary.py --dry-run
-    python scripts/build_summary.py --engine lualatex
+    python scripts/build_guide.py                   # defaults
+    python scripts/build_guide.py -o my_summary.pdf
+    python scripts/build_guide.py --dry-run
+    python scripts/build_guide.py --engine lualatex
 """
 
 from __future__ import annotations
@@ -30,19 +30,14 @@ from pathlib import Path
 
 SOURCE_FILE = "supplementary/ethics-theorem-guide.md"
 IMAGES_DIR = "supplementary/ethics-theorem-guide-images"
-LATEX_PREAMBLE = "supplementary/summary-preamble.tex"
+LATEX_PREAMBLE = "supplementary/guide-preamble.tex"
 DEFAULT_OUTPUT = "output/ethics-theorem-guide.pdf"
-
-TITLE = "The Ethics Theorem: Why Cooperation Is a Law of Physics"
-SUBTITLE = "A Plain-Language Guide to the Mathematics of Coexistence"
-AUTHOR = "Keith Lostracco"
 
 # Metadata tuned for a general-audience document: slightly larger font,
 # generous margins, coloured hyperlinks, no numbered sections.
+# Title, subtitle, and author are set in the YAML front matter of the
+# source .md file so that Pandoc can handle line breaks properly.
 DEFAULT_METADATA: dict[str, str] = {
-    "title": TITLE,
-    "subtitle": SUBTITLE,
-    "author": AUTHOR,
     "documentclass": "article",
     "geometry": "margin=1.25in",
     "fontsize": "12pt",
@@ -134,7 +129,6 @@ def main() -> int:
         return 0
 
     print(f"Building {output} ...")
-    print(f'  Title:  "{TITLE}"')
     print(f"  Source: {root / SOURCE_FILE}")
     print(f"  Engine: {args.engine}")
     print()

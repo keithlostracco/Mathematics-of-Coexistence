@@ -54,7 +54,7 @@ This is the mathematical formalization of Hobbes's Leviathan [@Hobbes1651, Ch. X
 
 Agents interact not once but *repeatedly*, over indefinite horizons. The key parameter is:
 
-> **Definition 20 (Discount Factor).** An agent's discount factor is $\delta = \sigma \cdot e^{-r}$, where $\sigma \in (0,1]$ is the per-period survival probability and $r \geq 0$ is the time-preference rate. For entities with long planning horizons (high $\sigma$, low $r$), $\delta \to 1$; for short-sighted agents, $\delta \to 0$.
+> **Definition 20 (Discount Factor).** An agent's discount factor is $\delta = \sigma \cdot e^{-r}$, where $\sigma \in (0,1]$ is the per-period survival probability and $r \geq 0$ is the time-preference rate. For agents with long planning horizons (high $\sigma$, low $r$), $\delta \to 1$; for short-sighted agents, $\delta \to 0$.
 
 The discount factor has direct physical content: $\sigma$ is a measurable survival probability, and $r$ captures how steeply the agent discounts future energy. Unlike the abstract "patience parameter" of standard game theory, $\delta$ is anchored to observable quantities — a falsifiable prediction.
 

@@ -7,7 +7,7 @@ Theorems 8-10, Definitions 12-18, Corollary 10.1.
 Validates all numerical claims in supplementary/D-ai-applications/deception-entropy.md
 using both symbolic (SymPy) and numerical (NumPy) computation.
 
-Run:  python scripts/simulations/ai-applications/verify_ai_deception_entropy.py
+Run:  python scripts/simulations/applications/verify_deception_entropy.py
 """
 
 from __future__ import annotations

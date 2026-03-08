@@ -7,7 +7,7 @@ Theorems 4-7, Propositions 2-3.
 Validates all numerical claims in supplementary/D-ai-applications/misalignment-friction.md
 using both symbolic (SymPy) and numerical (NumPy) computation.
 
-Run:  python scripts/simulations/ai-applications/verify_ai_misalignment_friction.py
+Run:  python scripts/simulations/applications/verify_misalignment_friction.py
 """
 
 from __future__ import annotations

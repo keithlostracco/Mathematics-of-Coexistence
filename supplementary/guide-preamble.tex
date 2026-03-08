@@ -15,6 +15,25 @@
 % commands so no glyph-missing warnings are emitted.
 \usepackage{amssymb}
 \usepackage{newunicodechar}
+
+% Typography: paragraph spacing and line height for readability.
+% parskip replaces first-line indents with inter-paragraph gaps.
+% setspace opens up line height slightly (1.2x, not 1.5x).
+% \usepackage{parskip}
+% \usepackage{setspace}
+% \setstretch{1.2}
+
+% Section spacing: generous gap above headings to visually separate
+% sections; tighter gap below so the heading stays close to its body.
+%   \titlespacing*{command}{left}{before-sep}{after-sep}
+%   body → \section:      4 lines  (clear section break)
+%   body → \subsection:   2.5 lines (clear but smaller)
+%   \section → \subsection: 0.5 + 2.5 = 3 lines (compact heading stack)
+%   heading → body text:  0.5 lines (heading stays with its content)
+\usepackage{titlesec}
+\titlespacing*{\section}{0pt}{4\baselineskip}{0.5\baselineskip}
+\titlespacing*{\subsection}{0pt}{2.5\baselineskip}{0.5\baselineskip}
+\titlespacing*{\subsubsection}{0pt}{2\baselineskip}{0.5\baselineskip}
 % Proof marker and comparison operators
 \newunicodechar{✓}{$\checkmark$}
 \newunicodechar{≠}{$\neq$}

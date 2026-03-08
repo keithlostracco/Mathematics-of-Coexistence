@@ -20,7 +20,7 @@ The total entropy of an isolated system never decreases. Maintaining highly orde
 
 **Status of $A_0$:** The Second Law is not a novel premise of this framework — it is universally accepted background physics. We label it $A_0$ for formal completeness; it introduces no assumption beyond standard physics. When we refer to the framework as resting on "one axiom," we mean $A_1$ (below) — the single conditional premise beyond background physics.
 
-**Consequence for agents:** Any localized structure that maintains internal order against the universal trend toward disorder must perform continuous thermodynamic work. Ceasing to perform this work results in boundary dissolution, entropy flooding, and the irreversible loss of the structure's organized state.[^entropy-local]
+**Consequence for entities:** Any localized structure that maintains internal order against the universal trend toward disorder must perform continuous thermodynamic work. Ceasing to perform this work results in boundary dissolution, entropy flooding, and the irreversible loss of the structure's organized state.[^entropy-local]
 
 [^entropy-local]: A reader versed in non-equilibrium thermodynamics may object that self-maintaining systems *accelerate* entropy rather than resist it: the biosphere degrades solar free energy into thermal radiation far more efficiently than bare rock. This perspective — developed by Prigogine, refined by England, and implicit in Lotka's maximum power principle — is entirely compatible with our framework. Locally, the entity must perform anti-entropic work to maintain its boundary ($\gamma_i B_i > 0$); globally, that work exports more entropy than it prevents ($\Delta S_{\text{universe}} > 0$). Our framework operates at the local scale, where the entity's optimization problem is identical regardless of whether its existence is *permitted* or *favored* by global entropy dynamics: it must still acquire free energy, maintain its boundary, and navigate multi-agent conflict. The global perspective explains *why* self-maintaining entities exist; our framework determines *how* they must interact once they do.
 
@@ -76,7 +76,7 @@ Given $A_0$ and $A_1$, each entity's fundamental drive — persistence — trans
 2. Repair any damage inflicted by external agents or environmental perturbations,
 3. Retain a surplus (profit) that buffers against future stochastic shocks.
 
-This behavioral description is formalized as the utility function $U_i(\mathbf{x}_i)$, where $\mathbf{x}_i$ is the entity's resource-allocation strategy vector (defined in §3.3 below). The entity's objective is:
+This behavioral description is formalized as the utility function $U_i(\mathbf{x}_i)$, where $\mathbf{x}_i$ is the agent's resource-allocation strategy vector (defined in §3.3 below). The agent's objective is:
 
 $$\max_{\mathbf{x}_i \geq \mathbf{0}} \; U_i(\mathbf{x}_i)$$
 

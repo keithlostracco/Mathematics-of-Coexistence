@@ -7,7 +7,7 @@ Theorems 11-16, Proposition 4, Corollaries 11.1, 13.1, 13.2, 14.1, 16.1.
 Validates all numerical claims in supplementary/D-ai-applications/cooperative-equilibrium.md
 using both symbolic (SymPy) and numerical (NumPy) computation.
 
-Run:  python scripts/simulations/ai-applications/verify_ai_cooperative_equilibrium.py
+Run:  python scripts/simulations/applications/verify_cooperative_equilibrium.py
 """
 
 from __future__ import annotations
@@ -695,7 +695,7 @@ if __name__ == "__main__":
     ])
 
     save_figure_data(
-        "cooperative_ai_equilibrium",
+        "cooperative_equilibrium",
         Phi_vals=Phi_vals,
         payoff_matrix=payoff_matrix,
         N_range=N_range_fig,

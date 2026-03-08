@@ -7,7 +7,7 @@ Theorems 17–21, Definitions 27–34, Propositions 5–7, Corollaries 18.1, 19.
 Validates all numerical claims in supplementary/D-ai-applications/biosphere-preservation.md
 using both symbolic (SymPy) and numerical (NumPy) computation.
 
-Run:  python scripts/simulations/ai-applications/verify_ai_biosphere_preservation.py
+Run:  python scripts/simulations/applications/verify_biosphere_preservation.py
 """
 
 from __future__ import annotations
@@ -548,7 +548,7 @@ if __name__ == "__main__":
     PV_gen = I_gen_rate * v_per_bit / delta_range
 
     save_figure_data(
-        "burning_library_ai",
+        "burning_library",
         # Panel (a)
         N_vals=N_vals,
         E_extract=E_extract,

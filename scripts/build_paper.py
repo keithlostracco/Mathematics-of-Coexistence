@@ -18,7 +18,7 @@ Usage:
     python scripts/build_paper.py --skip-figures     # skip figure regeneration
 
 Pre-build steps (unless skipped):
-    1. Run the mathematical verification suite (scripts/run_verification.py -q).
+    1. Run the mathematical verification suite (scripts/run_verification.py).
        Build aborts if any check fails.
     2. Regenerate all figures from scripts/figures/fig_*.py.
 """
@@ -51,7 +51,7 @@ PAPER_SECTIONS = [
 ]
 
 BIBLIOGRAPHY = "paper/references.bib"
-LATEX_PREAMBLE = "paper/latex-preamble.tex"
+LATEX_PREAMBLE = "paper/paper-preamble.tex"
 METADATA_FILE = "paper/metadata.yaml"
 
 # Supplementary Appendix A files, appended after the main text.
@@ -94,7 +94,7 @@ def run_verification(root: Path) -> bool:
     print("Running mathematical verification suite ...")
     t0 = time.time()
     result = subprocess.run(
-        [sys.executable, str(script), "-q"],
+        [sys.executable, str(script)],
         cwd=root,
     )
     elapsed = time.time() - t0
@@ -303,7 +303,7 @@ def main() -> int:
     parser.add_argument(
         "-o", "--output",
         default=None,
-        help="Output PDF path (default: output/paper.pdf)",
+        help="Output PDF path (default: output/ethics-theorem.pdf)",
     )
     parser.add_argument(
         "--engine",
@@ -340,7 +340,7 @@ def main() -> int:
     if args.output:
         output = Path(args.output)
     else:
-        output = root / "output" / "paper.pdf"
+        output = root / "output" / "ethics-theorem.pdf"
 
     # Ensure output directory exists
     output.parent.mkdir(parents=True, exist_ok=True)

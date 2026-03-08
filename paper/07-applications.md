@@ -69,7 +69,7 @@ where $\mu_{B_k,j}^* = \partial U_A^* / \partial c_{B_k,j} \geq 0$ is the shadow
 
 **Worked Example 1 (Resource Allocation):** An AI datacenter on a shared 500 MW grid with a human floor of 350 MW is constrained to $x_A^* = 150$ MW. The shadow price $\mu^* = 8.20$ utility/MW quantifies the AI's incentive to violate — a transparent alarm signal for operators.
 
-![Figure 1: Pareto Frontier of AI Utility vs. Human Allocation Guarantee. (a) AI utility vs. human floor $\bar{x}_B$. (b) Shadow price $\mu^*$ vs. human floor. (c) AI allocation $x_A^*$ with annotated Pareto frontier showing the trade-off between productive efficiency and rights protection.](output/figures/fig_ai_resource_pareto.png)
+![Figure 1: Pareto Frontier of AI Utility vs. Human Allocation Guarantee. (a) AI utility vs. human floor $\bar{x}_B$. (b) Shadow price $\mu^*$ vs. human floor. (c) AI allocation $x_A^*$ with annotated Pareto frontier showing the trade-off between productive efficiency and rights protection.](output/figures/fig_resource_pareto.png)
 
 ---
 
@@ -163,7 +163,7 @@ where:
 
 **Worked Example 4 (Biosphere Destruction):** An ASI evaluating biosphere destruction for compute infrastructure finds: extraction yields $\sim 10^{22}$ J; rebuilding would cost $\geq 10^{29}$ J; the ongoing generative stream has present value $\geq 10^{16}$ J even at aggressive discounting ($r = 0.10$). Destruction is computationally irrational by every measure.
 
-![Figure 4: The Burning-Library Inequality. (a) Log-scale comparison of extraction value vs. rebuild cost vs. search cost across biosphere, ecosystem, and species scales — the seven-order-of-magnitude gap. (b) Burning-Library ratio $\mathcal{R}_{\text{BL}}$ vs. ordering efficiency $\eta_{\text{order}}$ (sensitivity analysis). (c) Present value of generative information vs. discount rate $\delta$.](output/figures/fig_burning_library_ai.png)
+![Figure 4: The Burning-Library Inequality. (a) Log-scale comparison of extraction value vs. rebuild cost vs. search cost across biosphere, ecosystem, and species scales — the seven-order-of-magnitude gap. (b) Burning-Library ratio $\mathcal{R}_{\text{BL}}$ vs. ordering efficiency $\eta_{\text{order}}$ (sensitivity analysis). (c) Present value of generative information vs. discount rate $\delta$.](output/figures/fig_burning_library.png)
 
 ---
 
@@ -194,7 +194,7 @@ where:
 
 **Worked Example 5 (Foundation Model Ecosystem Collapse):** A foundation model at $\mathcal{M} = 10^8$ (parameter-scale $\times$ deployment) creates a dissolution threshold: once $>40\%$ of downstream training data is model-generated (synthetic data fraction $\alpha > \alpha^*$), the coexistence band collapses irreversibly (Corollary 27.2). No per-model RLHF can compensate because the *data substrate itself* is degraded — architectural coupling and data contamination create a dual-channel cascade worse than either alone.
 
-![Figure 5: Foundation Model Ecosystem Collapse. (a) Coexistence potential $V(r)$ for $\mathcal{M} = 10^2, 10^4, 10^6, 10^8$. (b) Phase diagram: band width $w$ as a function of $\mathcal{M}$ and $B_i$, with irreversible collapse zone shaded. (c) Dual-channel cascade: surviving independent models vs. time under three scenarios.](output/figures/fig_ai_foundation_collapse.png)
+![Figure 5: Foundation Model Ecosystem Collapse. (a) Coexistence potential $V(r)$ for $\mathcal{M} = 10^2, 10^4, 10^6, 10^8$. (b) Phase diagram: band width $w$ as a function of $\mathcal{M}$ and $B_i$, with irreversible collapse zone shaded. (c) Dual-channel cascade: surviving independent models vs. time under three scenarios.](output/figures/fig_foundation_collapse.png)
 
 ---
 
@@ -242,7 +242,7 @@ These guarantees apply to $\mathcal{R}$ as formally specified. Deployed approxim
 
 **(e) Complementary to Existing Methods.** The reward function does not replace RLHF, Constitutional AI, or other practical alignment techniques. It provides the *theoretical foundation* — the correct objective — that these methods attempt to approximate. RLHF can be used to fine-tune the AI's policy toward the $\mathcal{R}$-optimal strategy; Constitutional AI's principles can be derived from the formal constraints; scalable oversight's evaluation criteria can be grounded in computable energy metrics. The relationship is analogous to theoretical physics and engineering: the theory specifies what is correct; the engineering implements it.
 
-![Figure 6: Cooperative AI Equilibrium. (a) Payoff matrix across friction regimes — how increasing friction transforms the game from Prisoner's Dilemma to Harmony Game. (b) N-player cooperation threshold vs. friction — the critical discount factor $\delta^*$ decreases as friction rises. (c) Invasion barrier: expected payoff of a single defector vs. cooperator fraction, showing that defection is unprofitable above $\delta^*$.](output/figures/fig_cooperative_ai_equilibrium.png)
+![Figure 6: Cooperative AI Equilibrium. (a) Payoff matrix across friction regimes — how increasing friction transforms the game from Prisoner's Dilemma to Harmony Game. (b) N-player cooperation threshold vs. friction — the critical discount factor $\delta^*$ decreases as friction rises. (c) Invasion barrier: expected payoff of a single defector vs. cooperator fraction, showing that defection is unprofitable above $\delta^*$.](output/figures/fig_cooperative_equilibrium.png)
 
 ---
 

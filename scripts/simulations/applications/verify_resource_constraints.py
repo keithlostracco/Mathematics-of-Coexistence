@@ -7,7 +7,7 @@ Theorems 1-3, Proposition 1.
 Validates all numerical claims in supplementary/D-ai-applications/resource-constraints.md
 using both symbolic (SymPy) and numerical (SciPy) computation.
 
-Run:  python scripts/simulations/ai-applications/verify_ai_resource_constraints.py
+Run:  python scripts/simulations/applications/verify_resource_constraints.py
 """
 
 from __future__ import annotations
@@ -456,7 +456,7 @@ if __name__ == "__main__":
     U_grid = alpha * R_total - (beta / 2) * R_total**2
 
     save_figure_data(
-        "ai_resource_pareto",
+        "resource_pareto",
         x_bar_range=x_bar_range,
         x_A_star=x_A_star,
         U_A_star=U_A_star,

@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+title: "The Mathematics of Coexistence: A Formal Framework for Universal Ethics"
+message: "If you use this work, please cite it as below."
+type: article
+authors:
+  - family-names: Lostracco
+    given-names: Keith
+    orcid: "https://orcid.org/0009-0005-3106-006X"
+doi: "10.5281/zenodo.18900496"
+url: "https://github.com/keithlostracco/ethics-theorem"
+date-released: "2026-03-07"
+license: CC-BY-4.0
+keywords:
+  - formal ethics
+  - thermodynamic game theory
+  - AI alignment
+  - negentropy
+  - cooperative equilibrium
+  - constrained optimization
