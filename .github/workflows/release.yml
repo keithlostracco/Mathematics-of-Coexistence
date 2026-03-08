@@ -54,17 +54,17 @@ jobs:
       - name: Build paper (verify → figures → PDF)
         run: python scripts/build_paper.py
 
-      # - name: Build plain-language guide PDF
-      #   run: python scripts/build_guide.py
+      - name: Build plain-language guide PDF
+        run: python scripts/build_guide.py
 
       # ── Rename PDFs to include version tag ──────────────────────────────
       - name: Rename PDFs
         run: |
           VERSION="${{ github.ref_name }}"
           cp output/ethics-theorem.pdf "output/ethics-theorem-${VERSION}.pdf"
-          # cp output/ethics-theorem-guide.pdf "output/the-ethics-theorem-guide-${VERSION}.pdf"
+          cp output/ethics-theorem-guide.pdf "output/the-ethics-theorem-guide-${VERSION}.pdf"
           echo "PDF_NAME=ethics-theorem-${VERSION}.pdf" >> "$GITHUB_ENV"
-          # echo "GUIDE_PDF_NAME=the-ethics-theorem-guide-${VERSION}.pdf" >> "$GITHUB_ENV"
+          echo "GUIDE_PDF_NAME=the-ethics-theorem-guide-${VERSION}.pdf" >> "$GITHUB_ENV"
 
       # ── GitHub Release ───────────────────────────────────────────────────
       - name: Create GitHub Release
@@ -80,10 +80,12 @@ jobs:
             | File | Description |
             |---|---|
             | `${{ env.PDF_NAME }}` | Full paper with mathematical appendices |
+            | `${{ env.GUIDE_PDF_NAME }}` | Plain-language conceptual guide |
 
             ---
             Built automatically from source · ${{ github.sha }}
           files: |
             output/${{ env.PDF_NAME }}
+            output/${{ env.GUIDE_PDF_NAME }}
           fail_on_unmatched_files: true
           make_latest: true

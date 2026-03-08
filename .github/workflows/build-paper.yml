@@ -47,8 +47,8 @@ jobs:
       - name: Build paper (verify → figures → PDF)
         run: python scripts/build_paper.py
 
-      # - name: Build plain-language guide PDF
-      #   run: python scripts/build_guide.py
+      - name: Build plain-language guide PDF
+        run: python scripts/build_guide.py
 
       # ── Artifacts ────────────────────────────────────────────────────────
       - name: Upload paper PDF artifact
@@ -59,10 +59,10 @@ jobs:
           retention-days: 30
           if-no-files-found: error
 
-      # - name: Upload guide PDF artifact
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: guide-pdf
-      #     path: output/ethics-theorem-guide.pdf
-      #     retention-days: 30
-      #     if-no-files-found: error
+      - name: Upload guide PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: guide-pdf
+          path: output/ethics-theorem-guide.pdf
+          retention-days: 30
+          if-no-files-found: error
