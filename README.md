@@ -6,7 +6,7 @@
 [![Latest Release](https://img.shields.io/github/v/release/keithlostracco/ethics-theorem)](https://github.com/keithlostracco/ethics-theorem/releases/latest)
 [![Verify](https://github.com/keithlostracco/ethics-theorem/actions/workflows/build-paper.yml/badge.svg)](https://github.com/keithlostracco/ethics-theorem/actions/workflows/build-paper.yml)
 
-> **Paper PDF:** Download from [GitHub Releases](https://github.com/keithlostracco/ethics-theorem/releases/latest) or browse [`pdfs/`](pdfs/).
+> **Paper PDF:** Download from [GitHub Releases](https://github.com/keithlostracco/ethics-theorem/releases/latest) or browse [`pdf/`](pdf/).
 
 ---
 
