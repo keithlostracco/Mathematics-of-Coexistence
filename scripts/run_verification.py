@@ -35,19 +35,19 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
 # Add new scripts here to include them in the suite.
 CORE_SCRIPTS = [
     # Core mathematical derivation verification (6 scripts)
-    "scripts/simulations/verify_lagrangian_constraints.py",
-    "scripts/simulations/verify_thermodynamic_friction.py",
-    "scripts/simulations/verify_information_entropy.py",
-    "scripts/simulations/verify_game_theory.py",
-    "scripts/simulations/verify_value_dynamics.py",
-    "scripts/simulations/verify_accumulated_negentropy.py",
-    # Application verification scripts (6 scripts — also generate figure data)
-    "scripts/simulations/applications/verify_misalignment_friction.py",
-    "scripts/simulations/applications/verify_deception_entropy.py",
-    "scripts/simulations/applications/verify_cooperative_equilibrium.py",
-    "scripts/simulations/applications/verify_resource_constraints.py",
-    "scripts/simulations/applications/verify_biosphere_preservation.py",
-    "scripts/simulations/applications/verify_foundation_collapse.py",
+    "scripts/simulations/derivations/verify_lagrangian_constraints.py",
+    "scripts/simulations/derivations/verify_thermodynamic_friction.py",
+    "scripts/simulations/derivations/verify_information_entropy.py",
+    "scripts/simulations/derivations/verify_game_theory.py",
+    "scripts/simulations/derivations/verify_value_dynamics.py",
+    "scripts/simulations/derivations/verify_accumulated_negentropy.py",
+    # AI application verification scripts (6 scripts — also generate figure data)
+    "scripts/simulations/case-studies/ai/verify_misalignment_friction.py",
+    "scripts/simulations/case-studies/ai/verify_deception_entropy.py",
+    "scripts/simulations/case-studies/ai/verify_cooperative_equilibrium.py",
+    "scripts/simulations/case-studies/ai/verify_resource_constraints.py",
+    "scripts/simulations/case-studies/ai/verify_biosphere_preservation.py",
+    "scripts/simulations/case-studies/ai/verify_foundation_collapse.py",
 ]
 
 # Matches any of the summary formats the scripts use:

@@ -4,12 +4,13 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18900496.svg)](https://doi.org/10.5281/zenodo.18900496)
 [![Latest Release](https://img.shields.io/github/v/release/keithlostracco/ethics-theorem)](https://github.com/keithlostracco/ethics-theorem/releases/latest)
+[![Verify](https://github.com/keithlostracco/ethics-theorem/actions/workflows/build-paper.yml/badge.svg)](https://github.com/keithlostracco/ethics-theorem/actions/workflows/build-paper.yml)
 
-> **Paper PDF:** Download the latest revision from [GitHub Releases](https://github.com/keithlostracco/ethics-theorem/releases/latest) or [Zenodo](https://zenodo.org/records/18900496).
+> **Paper PDF:** Download from [GitHub Releases](https://github.com/keithlostracco/ethics-theorem/releases/latest) or browse [`pdfs/`](pdfs/).
 
 ---
 
-This repository contains the paper, mathematical derivations, verification scripts, and figure-generation code for *The Mathematics of Coexistence*.
+This repository is the **reproducibility package** for *The Mathematics of Coexistence*. It contains the computational verification scripts and figure-generation code that support every mathematical claim in the paper. Run them locally to reproduce all results.
 
 ## What This Paper Does
 
@@ -31,51 +32,17 @@ The framework comprises 28 theorems, 46 definitions, 13 propositions, and 2 lemm
 ## Repository Structure
 
 ```
-paper/                                Main manuscript (§0–§IX + references)
-supplementary/
-  A-mathematical-derivations/         Full proofs and derivations (5 files)
-  E-conceptual-overview/              Conceptual overview for non-mathematical readers
+pdfs/                          Pre-built paper PDF
 scripts/
-  simulations/                        Core verification scripts (6)
-  simulations/applications/           Application verification scripts (6)
-  simulations/case-studies/           Case study scripts (non-CORE)
-  figures/                            Figure-rendering scripts
-  build_paper.py                      Pandoc → PDF build script
-  generate_figures.py                 Render all figures from pre-computed data
-  run_verification.py                 Run all scripts + consolidated report
-modules/                              Python computation library
-output/
-  figures/                            Generated figures (gitignored)
-  data/                               Generated data (gitignored)
+  run_verification.py          Run all verification scripts + consolidated report
+  generate_figures.py          Render all figures from verification data
+  simulations/
+    derivations/               Core derivation verification scripts (6)
+    case-studies/ai/           AI application verification scripts (6)
+  figures/                     Figure-rendering scripts (6)
+modules/                       Python computation library
+VERIFICATION.md                Verification methodology and results summary
 ```
-
-## Paper Sections
-
-| §    | File                                   | Title                         |
-| ---- | -------------------------------------- | ----------------------------- |
-| 0    | `paper/00-abstract.md`                 | Abstract                      |
-| I    | `paper/01-introduction.md`             | Introduction                  |
-| II   | `paper/02-literature-review.md`        | Literature Review             |
-| III  | `paper/03-axioms-definitions.md`       | Axioms & Definitions          |
-| IV   | `paper/04-rights-constraints.md`       | Rights as Constraints         |
-| V    | `paper/05-ethics-equilibrium.md`       | Ethics as Equilibrium         |
-| VI   | `paper/06-stress-testing.md`           | Stress-Testing                |
-| VII  | `paper/07-applications.md`             | Applications and Implications |
-| VIII | `paper/08-limitations-scope-future.md` | Limitations, Scope & Future   |
-| IX   | `paper/09-conclusion.md`              | Conclusion                    |
-| —    | `paper/references.bib`                | Bibliography                  |
-
-## Supplementary Material
-
-**Appendix A — Mathematical Derivations.** Complete proofs for:
-
-| File                        | Domain                                                                    |
-| --------------------------- | ------------------------------------------------------------------------- |
-| `lagrangian-constraints.md` | Lagrangian formulation, shadow prices, KKT conditions                     |
-| `thermodynamic-friction.md` | Entropy production bounds, friction costs                                 |
-| `information-negentropy.md` | Information-theoretic identities, deception costs, accumulated negentropy |
-| `game-theory-payoffs.md`    | Nash equilibrium existence, δ\* threshold, cooperative surplus            |
-| `value-dynamics.md`         | Value evolution equations, inequality dynamics                            |
 
 ## Getting Started
 
@@ -83,10 +50,6 @@ output/
 
 - Python ≥ 3.11
 - [uv](https://docs.astral.sh/uv/) (recommended) or pip
-
-For building the PDF:
-- [Pandoc](https://pandoc.org/) ≥ 3.0
-- A LaTeX distribution (TeX Live, MiKTeX, or TinyTeX)
 
 ### Installation
 
@@ -105,95 +68,56 @@ All 1,191 computational checks can be run from the repository root:
 python scripts/run_verification.py
 ```
 
-This runs all 13 scripts and prints a consolidated report:
-
-```
-  FINAL REPORT
-========================================================================
-  Script                                            Passed  Failed    Time
-  ------------------------------------------------  ------  ------  ------
-  ✓ verify_lagrangian_constraints.py                    90       0    0.9s
-  ✓ verify_thermodynamic_friction.py                   172       0    0.4s
-  ✓ verify_information_entropy.py                      127       0    0.5s
-  ✓ verify_game_theory.py                              143       0    0.4s
-  ✓ verify_value_dynamics.py                           107       0    0.5s
-  ✓ verify_accumulated_negentropy.py                   105       0    0.3s
-  ✓ verify_misalignment_friction.py                    54       0    0.3s
-  ✓ verify_deception_entropy.py                        105       0    0.6s
-  ✓ verify_cooperative_equilibrium.py                   84       0    0.3s
-  ✓ verify_resource_constraints.py                      23       0    0.6s
-  ✓ verify_biosphere_preservation.py                    67       0    0.3s
-  ✓ verify_foundation_collapse.py                      114       0    0.5s
-  ------------------------------------------------  ------  ------  ------
-  TOTAL                                               1191       0    5.7s
-
-  ✓ ALL 1191/1191 CHECKS PASSED
-========================================================================
-```
-
-Pass `-v` for verbose per-check output:
-
-```bash
-python scripts/run_verification.py -v
-```
+This runs all verification scripts and prints a consolidated report. Pass `-v` for verbose per-check output.
 
 ### Verification Scripts
 
-**Core derivation scripts** verify the mathematical results in the paper and Appendix A:
+**Core derivation scripts** verify the mathematical results in the paper:
 
-| Script                              | Verifies                                                            |
-| ----------------------------------- | ------------------------------------------------------------------- |
-| `verify_lagrangian_constraints.py`  | Lagrangian formulation, shadow prices, KKT conditions (§IV)         |
-| `verify_thermodynamic_friction.py`  | Entropy production bounds, friction costs (§IV)                     |
-| `verify_information_entropy.py`     | Information-theoretic identities, deception costs (§IV)             |
-| `verify_game_theory.py`             | Nash equilibrium existence, δ\* threshold, cooperative surplus (§V) |
-| `verify_value_dynamics.py`          | Value evolution equations, inequality dynamics (§V)                 |
-| `verify_accumulated_negentropy.py`  | Negentropy integrals, destruction-irrationality ratio (§V)          |
+| Script | Verifies |
+| --- | --- |
+| `verify_lagrangian_constraints.py` | Lagrangian formulation, shadow prices, KKT conditions (§IV) |
+| `verify_thermodynamic_friction.py` | Entropy production bounds, friction costs (§IV) |
+| `verify_information_entropy.py` | Information-theoretic identities, deception costs (§IV) |
+| `verify_game_theory.py` | Nash equilibrium existence, δ\* threshold, cooperative surplus (§V) |
+| `verify_value_dynamics.py` | Value evolution equations, inequality dynamics (§V) |
+| `verify_accumulated_negentropy.py` | Negentropy integrals, destruction-irrationality ratio (§V) |
 
 **Application scripts** verify the applied results in §VII and generate figure data:
 
-| Script                                 | Verifies                                            |
-| -------------------------------------- | --------------------------------------------------- |
-| `verify_misalignment_friction.py`      | Reward-hacking friction landscape (§VII)            |
-| `verify_deception_entropy.py`          | Deception-entropy cost surface (§VII)               |
-| `verify_cooperative_equilibrium.py`    | Cooperative equilibrium basin of attraction (§VII)  |
-| `verify_resource_constraints.py`       | Resource-allocation Pareto frontier (§VII)          |
-| `verify_biosphere_preservation.py`     | Burning-library negentropy visualization (§VII)     |
-| `verify_foundation_collapse.py`        | Foundation model ecosystem collapse (§VII)          |
+| Script | Verifies |
+| --- | --- |
+| `verify_misalignment_friction.py` | Reward-hacking friction landscape |
+| `verify_deception_entropy.py` | Deception-entropy cost surface |
+| `verify_cooperative_equilibrium.py` | Cooperative equilibrium basin of attraction |
+| `verify_resource_constraints.py` | Resource-allocation Pareto frontier |
+| `verify_biosphere_preservation.py` | Burning-library negentropy visualization |
+| `verify_foundation_collapse.py` | Foundation model ecosystem collapse |
 
 ### Generating Figures
 
-Figure scripts render from JSON data generated by the verification suite in `output/data/`:
+Verification scripts write intermediate data to `output/data/`. Figure scripts then render from that data:
 
 ```bash
-python scripts/generate_figures.py   # render all figures
+python scripts/run_verification.py    # produces output/data/*.json
+python scripts/generate_figures.py    # produces output/figures/*.png
 ```
-
-Figures are written to `output/figures/`.
-
-### Building the PDF
-
-```bash
-python scripts/build_paper.py
-```
-
-This runs verification, generates figures, then calls Pandoc with `--citeproc` to render all `[@BibKey]` citations from `paper/references.bib` and produces `output/ethics-theorem.pdf`. See `python scripts/build_paper.py --help` for options.
 
 ## Computational Library
 
 The `modules/` package provides reusable implementations of the framework's core mathematics:
 
-| Module              | Purpose                                                                |
-| ------------------- | ---------------------------------------------------------------------- |
-| `lagrangian.py`     | Constrained optimization and shadow-price computation                  |
-| `thermodynamics.py` | Entropy production and thermodynamic friction                          |
-| `information.py`    | Information-theoretic measures and deception costs                     |
-| `game_theory.py`    | Nash equilibrium and cooperative surplus calculations                  |
-| `value_dynamics.py` | Value evolution and inequality dynamics                                |
-| `negentropy.py`     | Accumulated negentropy and destruction-irrationality                   |
-| `plotting.py`       | Shared visualization utilities                                         |
-| `figure_data.py`    | Save/load figure data (JSON) between verify and figure scripts         |
-| `verify.py`         | Test harness (`check()` / `section()` helpers)                         |
+| Module | Purpose |
+| --- | --- |
+| `lagrangian.py` | Constrained optimization and shadow-price computation |
+| `thermodynamics.py` | Entropy production and thermodynamic friction |
+| `information.py` | Information-theoretic measures and deception costs |
+| `game_theory.py` | Nash equilibrium and cooperative surplus calculations |
+| `value_dynamics.py` | Value evolution and inequality dynamics |
+| `negentropy.py` | Accumulated negentropy and destruction-irrationality |
+| `plotting.py` | Shared visualization utilities |
+| `figure_data.py` | Save/load figure data (JSON) between verify and figure scripts |
+| `verify.py` | Test harness (`check()` / `section()` helpers) |
 
 ## License
 
