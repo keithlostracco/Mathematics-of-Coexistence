@@ -1,7 +1,8 @@
 name: Verify
 
 # Runs all computational verification checks on every push/PR to main.
-# No Pandoc or LaTeX needed — the PDF is pre-built and committed to pdfs/.
+# PDFs are built from tex/ during release; this workflow only validates
+# the mathematical verification suite and figure generation pipeline.
 on:
   push:
     branches: [main]

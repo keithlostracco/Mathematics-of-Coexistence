@@ -1,8 +1,8 @@
 name: Release
 
 # Triggered by pushing a revision tag (e.g. rev1, rev2, rev3).
-# Runs verification, then creates a GitHub Release with all pre-built
-# PDFs from pdf/ attached as download assets.
+# Runs verification, builds PDFs from committed TeX sources via latexmk,
+# then creates a GitHub Release with PDFs attached.
 on:
   push:
     tags:
@@ -14,7 +14,7 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
@@ -31,6 +31,30 @@ jobs:
 
       - name: Run all verification checks
         run: python scripts/run_verification.py
+
+      - name: Install TeX Live
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            texlive-latex-extra texlive-fonts-recommended \
+            texlive-science texlive-plain-generic latexmk
+
+      - name: Build PDFs from TeX sources
+        run: |
+          mkdir -p pdf
+          for paperdir in tex/*/paper/; do
+            if [ -d "$paperdir" ]; then
+              paper=$(basename "$(dirname "$paperdir")")
+              main_tex=$(grep -rl '\\begin{document}' "$paperdir" | head -1)
+              if [ -n "$main_tex" ]; then
+                echo "::group::Building $paper"
+                (cd "$paperdir" && latexmk -pdf -interaction=nonstopmode \
+                  "$(basename "$main_tex")")
+                cp "$paperdir"*.pdf pdf/ 2>/dev/null || true
+                echo "::endgroup::"
+              fi
+            fi
+          done
 
       # ── GitHub Release ──────────────────────────────────────────────────
       - name: Create GitHub Release

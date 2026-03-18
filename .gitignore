@@ -6,7 +6,10 @@ __pycache__/
 dist/
 build/
 
-# Generated output (run verification + figures locally to reproduce)
+# Built PDFs (reproducible from tex/ via latexmk)
+pdf/
+
+# Generated output (run verification locally to reproduce)
 output/
 
 # OS
