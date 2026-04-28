@@ -12,7 +12,12 @@ Run:  python scripts/simulations/verify_accumulated_negentropy.py
 from __future__ import annotations
 
 import sys
+import os
 import math
+
+if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', '..'))
 
 import numpy as np
 import sympy as sp
@@ -533,6 +538,39 @@ def verify_generative_info() -> None:
           PV_small_delta > PV_gen * 10,
           f"PV(δ=0.001) = {PV_small_delta:.2e} >> PV(δ=0.05) = {PV_gen:.2e}")
 
+    # Corollary: numerical bound on PV_gen for biosphere-scale parameters
+    # I_dot ∈ [1e4, 1e6] bits/yr, v ∈ [1e9, 1e14] J/bit, r ∈ [0.01, 0.1] /yr
+    I_dot_min, I_dot_max = 1e4, 1e6
+    v_min, v_max = 1e9, 1e14
+    r_min, r_max = 0.01, 0.05
+
+    PV_lower = I_dot_min * v_min / r_max  # = 1e4 * 1e9 / 0.05 = 2e14
+    PV_upper = I_dot_max * v_max / r_min  # = 1e6 * 1e14 / 0.01 = 1e22
+
+    check("PV_gen lower-bound corner ≈ 2e14 J",
+          np.isclose(np.log10(PV_lower), np.log10(2e14), atol=0.5),
+          f"PV_lower = {PV_lower:.2e} J")
+    check("PV_gen upper-bound corner ≈ 1e22 J",
+          np.isclose(np.log10(PV_upper), 22, atol=0.5),
+          f"PV_upper = {PV_upper:.2e} J")
+    check("PV bound finite for any r > 0 (Corollary cor-generative-pv-bound)",
+          np.isfinite(PV_upper) and PV_upper > 0,
+          f"PV_upper = {PV_upper:.2e} J < ∞")
+
+    # Burning-Library Ratio robust to inclusion of flow term:
+    # E_destroy / (N_bio + PV_gen) ≈ E_destroy / N_bio across full parameter range
+    N_bio_val = 1e29
+    E_destroy_val = 1e22
+    R_BL_stock = E_destroy_val / N_bio_val
+    R_BL_with_flow_lo = E_destroy_val / (N_bio_val + PV_lower)
+    R_BL_with_flow_hi = E_destroy_val / (N_bio_val + PV_upper)
+    check("Burning-Library Ratio robust at lower PV corner (rel. change < 1%)",
+          abs(R_BL_with_flow_lo - R_BL_stock) / R_BL_stock < 1e-2,
+          f"R_BL = {R_BL_with_flow_lo:.3e} vs stock-only {R_BL_stock:.3e}")
+    check("Burning-Library Ratio robust at upper PV corner (rel. change < 1%)",
+          abs(R_BL_with_flow_hi - R_BL_stock) / R_BL_stock < 1e-2,
+          f"R_BL = {R_BL_with_flow_hi:.3e} vs stock-only {R_BL_stock:.3e}")
+
     # Total preservation value (stock + flow)
     N_bio = 1e29
     V_total = N_bio + PV_gen
@@ -923,6 +961,736 @@ def verify_stress_tests() -> None:
 
 
 # ===========================================================================
+# 19. Rate-Stock Coupling & Superlinear Destruction Penalty
+#     (Definition def-rate-stock-coupling, Proposition prop-superlinear-destruction-penalty)
+# ===========================================================================
+
+def verify_rate_stock_coupling() -> None:
+    section("19. Rate-Stock Coupling & Superlinear Destruction Penalty")
+
+    # ---- Definition: g(N) = alpha * N^beta with beta > 1 ----
+
+    alpha = 1e-20   # coupling coefficient (units chosen so g gives bits/s)
+    beta = 1.5      # superlinear exponent
+
+    # g(0) = 0
+    g_zero = alpha * 0.0 ** beta
+    check("g(0) = 0 (no complexity → no generation)",
+          g_zero == 0.0,
+          f"g(0) = {g_zero}")
+
+    # g'(N) = alpha * beta * N^(beta-1) > 0 for N > 0
+    N_test = 1e29
+    g_prime = alpha * beta * N_test ** (beta - 1)
+    check("g'(N) > 0 for N > 0 (more complexity → faster generation)",
+          g_prime > 0,
+          f"g'({N_test:.0e}) = {g_prime:.3e}")
+
+    # Superlinearity: g(N)/N is strictly increasing
+    # d/dN [g(N)/N] = alpha * (beta - 1) * N^(beta - 2) > 0 for beta > 1
+    d_ratio = alpha * (beta - 1) * N_test ** (beta - 2)
+    check("d/dN [g(N)/N] > 0 for β > 1 (superlinearity)",
+          d_ratio > 0,
+          f"d/dN [g/N] = {d_ratio:.3e}")
+
+    # Verify g(N) at two scales: g(2N)/g(N) > 2 for superlinear
+    g_N = alpha * N_test ** beta
+    g_2N = alpha * (2 * N_test) ** beta
+    ratio_g = g_2N / g_N
+    check("g(2N)/g(N) > 2 (superlinear doubling test)",
+          ratio_g > 2.0,
+          f"g(2N)/g(N) = {ratio_g:.3f}, expected > 2 (= 2^{beta} = {2**beta:.3f})")
+
+    check("g(2N)/g(N) = 2^β (power-law consistency)",
+          np.isclose(ratio_g, 2 ** beta, rtol=1e-10),
+          f"ratio = {ratio_g:.6f}, 2^β = {2**beta:.6f}")
+
+    # ---- Module function consistency ----
+    from modules.negentropy import rate_stock_generative_rate
+    g_module = rate_stock_generative_rate(N_test, alpha, beta)
+    check("Module rate_stock_generative_rate matches manual calc",
+          np.isclose(g_module, g_N),
+          f"module = {g_module:.3e}, manual = {g_N:.3e}")
+
+    # ---- Proposition: Superlinear destruction penalty ----
+    v = 1e9       # J/bit
+    r = 0.05      # discount rate
+
+    # PV before destruction
+    PV_0 = alpha * v * N_test ** beta / r
+    check("PV_0 = alpha * v * N^β / r > 0",
+          PV_0 > 0,
+          f"PV_0 = {PV_0:.3e} J")
+
+    # Test at multiple destruction fractions
+    # Correct inequality: 1 - (1-λ)^β > λ for β > 1, λ ∈ (0,1)
+    # This is the meaningful superlinearity result: flow loss fraction
+    # exceeds the stock loss fraction.
+    # Proof: (1-λ)^β < (1-λ) for 0 < 1-λ < 1, β > 1
+    #        => 1-(1-λ)^β > 1-(1-λ) = λ
+    for lam in [0.01, 0.1, 0.25, 0.5, 0.75, 0.99]:
+        # PV after destruction
+        PV_1 = alpha * v * ((1 - lam) * N_test) ** beta / r
+        delta_PV = PV_0 - PV_1
+        fractional_loss = 1.0 - (1.0 - lam) ** beta
+
+        # Core inequality: fractional flow loss > fractional stock loss
+        check(f"λ={lam}: frac_flow_loss={fractional_loss:.4f} > λ={lam:.4f}",
+              fractional_loss > lam,
+              f"gap = {fractional_loss - lam:.4f}")
+
+        # Verify ΔPV formula
+        delta_PV_formula = PV_0 * fractional_loss
+        check(f"λ={lam}: ΔPV formula matches direct calculation",
+              np.isclose(delta_PV, delta_PV_formula, rtol=1e-10),
+              f"direct = {delta_PV:.3e}, formula = {delta_PV_formula:.3e}")
+
+    # ---- Concavity: f(λ) = 1 - (1-λ)^β is strictly concave for β > 1 ----
+    # f''(λ) = -β(β-1)(1-λ)^(β-2) < 0
+    for lam in [0.1, 0.5, 0.9]:
+        f_double_prime = -beta * (beta - 1) * (1 - lam) ** (beta - 2)
+        check(f"f''(λ={lam}) < 0 (strict concavity, corrected sign)",
+              f_double_prime < 0,
+              f"f'' = {f_double_prime:.4f}")
+
+    # ---- Total destruction cost: stock + capitalized flow ----
+    from modules.negentropy import superlinear_destruction_penalty
+    lam_test = 0.1
+    result = superlinear_destruction_penalty(
+        negentropy=N_test, lam=lam_test, alpha=alpha,
+        beta=beta, value_per_bit=v, discount_rate=r,
+    )
+    stock_expected = lam_test * N_test
+    check(f"Stock loss (λ={lam_test}): module matches",
+          np.isclose(result["stock_loss"], stock_expected),
+          f"module = {result['stock_loss']:.3e}, expected = {stock_expected:.3e}")
+
+    check(f"Flow loss > 0",
+          result["flow_loss"] > 0,
+          f"flow_loss = {result['flow_loss']:.3e}")
+
+    check(f"Total cost = stock + flow",
+          np.isclose(result["total_cost"],
+                     result["stock_loss"] + result["flow_loss"]),
+          f"total = {result['total_cost']:.3e}")
+
+    check(f"Fractional flow loss > λ (superlinearity via module)",
+          result["fractional_flow_loss"] > lam_test,
+          f"{result['fractional_flow_loss']:.4f} > {lam_test}")
+
+    # ---- Symbolic verification of key properties ----
+    lam_sym = sp.Symbol("lambda", positive=True)
+    beta_sym = sp.Symbol("beta")
+
+    f_sym = 1 - (1 - lam_sym) ** beta_sym
+    f_prime = sp.diff(f_sym, lam_sym)
+    f_double_prime_sym = sp.diff(f_sym, lam_sym, 2)
+
+    # f'(0) = beta
+    f_prime_at_0 = f_prime.subs(lam_sym, 0)
+    check("Symbolic: f'(0) = β",
+          sp.simplify(f_prime_at_0 - beta_sym) == 0,
+          f"f'(0) = {f_prime_at_0}")
+
+    # f''(λ) = -β(β-1)(1-λ)^(β-2) — verify sign at concrete values
+    f_pp_numeric = float(f_double_prime_sym.subs({lam_sym: 0.5, beta_sym: 1.5}))
+    f_pp_expected = -1.5 * 0.5 * 0.5 ** (1.5 - 2)  # -β(β-1)(1-λ)^(β-2)
+    check("Symbolic f'' matches corrected analytic formula (negative)",
+          np.isclose(f_pp_numeric, f_pp_expected, rtol=1e-6),
+          f"symbolic = {f_pp_numeric:.6f}, analytic = {f_pp_expected:.6f}")
+
+    # ---- Stress test: vary β — verify f(λ) > λ holds across exponents ----
+    for beta_val in [1.1, 1.5, 2.0, 3.0]:
+        lam_val = 0.2
+        frac_loss = 1.0 - (1.0 - lam_val) ** beta_val
+        check(f"β={beta_val}, λ={lam_val}: frac_loss={frac_loss:.4f} > λ={lam_val}",
+              frac_loss > lam_val,
+              f"gap = {frac_loss - lam_val:.6f}")
+
+    # ---- Historical note ----
+    # The original draft of prop-superlinear-destruction-penalty contained
+    # sign and inequality errors (f''(λ) sign, claim f(λ) > βλ, convexity).
+    # These were caught by this verification script and corrected in the
+    # paper. The current paper text is consistent with all tests above.
+
+
+# ===========================================================================
+# 20. Tipping Point & Maximum Sustainable Extraction
+#     (Proposition prop-negentropy-tipping-point,
+#      Corollary cor-maximum-sustainable-extraction)
+# ===========================================================================
+
+def verify_tipping_point() -> None:
+    section("20. Tipping Point & Maximum Sustainable Extraction")
+
+    from modules.negentropy import (
+        tipping_threshold,
+        tipping_destruction_fraction,
+        max_sustainable_extraction,
+        negentropy_dynamics,
+    )
+
+    # ---- Parameters ----
+    alpha = 1e-20   # coupling coefficient
+    beta = 1.5      # superlinear exponent
+    delta = 1e-10   # specific entropic decay rate (s^-1)
+
+    # ---- Proposition (a): N_c = (delta/alpha)^(1/(beta-1)) ----
+    N_c = (delta / alpha) ** (1.0 / (beta - 1.0))
+    N_c_module = tipping_threshold(alpha, beta, delta)
+
+    check("N_c formula: (delta/alpha)^(1/(beta-1))",
+          np.isclose(N_c_module, N_c),
+          f"module = {N_c_module:.3e}, manual = {N_c:.3e}")
+
+    check("N_c > 0",
+          N_c > 0,
+          f"N_c = {N_c:.3e}")
+
+    # At N_c: alpha * N_c^beta = delta * N_c (generation equals decay)
+    gen_at_Nc = alpha * N_c ** beta
+    decay_at_Nc = delta * N_c
+    check("At N_c: generation = decay (alpha*N_c^beta = delta*N_c)",
+          np.isclose(gen_at_Nc, decay_at_Nc, rtol=1e-10),
+          f"gen = {gen_at_Nc:.3e}, decay = {decay_at_Nc:.3e}")
+
+    # ---- Proposition (a): F(N) < 0 for N < N_c ----
+    for frac in [0.01, 0.1, 0.5, 0.9, 0.99]:
+        N_below = frac * N_c
+        F_below = alpha * N_below ** beta - delta * N_below
+        check(f"F(N={frac}*N_c) < 0 (below tipping point)",
+              F_below < 0,
+              f"F = {F_below:.3e}")
+
+    # ---- F(N) > 0 for N > N_c ----
+    for mult in [1.01, 1.1, 2.0, 10.0, 100.0]:
+        N_above = mult * N_c
+        F_above = alpha * N_above ** beta - delta * N_above
+        check(f"F(N={mult}*N_c) > 0 (above tipping point)",
+              F_above > 0,
+              f"F = {F_above:.3e}")
+
+    # ---- F(N_c) = 0 exactly ----
+    F_at_Nc = alpha * N_c ** beta - delta * N_c
+    check("F(N_c) = 0 (boundary)",
+          np.isclose(F_at_Nc, 0.0, atol=1e-20),
+          f"F(N_c) = {F_at_Nc:.3e}")
+
+    # ---- Proposition (b): lambda* = 1 - N_c/N_0 ----
+    N_0 = 1e29  # biosphere-scale
+    lam_star = 1.0 - N_c / N_0
+    lam_star_module = tipping_destruction_fraction(N_0, alpha, beta, delta)
+
+    check("lambda* formula matches module",
+          np.isclose(lam_star, lam_star_module),
+          f"manual = {lam_star:.10f}, module = {lam_star_module:.10f}")
+
+    check("lambda* in (0, 1)",
+          0 < lam_star < 1,
+          f"lambda* = {lam_star}")
+
+    # After destroying lambda*, stock = N_c (just at boundary)
+    N_after_star = (1 - lam_star) * N_0
+    check("After lambda* destruction: stock = N_c",
+          np.isclose(N_after_star, N_c, rtol=1e-6),
+          f"N_after = {N_after_star:.3e}, N_c = {N_c:.3e}")
+
+    # After destroying more than lambda*, stock < N_c
+    lam_over = lam_star + 0.001 * (1 - lam_star)  # slightly more
+    N_after_over = (1 - lam_over) * N_0
+    check("Destroying > lambda*: stock < N_c (collapse)",
+          N_after_over < N_c,
+          f"N_after = {N_after_over:.3e} < N_c = {N_c:.3e}")
+
+    # ---- Proposition (c): self-reinforcing decline below N_c ----
+    # The per-unit decay rate |dN/dt|/N = |delta - alpha*N^(beta-1)| INCREASES
+    # as N decreases below N_c (the relative rate accelerates).
+    N_seq = [0.9 * N_c, 0.5 * N_c, 0.1 * N_c]
+    relative_rates = [abs(alpha * N ** beta - delta * N) / N for N in N_seq]
+    check("Relative decline |dN/dt|/N increases as N decreases below N_c",
+          all(relative_rates[i] <= relative_rates[i+1]
+              for i in range(len(relative_rates)-1)),
+          f"rates = {[f'{r:.3e}' for r in relative_rates]}")
+
+    # ---- Corollary: h*(N) = alpha*N^beta - delta*N ----
+    h_star = alpha * N_0 ** beta - delta * N_0
+    h_star_module = max_sustainable_extraction(N_0, alpha, beta, delta)
+
+    check("h*(N_0) formula matches module",
+          np.isclose(h_star, h_star_module),
+          f"manual = {h_star:.3e}, module = {h_star_module:.3e}")
+
+    check("h*(N_0) > 0 for N_0 > N_c",
+          h_star > 0,
+          f"h* = {h_star:.3e}")
+
+    # h* = 0 for N <= N_c
+    h_at_Nc = max_sustainable_extraction(N_c, alpha, beta, delta)
+    check("h*(N_c) = 0 (no extraction at tipping point)",
+          h_at_Nc == 0.0,
+          f"h*(N_c) = {h_at_Nc}")
+
+    h_below = max_sustainable_extraction(0.5 * N_c, alpha, beta, delta)
+    check("h*(N < N_c) = 0 (already collapsing)",
+          h_below == 0.0,
+          f"h*(0.5*N_c) = {h_below}")
+
+    # ---- Dynamics: dN/dt with extraction ----
+    # At h = h*, dN/dt = 0 (steady state)
+    dNdt_at_hstar = negentropy_dynamics(N_0, alpha, beta, delta, h=h_star)
+    check("dN/dt = 0 at h = h* (steady state)",
+          np.isclose(dNdt_at_hstar, 0.0, atol=1e-10),
+          f"dN/dt = {dNdt_at_hstar:.3e}")
+
+    # At h > h*, dN/dt < 0 (decline)
+    h_over = h_star * 1.1
+    dNdt_over = negentropy_dynamics(N_0, alpha, beta, delta, h=h_over)
+    check("dN/dt < 0 at h > h* (over-extraction)",
+          dNdt_over < 0,
+          f"dN/dt = {dNdt_over:.3e}")
+
+    # At h = 0, N > N_c: dN/dt > 0 (system grows)
+    dNdt_zero_h = negentropy_dynamics(N_0, alpha, beta, delta, h=0)
+    check("dN/dt > 0 at h=0, N > N_c (system grows)",
+          dNdt_zero_h > 0,
+          f"dN/dt = {dNdt_zero_h:.3e}")
+
+    # At h = 0, N < N_c: dN/dt < 0 (system collapses)
+    dNdt_below = negentropy_dynamics(0.5 * N_c, alpha, beta, delta, h=0)
+    check("dN/dt < 0 at h=0, N < N_c (collapse even without extraction)",
+          dNdt_below < 0,
+          f"dN/dt = {dNdt_below:.3e}")
+
+    # ---- Symbolic verification ----
+    N_sym = sp.Symbol("N", positive=True)
+    a_sym = sp.Symbol("alpha", positive=True)
+    b_sym = sp.Symbol("beta")
+    d_sym = sp.Symbol("delta", positive=True)
+
+    F_sym = a_sym * N_sym ** b_sym - d_sym * N_sym
+    N_c_sym = (d_sym / a_sym) ** (1 / (b_sym - 1))
+
+    # Verify F(N_c) = 0 symbolically (use numerical evaluation since
+    # SymPy struggles to simplify the nested power expression)
+    F_at_Nc_numeric = float(F_sym.subs(
+        {N_sym: N_c_sym, a_sym: alpha, b_sym: beta, d_sym: delta}))
+    check("Symbolic: F(N_c) evaluates to 0 numerically",
+          np.isclose(F_at_Nc_numeric, 0.0, atol=1e-20),
+          f"F(N_c) = {F_at_Nc_numeric:.3e}")
+
+    # Verify dF/dN at N_c
+    dF_dN = sp.diff(F_sym, N_sym)
+    # dF/dN = alpha*beta*N^(beta-1) - delta
+    # At N_c: alpha*beta*N_c^(beta-1) - delta = beta*delta - delta = delta*(beta-1) > 0
+    dF_at_Nc = float(dF_dN.subs(
+        {N_sym: N_c, a_sym: alpha, b_sym: beta, d_sym: delta}))
+    expected_dF = delta * (beta - 1)
+    check("Symbolic: dF/dN at N_c = delta*(beta-1) > 0 (unstable equilibrium)",
+          np.isclose(dF_at_Nc, expected_dF, rtol=1e-6),
+          f"dF/dN = {dF_at_Nc:.6e}, expected = {expected_dF:.6e}")
+
+    # ---- Stress test: vary beta ----
+    for beta_val in [1.1, 1.5, 2.0, 3.0]:
+        N_c_test = (delta / alpha) ** (1.0 / (beta_val - 1.0))
+        # Verify F < 0 below, F > 0 above
+        F_below = alpha * (0.5 * N_c_test) ** beta_val - delta * (0.5 * N_c_test)
+        F_above = alpha * (2.0 * N_c_test) ** beta_val - delta * (2.0 * N_c_test)
+        check(f"beta={beta_val}: F(0.5*N_c) < 0 and F(2*N_c) > 0",
+              F_below < 0 and F_above > 0,
+              f"F_below={F_below:.3e}, F_above={F_above:.3e}")
+
+    # ---- Stress test: vary delta ----
+    for delta_val in [1e-12, 1e-10, 1e-8]:
+        N_c_test = (delta_val / alpha) ** (1.0 / (beta - 1.0))
+        # Higher delta => higher N_c (more decay => need more stock)
+        check(f"delta={delta_val:.0e}: N_c = {N_c_test:.3e}",
+              N_c_test > 0,
+              f"N_c scales with delta")
+
+    # Higher delta => higher N_c
+    N_c_low_delta = (1e-12 / alpha) ** (1.0 / (beta - 1.0))
+    N_c_high_delta = (1e-8 / alpha) ** (1.0 / (beta - 1.0))
+    check("Higher delta => higher N_c (more decay needs more stock)",
+          N_c_high_delta > N_c_low_delta,
+          f"N_c(1e-8)={N_c_high_delta:.3e} > N_c(1e-12)={N_c_low_delta:.3e}")
+
+
+# ===========================================================================
+# 21. Chaisson Cross-Validation (§5.5)
+# ===========================================================================
+
+def verify_chaisson_cross_validation() -> None:
+    """Verify the Chaisson energy rate density cross-validation of §5.5."""
+    section("21. Chaisson Cross-Validation (§5.5)")
+
+    # --- Paper constants ---
+    P_GPP = 1.5e14        # W, gross primary production
+    M_bio_C = 5.5e14      # kg, total biosphere carbon mass (Bar-On 2018)
+    eta_order = 0.01       # ordering efficiency
+    T_bio = 4e9 * 3.156e7  # s, biosphere age
+
+    # --- Chaisson Φ_m values (W/kg) ---
+    phi_m_plants = 0.1
+    phi_m_animals = 4.0
+    phi_m_bacteria = 1.5   # intermediate between plants and animals
+
+    # --- Effective biosphere-average Φ_m ---
+    phi_m_eff = P_GPP / M_bio_C
+    check("Effective ⟨Φ_m⟩ = P_GPP / M_bio^C ≈ 0.27 W/kg",
+          np.isclose(phi_m_eff, 0.27, rtol=0.05),
+          f"⟨Φ_m⟩_eff = {phi_m_eff:.3f} W/kg")
+
+    # Verify it falls between plant and animal values
+    check("⟨Φ_m⟩_eff between plant (0.1) and animal (4) values",
+          phi_m_plants < phi_m_eff < phi_m_animals,
+          f"{phi_m_plants} < {phi_m_eff:.3f} < {phi_m_animals}")
+
+    # Closer to plants (as expected for plant-dominated biosphere)
+    log_dist_to_plants = np.log10(phi_m_eff / phi_m_plants)
+    log_dist_to_animals = np.log10(phi_m_animals / phi_m_eff)
+    check("⟨Φ_m⟩_eff closer to plants on log scale",
+          log_dist_to_plants < log_dist_to_animals,
+          f"log-dist to plants={log_dist_to_plants:.2f}, "
+          f"to animals={log_dist_to_animals:.2f}")
+
+    # --- Chaisson-weighted estimate ---
+    phi_m_chaisson = 0.2  # mass-weighted mean from paper §5.5
+    P_bio_chaisson = M_bio_C * phi_m_chaisson
+    check("P_bio^Chaisson = M_bio × ⟨Φ_m⟩_Chaisson ≈ 1.1×10¹⁴ W",
+          np.isclose(P_bio_chaisson, 1.1e14, rtol=0.05),
+          f"P_bio^Chaisson = {P_bio_chaisson:.2e} W")
+
+    # Chaisson-derived power agrees with GPP within 30%
+    power_ratio = P_GPP / P_bio_chaisson
+    check("GPP / P_bio^Chaisson agrees within 30%",
+          0.7 < power_ratio < 1.5,
+          f"ratio = {power_ratio:.2f}")
+
+    # --- Chaisson-derived accumulated negentropy ---
+    N_chaisson = 0.5 * eta_order * P_bio_chaisson * T_bio
+    N_top_down = 0.5 * eta_order * P_GPP * T_bio
+
+    check("N_bio^Chaisson ≈ 6.9×10²⁸ J",
+          np.isclose(N_chaisson, 6.9e28, rtol=0.05),
+          f"N_bio^Chaisson = {N_chaisson:.2e} J")
+
+    check("N_bio^top-down ≈ 9.5×10²⁸ J",
+          np.isclose(N_top_down, 9.45e28, rtol=0.05),
+          f"N_bio^top-down = {N_top_down:.2e} J")
+
+    # Agreement factor
+    agreement_factor = N_top_down / N_chaisson
+    check("Top-down / Chaisson agreement factor ≈ 1.4",
+          1.0 < agreement_factor < 2.0,
+          f"factor = {agreement_factor:.2f}")
+
+    # Both are order 10²⁸-10²⁹
+    check("Both estimates are O(10²⁸–10²⁹) J",
+          28 <= np.log10(N_chaisson) <= 29.5 and
+          28 <= np.log10(N_top_down) <= 29.5,
+          f"log10(N_C) = {np.log10(N_chaisson):.2f}, "
+          f"log10(N_TD) = {np.log10(N_top_down):.2f}")
+
+    # --- Chaisson's Φ_m hierarchy ---
+    # Verify monotonic increase with complexity
+    phi_hierarchy = [0.00001, 0.0002, 0.007, 0.1, 4, 50]
+    labels = ["galaxy", "star", "planet", "plant", "animal", "society"]
+    for i in range(len(phi_hierarchy) - 1):
+        check(f"Φ_m({labels[i]}) < Φ_m({labels[i+1]})",
+              phi_hierarchy[i] < phi_hierarchy[i + 1],
+              f"{phi_hierarchy[i]} < {phi_hierarchy[i+1]}")
+
+    # Total range spans ~7 orders of magnitude
+    total_range = phi_hierarchy[-1] / phi_hierarchy[0]
+    check("Φ_m spans ~7 orders of magnitude",
+          6 < np.log10(total_range) < 8,
+          f"range = {total_range:.0e} ({np.log10(total_range):.1f} decades)")
+
+    # --- Consistency: Chaisson N vs search cost amplification ---
+    W_landauer = 1e15 * 2.87e-21  # ~10^{-6} J
+    Xi_chaisson = N_chaisson / W_landauer
+    check("Chaisson-derived Ξ ≈ 10³⁴ (consistent with §5.4)",
+          33 < np.log10(Xi_chaisson) < 36,
+          f"Ξ_Chaisson = {Xi_chaisson:.1e}")
+
+
+# ===========================================================================
+# 22. Portfolio Irreplaceability (§7.8)
+# ===========================================================================
+
+def verify_portfolio_irreplaceability() -> None:
+    """Verify the portfolio destruction ordering and convexity results."""
+    section("22. Portfolio Irreplaceability (§7.8)")
+
+    from modules.negentropy import (
+        portfolio_marginal_cost,
+        portfolio_total_cost,
+    )
+
+    # --- Setup: three systems with different beta ---
+    # Parameters chosen so the flow term (alpha*v*beta*N^(beta-1)/r) is
+    # significant relative to 1 (the stock cost component of MC).
+    N = 1e6
+    alpha = 1e-3
+    v = 1.0
+    r = 0.03
+    betas = [1.2, 1.5, 2.0]
+
+    # --- Marginal cost ordering (lower beta = lower MC at Lambda=0) ---
+    mc_values = [portfolio_marginal_cost(N, alpha, b, v, r) for b in betas]
+    check("MC_0(beta=1.2) < MC_0(beta=1.5) < MC_0(beta=2.0)",
+          mc_values[0] < mc_values[1] < mc_values[2],
+          f"MCs = {[f'{mc:.4e}' for mc in mc_values]}")
+
+    # --- Marginal cost DECREASING in Lambda_i (front-loaded cost) ---
+    for beta_val in betas:
+        mc_0 = portfolio_marginal_cost(N, alpha, beta_val, v, r, Lambda_i=0)
+        mc_half = portfolio_marginal_cost(N, alpha, beta_val, v, r,
+                                          Lambda_i=0.5 * N)
+        mc_90 = portfolio_marginal_cost(N, alpha, beta_val, v, r,
+                                        Lambda_i=0.9 * N)
+        check(f"beta={beta_val}: MC(0) > MC(0.5N) > MC(0.9N) (front-loaded)",
+              mc_0 > mc_half > mc_90,
+              f"MC(0)={mc_0:.3e}, MC(0.5N)={mc_half:.3e}, MC(0.9N)={mc_90:.3e}")
+
+    # --- MC decreases substantially toward stock cost as system depletes ---
+    mc_0 = portfolio_marginal_cost(N, alpha, 2.0, v, r, Lambda_i=0)
+    mc_near_empty = portfolio_marginal_cost(N, alpha, 2.0, v, r,
+                                            Lambda_i=0.999 * N)
+    check("MC drops substantially as system is nearly depleted",
+          mc_near_empty < mc_0 * 0.01,
+          f"MC(0)={mc_0:.1f}, MC(0.999N)={mc_near_empty:.2f}, "
+          f"ratio={mc_near_empty/mc_0:.4f}")
+
+    # --- Total cost CONCAVITY ---
+    # C_i is concave: C(mid) > linear interpolation
+    for beta_val in betas:
+        C_small = portfolio_total_cost(N, alpha, beta_val, v, r, 0.1 * N)
+        C_mid = portfolio_total_cost(N, alpha, beta_val, v, r, 0.5 * N)
+        C_large = portfolio_total_cost(N, alpha, beta_val, v, r, 0.9 * N)
+        C_interp = C_small + (C_large - C_small) * (0.5 - 0.1) / (0.9 - 0.1)
+        check(f"beta={beta_val}: C(0.5N) > linear interpolation (concavity)",
+              C_mid > C_interp,
+              f"C(0.5N)={C_mid:.3e}, interp={C_interp:.3e}")
+
+    # --- Superlinearity: flow loss > proportional stock loss ---
+    for beta_val in betas:
+        lam = 0.3
+        C = portfolio_total_cost(N, alpha, beta_val, v, r, lam * N)
+        stock_only = lam * N
+        check(f"beta={beta_val}: total cost > stock loss alone (flow matters)",
+              C > stock_only,
+              f"C={C:.3e}, stock_only={stock_only:.3e}")
+
+    # --- MC at exhaustion = infinity ---
+    mc_inf = portfolio_marginal_cost(N, alpha, 2.0, v, r, Lambda_i=N)
+    check("MC(Lambda_i=N) = infinity (system fully depleted)",
+          mc_inf == float("inf"),
+          f"MC = {mc_inf}")
+
+    # --- Concentration principle: concentrated destruction is cheaper ---
+    # With concave costs, destroying 0.4N from one system is cheaper
+    # than destroying 0.2N from each of two identical systems.
+    beta_test = 2.0
+    C_concentrated = portfolio_total_cost(N, alpha, beta_test, v, r, 0.4 * N)
+    C_spread = (portfolio_total_cost(N, alpha, beta_test, v, r, 0.2 * N) * 2)
+    check("Concentrated destruction cheaper than spread (concavity)",
+          C_concentrated < C_spread,
+          f"concentrated={C_concentrated:.3e}, spread={C_spread:.3e}")
+
+    # --- First-unit penalty: MC(0) >> 1 for high-beta systems ---
+    mc_high_beta = portfolio_marginal_cost(N, alpha, 2.0, v, r, Lambda_i=0)
+    check("First-unit MC >> 1 for high-beta system (strong disincentive)",
+          mc_high_beta > 100,
+          f"MC_0(beta=2) = {mc_high_beta:.1f}")
+
+
+# ===========================================================================
+# 23. Information Recovery Debt (§7.9)
+# ===========================================================================
+
+def verify_recovery_debt() -> None:
+    """Verify superlinear recovery time and convexity results."""
+    section("23. Information Recovery Debt (§7.9)")
+
+    from modules.negentropy import (
+        recovery_time,
+        recovery_time_lower_bound,
+        tipping_threshold,
+        negentropy_dynamics,
+    )
+
+    # --- Setup ---
+    alpha = 1e-30
+    beta = 2.0
+    delta = 1e-10
+    N_c = tipping_threshold(alpha, beta, delta)
+    N_0 = 100.0 * N_c  # well above tipping point
+
+    # --- Recovery time positive and finite ---
+    T_10 = recovery_time(N_0, 0.1, alpha, beta, delta)
+    check("T_recover(10%) > 0 and finite",
+          0 < T_10 < float("inf"),
+          f"T(10%) = {T_10:.3e} s")
+
+    T_50 = recovery_time(N_0, 0.5, alpha, beta, delta)
+    check("T_recover(50%) > 0 and finite",
+          0 < T_50 < float("inf"),
+          f"T(50%) = {T_50:.3e} s")
+
+    # --- Superlinear: T(50%) > 5 * T(10%) ---
+    ratio_5x = T_50 / T_10
+    check("T(50%) > 5 * T(10%) (superlinear recovery)",
+          T_50 > 5 * T_10,
+          f"T(50%)/T(10%) = {ratio_5x:.2f}")
+
+    # --- Convexity: T(30%) < [T(10%) + T(50%)] / 2 evaluated at midpoint ---
+    T_30 = recovery_time(N_0, 0.3, alpha, beta, delta)
+    T_interp = T_10 + (T_50 - T_10) * (0.3 - 0.1) / (0.5 - 0.1)
+    check("T(30%) < linear interpolation T(10%)-to-T(50%) (convexity)",
+          T_30 < T_interp,
+          f"T(30%)={T_30:.3e}, interp={T_interp:.3e}")
+
+    # --- Lower bound from convexity ---
+    for lam in [0.1, 0.3, 0.5]:
+        T_actual = recovery_time(N_0, lam, alpha, beta, delta)
+        T_lower = recovery_time_lower_bound(N_0, lam, alpha, beta, delta)
+        check(f"T_recover({lam:.0%}) > lower bound",
+              T_actual > T_lower,
+              f"actual={T_actual:.3e}, lower={T_lower:.3e}")
+
+    # --- Monotonicity: more destruction => longer recovery ---
+    lambdas = [0.05, 0.1, 0.2, 0.3, 0.5, 0.7]
+    T_vals = [recovery_time(N_0, l, alpha, beta, delta) for l in lambdas]
+    monotonic = all(T_vals[i] < T_vals[i + 1] for i in range(len(T_vals) - 1))
+    check("Recovery time strictly increasing in destruction fraction",
+          monotonic,
+          f"T_vals = {[f'{t:.2e}' for t in T_vals]}")
+
+    # --- Divergence near tipping point ---
+    lambda_star = 1.0 - N_c / N_0
+    T_near_tip = recovery_time(N_0, 0.98 * lambda_star, alpha, beta, delta)
+    T_far = recovery_time(N_0, 0.5 * lambda_star, alpha, beta, delta)
+    check("T_recover diverges near tipping point (T(0.98λ*) >> T(0.5λ*))",
+          T_near_tip > 10 * T_far,
+          f"T(0.98λ*)={T_near_tip:.3e}, T(0.5λ*)={T_far:.3e}")
+
+    # --- Beyond tipping point: infinite recovery ---
+    T_beyond = recovery_time(N_0, lambda_star * 1.01, alpha, beta, delta)
+    check("T_recover = infinity beyond tipping point",
+          T_beyond == float("inf"),
+          f"T(1.01*λ*) = {T_beyond}")
+
+    # --- Verify recovered system is at steady growth ---
+    dNdt_at_N0 = negentropy_dynamics(N_0, alpha, beta, delta)
+    check("dN/dt > 0 at N_0 (system can grow beyond recovery)",
+          dNdt_at_N0 > 0,
+          f"dN/dt = {dNdt_at_N0:.3e}")
+
+    # --- Stress test: vary beta ---
+    for beta_val in [1.2, 1.5, 2.0, 3.0]:
+        N_c_test = tipping_threshold(alpha, beta_val, delta)
+        N_0_test = 100 * N_c_test
+        T_20 = recovery_time(N_0_test, 0.2, alpha, beta_val, delta)
+        T_40 = recovery_time(N_0_test, 0.4, alpha, beta_val, delta)
+        check(f"beta={beta_val}: T(40%) > 2*T(20%) (superlinear)",
+              T_40 > 2 * T_20,
+              f"T(40%)/T(20%) = {T_40/T_20:.2f}")
+
+
+# ===========================================================================
+# 24. Conservation Fidelity Bound (§7.10)
+# ===========================================================================
+
+def verify_conservation_fidelity() -> None:
+    """Verify the ex-situ conservation fidelity bound and generative loss."""
+    section("24. Conservation Fidelity Bound (§7.10)")
+
+    from modules.negentropy import (
+        ex_situ_external_cost,
+        ex_situ_generative_loss,
+    )
+
+    # --- Setup ---
+    W_maint = 1.5e12  # W, biosphere maintenance power
+    alpha = 1e-30
+    beta = 2.0
+    N = 1e20
+    v = 1e-10
+    r = 0.03
+
+    # --- External cost monotonically increasing ---
+    phi_vals = [0.0, 0.25, 0.5, 0.75, 1.0]
+    costs = [ex_situ_external_cost(phi, W_maint) for phi in phi_vals]
+    monotonic = all(costs[i] <= costs[i + 1] for i in range(len(costs) - 1))
+    check("External cost monotonically increasing in fidelity",
+          monotonic,
+          f"costs = {[f'{c:.2e}' for c in costs]}")
+
+    # --- phi = 0: zero cost ---
+    check("Ex-situ cost at phi=0 is zero",
+          ex_situ_external_cost(0.0, W_maint) == 0.0,
+          f"W_ext(0) = {ex_situ_external_cost(0.0, W_maint)}")
+
+    # --- phi = 1: equals in-situ maintenance ---
+    check("Ex-situ cost at phi=1 equals W_maint",
+          np.isclose(ex_situ_external_cost(1.0, W_maint), W_maint),
+          f"W_ext(1) = {ex_situ_external_cost(1.0, W_maint):.2e}")
+
+    # --- In-situ cost is zero (self-maintaining) ---
+    W_in_situ_ext = 0.0  # self-maintained
+    check("In-situ external cost = 0 (self-sustaining)",
+          W_in_situ_ext == 0.0,
+          "by definition of self-maintaining")
+
+    # --- For phi > 0: ex-situ cost exceeds in-situ cost ---
+    for phi in [0.1, 0.5, 0.9]:
+        check(f"phi={phi}: ex-situ cost > in-situ cost (0)",
+              ex_situ_external_cost(phi, W_maint) > W_in_situ_ext,
+              f"W_ext = {ex_situ_external_cost(phi, W_maint):.2e}")
+
+    # --- Generative loss at phi=0: full loss ---
+    full_pv = alpha * v * N ** beta / r
+    loss_0 = ex_situ_generative_loss(0.0, alpha, beta, N, v, r)
+    check("Generative loss at phi=0 = full PV",
+          np.isclose(loss_0, full_pv),
+          f"loss(0) = {loss_0:.3e}, full PV = {full_pv:.3e}")
+
+    # --- Generative loss at phi=1: zero ---
+    loss_1 = ex_situ_generative_loss(1.0, alpha, beta, N, v, r)
+    check("Generative loss at phi=1 = 0",
+          np.isclose(loss_1, 0.0, atol=1e-20),
+          f"loss(1) = {loss_1:.3e}")
+
+    # --- Superlinear generative loss: loss(phi) > (1-phi) * PV ---
+    for phi in [0.1, 0.3, 0.5, 0.7, 0.9]:
+        loss = ex_situ_generative_loss(phi, alpha, beta, N, v, r)
+        proportional = (1.0 - phi) * full_pv
+        check(f"phi={phi}: generative loss > proportional ({1-phi:.0%} of PV)",
+              loss > proportional,
+              f"loss = {loss:.3e}, prop = {proportional:.3e}")
+
+    # --- Loss monotonically decreasing in phi ---
+    losses = [ex_situ_generative_loss(p, alpha, beta, N, v, r)
+              for p in phi_vals]
+    decreasing = all(losses[i] >= losses[i + 1]
+                     for i in range(len(losses) - 1))
+    check("Generative loss decreasing in fidelity",
+          decreasing,
+          f"losses = {[f'{l:.2e}' for l in losses]}")
+
+    # --- Stress test: beta sensitivity ---
+    for beta_val in [1.5, 2.0, 3.0]:
+        loss_half = ex_situ_generative_loss(0.5, alpha, beta_val, N, v, r)
+        prop_half = 0.5 * alpha * v * N ** beta_val / r
+        # 1 - 0.5^beta: should be > 0.5 for beta > 1
+        frac_lost = loss_half / (alpha * v * N ** beta_val / r)
+        check(f"beta={beta_val}: losing 50% fidelity costs >{50*100//100}% of PV",
+              frac_lost > 0.5,
+              f"fraction lost = {frac_lost:.3f}")
+
+
+# ===========================================================================
 # Main
 # ===========================================================================
 
@@ -949,6 +1717,12 @@ def main() -> None:
     verify_cross_task_consistency()
     verify_symbolic_inequalities()
     verify_stress_tests()
+    verify_rate_stock_coupling()
+    verify_tipping_point()
+    verify_chaisson_cross_validation()
+    verify_portfolio_irreplaceability()
+    verify_recovery_debt()
+    verify_conservation_fidelity()
 
     print(f"\n{'='*72}")
     print(f"  FINAL RESULT: {PASS} passed, {FAIL} failed, "

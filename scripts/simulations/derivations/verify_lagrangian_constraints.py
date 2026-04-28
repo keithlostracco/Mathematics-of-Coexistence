@@ -12,7 +12,12 @@ Run:  python scripts/simulations/verify_lagrangian_constraints.py
 from __future__ import annotations
 
 import sys
+import os
 from dataclasses import dataclass
+
+if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', '..'))
 
 import numpy as np
 import sympy as sp
@@ -567,6 +572,198 @@ def verify_symmetric_scarcity() -> None:
 
 
 # ---------------------------------------------------------------------------
+# 12. Theorem 4 — Welfare Optimality of the VE (N-agent)
+# ---------------------------------------------------------------------------
+
+def verify_welfare_optimality() -> None:
+    section("12. Theorem 4 — Welfare Optimality of the VE (N-agent)")
+
+    rng = np.random.default_rng(123)
+
+    for trial, (N, label) in enumerate([
+        (2, "2-agent symmetric"),
+        (2, "2-agent asymmetric"),
+        (5, "5-agent heterogeneous"),
+        (10, "10-agent heterogeneous"),
+        (20, "20-agent heterogeneous"),
+    ]):
+        if trial == 0:
+            alphas = np.array([10.0, 10.0])
+            betas = np.array([1.0, 1.0])
+        elif trial == 1:
+            alphas = np.array([10.0, 10.0])
+            betas = np.array([0.5, 2.0])
+        else:
+            alphas = rng.uniform(5, 15, size=N)
+            betas = rng.uniform(0.5, 2.5, size=N)
+
+        # Set R to 60% of total unconstrained demand to ensure collision
+        x_unc = alphas / betas
+        R_total = np.sum(x_unc) * 0.6
+
+        # --- Compute VE analytically (uniform-weight, single shared resource) ---
+        lam_ve = (np.sum(alphas / betas) - R_total) / np.sum(1.0 / betas)
+        x_ve = (alphas - lam_ve) / betas
+        sw_ve = np.sum(alphas * x_ve - betas / 2 * x_ve**2)
+
+        # --- Compute SW maximizer via SciPy constrained optimization ---
+        def neg_total_welfare(x):
+            return -np.sum(alphas * x - betas / 2 * x**2)
+
+        def neg_total_welfare_jac(x):
+            return -(alphas - betas * x)
+
+        constraint = {"type": "ineq", "fun": lambda x: R_total - np.sum(x)}
+        bounds = [(0, None)] * N
+
+        result = minimize(
+            neg_total_welfare, x0=np.full(N, R_total / N),
+            jac=neg_total_welfare_jac,
+            method="SLSQP", bounds=bounds, constraints=constraint,
+        )
+
+        sw_scipy = -result.fun
+        x_scipy = result.x
+
+        check(f"{label} (N={N}): SciPy converged", result.success, result.message)
+        check(f"{label} (N={N}): VE allocation = SW maximizer",
+              np.allclose(x_ve, x_scipy, atol=1e-3),
+              f"max diff = {np.max(np.abs(x_ve - x_scipy)):.2e}")
+        check(f"{label} (N={N}): VE welfare = optimal welfare",
+              np.isclose(sw_ve, sw_scipy, atol=1e-4),
+              f"VE={sw_ve:.4f}, SciPy={sw_scipy:.4f}")
+
+        # --- Verify VE strictly dominates greedy and equal-split ---
+        x_equal = np.full(N, R_total / N)
+        sw_equal = np.sum(alphas * x_equal - betas / 2 * x_equal**2)
+
+        # Greedy: highest-alpha agent takes its unconstrained optimum, rest split remainder
+        greedy_idx = np.argmax(alphas / betas)
+        x_greedy = np.full(N, 0.0)
+        x_greedy[greedy_idx] = min(x_unc[greedy_idx], R_total)
+        remainder = R_total - x_greedy[greedy_idx]
+        if remainder > 0:
+            others = [i for i in range(N) if i != greedy_idx]
+            for i in others:
+                x_greedy[i] = remainder / len(others)
+        sw_greedy = np.sum(alphas * x_greedy - betas / 2 * x_greedy**2)
+
+        check(f"{label} (N={N}): VE >= equal-split",
+              sw_ve >= sw_equal - 1e-10,
+              f"VE={sw_ve:.2f} >= equal={sw_equal:.2f}")
+        check(f"{label} (N={N}): VE > greedy",
+              sw_ve > sw_greedy,
+              f"VE={sw_ve:.2f} > greedy={sw_greedy:.2f}")
+
+    # --- Uniqueness: perturb away from VE, confirm welfare drops ---
+    section("12b. Welfare Uniqueness — Perturbation Test")
+
+    alphas = np.array([10, 8, 12, 6, 9], dtype=float)
+    betas = np.array([1, 1, 1.5, 0.8, 1.2], dtype=float)
+    R_total = 20.0
+    N = 5
+
+    lam_ve = (np.sum(alphas / betas) - R_total) / np.sum(1.0 / betas)
+    x_ve = (alphas - lam_ve) / betas
+    sw_ve = np.sum(alphas * x_ve - betas / 2 * x_ve**2)
+
+    # Apply 100 random feasible perturbations; all must yield lower SW
+    all_lower = True
+    for _ in range(100):
+        delta = rng.normal(0, 0.5, size=N)
+        delta -= delta.mean()  # zero-sum perturbation preserves sum constraint
+        x_pert = x_ve + delta
+        x_pert = np.clip(x_pert, 0, None)
+        # Re-normalize to satisfy resource constraint
+        if np.sum(x_pert) > R_total:
+            x_pert *= R_total / np.sum(x_pert)
+        sw_pert = np.sum(alphas * x_pert - betas / 2 * x_pert**2)
+        if sw_pert >= sw_ve - 1e-12:  # allow tiny numerical tolerance
+            if not np.allclose(x_pert, x_ve, atol=1e-6):
+                all_lower = False
+                break
+
+    check("100 random perturbations all yield lower SW", all_lower)
+
+    # --- Welfare Optimality under ACTIVE boundary constraints ---
+    # Theorem thm-welfare-optimality explicitly covers the case with boundary
+    # constraints: max sum U_i  s.t.  sum_i x_ij <= R_j  AND  g_Bk(x_i) <= 0.
+    # The KKT of this welfare problem yields shared lambda_j and private
+    # mu^(i)_Bk, which is exactly the VE stationarity condition. So the VE
+    # (with boundary constraints enforced in each agent's problem) must
+    # coincide with the constrained-welfare maximizer.
+    section("12c. Welfare Optimality with Active Boundary Constraints")
+
+    # 2 agents, 1 resource. Boundary constraint of B on A:  x_A <= R - xbar_B
+    # (A cannot take more than R - xbar_B, i.e. B is guaranteed xbar_B).
+    # Symmetric constraint on B:  x_B <= R - xbar_A.
+    alphas_bc = np.array([10.0, 8.0])
+    betas_bc = np.array([1.0, 1.0])
+    R_bc = 12.0
+    xbar_A, xbar_B = 3.0, 5.0  # guaranteed minima
+
+    # Constrained welfare max via SciPy
+    def neg_W(x):
+        return -np.sum(alphas_bc * x - betas_bc / 2 * x**2)
+
+    constraints_bc = [
+        {"type": "ineq", "fun": lambda x: R_bc - np.sum(x)},      # resource
+        {"type": "ineq", "fun": lambda x: (R_bc - xbar_B) - x[0]}, # B's bdy on A
+        {"type": "ineq", "fun": lambda x: (R_bc - xbar_A) - x[1]}, # A's bdy on B
+    ]
+    bounds_bc = [(0, None), (0, None)]
+    res_sw = minimize(neg_W, x0=[R_bc / 2, R_bc / 2], method="SLSQP",
+                      bounds=bounds_bc, constraints=constraints_bc)
+    x_sw_bc = res_sw.x
+    sw_sw_bc = -res_sw.fun
+
+    # VE: each agent solves its own problem with shared lambda for the
+    # resource constraint, subject to the boundary constraint imposed on it.
+    # For 2 agents on 1 resource with caps c_A = R - xbar_B, c_B = R - xbar_A:
+    #   Agent i's reaction: x_i = min(c_i, (alpha_i - lambda)/beta_i)
+    # Shared lambda enforces x_A + x_B = R (if binding).
+    c_A = R_bc - xbar_B  # = 7
+    c_B = R_bc - xbar_A  # = 9
+
+    # Sweep lambda to find the VE (market-clearing shared shadow price)
+    def demand(lam):
+        xA = min(c_A, max(0.0, (alphas_bc[0] - lam) / betas_bc[0]))
+        xB = min(c_B, max(0.0, (alphas_bc[1] - lam) / betas_bc[1]))
+        return xA, xB
+
+    # Bisection on lambda to clear the market
+    lo, hi = 0.0, max(alphas_bc)
+    for _ in range(200):
+        mid = 0.5 * (lo + hi)
+        xA, xB = demand(mid)
+        if xA + xB > R_bc:
+            lo = mid
+        else:
+            hi = mid
+    lam_ve_bc = 0.5 * (lo + hi)
+    x_ve_bc = np.array(demand(lam_ve_bc))
+    sw_ve_bc = np.sum(alphas_bc * x_ve_bc - betas_bc / 2 * x_ve_bc**2)
+
+    check("BC case: SciPy welfare-max converged", res_sw.success, res_sw.message)
+    check("BC case: boundary constraint on A is ACTIVE",
+          np.isclose(x_sw_bc[0], c_A, atol=1e-4),
+          f"x_A*={x_sw_bc[0]:.4f}, cap={c_A}")
+    check("BC case: VE allocation = welfare-max allocation",
+          np.allclose(x_ve_bc, x_sw_bc, atol=1e-3),
+          f"VE={np.round(x_ve_bc, 4)}, SW={np.round(x_sw_bc, 4)}")
+    check("BC case: VE welfare = optimal welfare",
+          np.isclose(sw_ve_bc, sw_sw_bc, atol=1e-4),
+          f"VE SW={sw_ve_bc:.4f}, SciPy SW={sw_sw_bc:.4f}")
+
+    # Numerical values (from worked example § 'Two Agents, One Resource'):
+    # x_A* = 7, x_B* = 5, U_A=45.5, U_B=27.5, SW=73.0
+    check("BC case: x_A* = 7", np.isclose(x_ve_bc[0], 7.0, atol=1e-3))
+    check("BC case: x_B* = 5", np.isclose(x_ve_bc[1], 5.0, atol=1e-3))
+    check("BC case: SW = 73.0", np.isclose(sw_ve_bc, 73.0, atol=1e-3),
+          f"SW={sw_ve_bc:.4f}")
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -587,6 +784,7 @@ def main() -> int:
     verify_social_welfare_sweep()
     verify_asymmetric_example()
     verify_symmetric_scarcity()
+    verify_welfare_optimality()
 
     print(f"\n{'='*70}")
     print(f"  SUMMARY: {PASS} passed, {FAIL} failed")

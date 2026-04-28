@@ -12,7 +12,12 @@ Run:  python scripts/simulations/verify_thermodynamic_friction.py
 from __future__ import annotations
 
 import sys
+import os
 import math
+
+if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', '..'))
 
 import numpy as np
 import sympy as sp
@@ -461,6 +466,17 @@ def verify_cascading_friction() -> None:
           np.isclose(phi_after / delta_phi, 0.5, atol=0.05),
           f"ratio = {phi_after / delta_phi:.4f}")
 
+    # Denser ecosystem (M = 10,000): amplification reaches 10^4 regime
+    M_dense = 10_000
+    C_cascade_dense = eta * v * M_dense * E_bar / epsilon
+    amp_dense = C_cascade_dense / v
+    check("Denser ecosystem (M=10,000): C_cascade = 1,000,000",
+          np.isclose(C_cascade_dense, 1_000_000),
+          f"C = {C_cascade_dense}")
+    check("Denser ecosystem amplification = 20,000x (10^4 regime)",
+          np.isclose(amp_dense, 20_000),
+          f"amp = {amp_dense}")
+
 
 # ---------------------------------------------------------------------------
 # 9. Friction Ratchet — Corollary 7.1 (Section 7.9)
@@ -572,40 +588,114 @@ def verify_worked_examples() -> None:
 
 
 # ---------------------------------------------------------------------------
-# 11. Decisive Contests r > 1 — Corollary 5.3 (Section 10)
+# 11. Decisive Contests — Moderate regime + Budget-constrained corner NE
 # ---------------------------------------------------------------------------
 
 def verify_decisive_contests() -> None:
-    section("11. Decisive Contests r > 1 — Corollary 5.3 (Section 10)")
+    section("11. Decisive Contests: Interior NE (r <= N/(N-1)) and Budget-Constrained Corner NE (r > N/(N-1))")
 
     E_j = 100.0
 
-    # For general r, symmetric N-agent: D_N = r*(N-1)/N * E_j
+    # ---- Moderate regime: interior NE valid for r in (0, N/(N-1)] ----
     for N in [2, 5, 10]:
         threshold_r = N / (N - 1)
-        check(f"N={N}: r threshold = {threshold_r:.4f}",
-              True,
-              f"r > {threshold_r:.4f} → D_N > E_j")
 
-        # Verify: at r = threshold, D_N = E_j
+        # At r = threshold: interior formula gives D_N = E_j (boundary case)
         D_at_threshold = threshold_r * (N - 1) / N * E_j
-        check(f"  D at r={threshold_r:.2f}: D = E",
+        check(f"N={N}: interior NE at r={threshold_r:.4f} gives D_N = E_j",
               np.isclose(D_at_threshold, E_j),
-              f"D = {D_at_threshold}")
+              f"D = {D_at_threshold:.4f}")
 
-        # Below threshold: D < E
+        # Below threshold: interior NE gives D_N < E_j
         r_low = threshold_r * 0.8
         D_low = r_low * (N - 1) / N * E_j
-        check(f"  r={r_low:.2f}: D < E",
+        check(f"N={N}: interior NE at r={r_low:.3f} gives D_N < E_j",
               D_low < E_j,
-              f"D = {D_low:.1f}")
+              f"D = {D_low:.2f}")
 
-        # Above threshold: D > E
-        r_high = threshold_r * 1.2
-        D_high = r_high * (N - 1) / N * E_j
-        check(f"  r={r_high:.2f}: D > E",
-              D_high > E_j,
-              f"D = {D_high:.1f}")
+        # At r = threshold, per-agent payoff is exactly zero
+        e_star = threshold_r * (N - 1) / N**2 * E_j
+        payoff = E_j / N - e_star
+        check(f"N={N}: per-agent payoff at r={threshold_r:.4f} is zero",
+              np.isclose(payoff, 0.0),
+              f"payoff = {payoff:.6f}")
+
+    # ---- Decisive regime r > N/(N-1): budget-constrained corner NE ----
+    # Proposition: with budget cap e_bar in (0, E_j/N], symmetric profile e_i = e_bar
+    # is a pure NE; D_N = N * e_bar; per-agent payoff = E_j/N - e_bar >= 0.
+    for N in [2, 5, 10]:
+        threshold_r = N / (N - 1)
+        e_bar_max = E_j / N  # maximum cap consistent with non-negative payoff
+        for e_bar_frac in [0.25, 0.5, 1.0]:
+            e_bar = e_bar_frac * e_bar_max
+            # Test for several r values strictly above the threshold
+            for r in [threshold_r * 1.2, threshold_r * 2.0, 5.0, 10.0]:
+                if r <= threshold_r:
+                    continue
+
+                # Verify symmetric corner profile is best response: at e_i = e_bar
+                # with others at e_bar, marginal payoff is positive (cap binds upward),
+                # and dropping to zero is weakly worse than playing at cap.
+
+                # Marginal payoff at the cap (others at e_bar):
+                # dPi/de_i = E_j * r * (N-1) * e_bar^(2r-1) / (N*e_bar^r)^2 - 1
+                #         = E_j * r * (N-1) / (N^2 * e_bar) - 1
+                marg_at_cap = E_j * r * (N - 1) / (N**2 * e_bar) - 1.0
+                check(f"N={N}, r={r:.3f}, e_bar={e_bar:.3f}: marginal payoff at cap > 0 (upward deviation infeasible)",
+                      marg_at_cap > 0,
+                      f"marginal = {marg_at_cap:.4f}")
+
+                # Equilibrium payoff at cap
+                eq_payoff = E_j / N - e_bar
+                # Drop-out payoff (e_i = 0; with others positive, p_i = 0): payoff = 0
+                dropout_payoff = 0.0
+                check(f"N={N}, r={r:.3f}, e_bar={e_bar:.3f}: cap-NE payoff >= dropout payoff",
+                      eq_payoff >= dropout_payoff - 1e-12,
+                      f"eq_payoff = {eq_payoff:.4f}, dropout = {dropout_payoff}")
+
+                # Verify no profitable interior deviation by grid search
+                # Pi_i(e_i) = E_j * e_i^r / (e_i^r + (N-1)*e_bar^r) - e_i
+                e_grid = np.linspace(1e-4, e_bar, 200)
+                others_pow = (N - 1) * e_bar**r
+                payoffs = E_j * e_grid**r / (e_grid**r + others_pow) - e_grid
+                max_interior_payoff = float(payoffs.max())
+                check(f"N={N}, r={r:.3f}, e_bar={e_bar:.3f}: cap-NE dominates all interior deviations",
+                      eq_payoff >= max_interior_payoff - 1e-9,
+                      f"eq_payoff = {eq_payoff:.4f}, max interior = {max_interior_payoff:.4f}")
+
+                # D_N = N * e_bar; check this equals N * e_bar and <= E_j
+                D_N_corner = N * e_bar
+                check(f"N={N}, r={r:.3f}, e_bar={e_bar:.3f}: D_N = N*e_bar = {D_N_corner:.3f} (<= E_j)",
+                      np.isclose(D_N_corner, N * e_bar) and D_N_corner <= E_j + 1e-12,
+                      f"D_N = {D_N_corner}")
+
+    # ---- Net-negativity under budget constraints ----
+    # In decisive regime: system loss = Phi * N * e_bar > E_j iff e_bar > E_j/(Phi*N)
+    Phi = 2.2
+    for N in [2, 5]:
+        e_bar_critical = E_j / (Phi * N)
+        # Just above critical: net-negative
+        e_bar = e_bar_critical * 1.01
+        L_sys = Phi * N * e_bar
+        check(f"N={N}, Phi={Phi}, e_bar just above E_j/(Phi*N): net-negative (L_sys > E_j)",
+              L_sys > E_j,
+              f"L_sys = {L_sys:.3f}")
+        # Just below critical: net-positive
+        e_bar = e_bar_critical * 0.99
+        L_sys = Phi * N * e_bar
+        check(f"N={N}, Phi={Phi}, e_bar just below E_j/(Phi*N): net-positive (L_sys < E_j)",
+              L_sys < E_j,
+              f"L_sys = {L_sys:.3f}")
+
+    # ---- Continuity at r = N/(N-1) when e_bar = E_j/N ----
+    # Interior formula at r = threshold gives e* = (N-1)E_j/N^2 * N/(N-1) = E_j/N = e_bar
+    for N in [2, 5, 10]:
+        threshold_r = N / (N - 1)
+        e_star_interior = threshold_r * (N - 1) / N**2 * E_j
+        e_bar_match = E_j / N
+        check(f"N={N}: interior NE at r={threshold_r:.4f} matches corner NE at e_bar = E_j/N",
+              np.isclose(e_star_interior, e_bar_match),
+              f"interior = {e_star_interior:.4f}, corner cap = {e_bar_match:.4f}")
 
 
 # ---------------------------------------------------------------------------

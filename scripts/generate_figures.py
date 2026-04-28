@@ -53,7 +53,7 @@ def main() -> int:
     if args.dry_run:
         print(f"Figure scripts ({len(fig_scripts)}):")
         for s in fig_scripts:
-            ex = "✓" if s.exists() else "✗ MISSING"
+            ex = "OK" if s.exists() else "X MISSING"
             print(f"  {ex}  {s.relative_to(root)}")
         return 0
 
@@ -79,21 +79,21 @@ def main() -> int:
         elapsed = time.monotonic() - t1
 
         if result.returncode != 0:
-            print(f"  ✗ {name}  FAILED ({elapsed:.1f}s)")
+            print(f"  X {name}  FAILED ({elapsed:.1f}s)")
             if result.stderr:
                 for line in result.stderr.strip().splitlines()[-5:]:
                     print(f"    {line}")
             ok = False
         else:
-            print(f"  ✓ {name}  ({elapsed:.1f}s)")
+            print(f"  OK {name}  ({elapsed:.1f}s)")
 
     elapsed = time.time() - t0
     print()
     print("=" * 60)
     if ok:
-        print(f"  ✓ All figures generated ({elapsed:.1f}s)")
+        print(f"  All figures generated ({elapsed:.1f}s)")
     else:
-        print(f"  ✗ Some figure scripts failed ({elapsed:.1f}s)")
+        print(f"  Some figure scripts failed ({elapsed:.1f}s)")
     print("=" * 60)
 
     return 0 if ok else 1

@@ -12,7 +12,12 @@ Run:  python scripts/simulations/verify_value_dynamics.py
 from __future__ import annotations
 
 import sys
+import os
 import math
+
+if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', '..'))
 
 import numpy as np
 import sympy as sp

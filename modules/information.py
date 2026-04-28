@@ -13,6 +13,9 @@ Core functions:
   network_verification_tax(q_bar, M, W_honest) — Section 5.3
   cascade_cost_info(delta_H, W_bit, eta_info, M, E_bar, epsilon) — Section 5.5
   steady_state_info_friction(nu_micro, eta_info, delta_H, W_bit, epsilon) — Section 5.6
+  bsc_series_q_eff(d, q)        — Proposition: Serial BSC Composition
+  bsc_series_capacity(d, q)     — End-to-end capacity for serial pipelines
+  pipeline_collapse_threshold(d, C_min) — Corollary: Pipeline Collapse Threshold
 
 All logarithms are base-2 (bits) unless otherwise noted.
 """
@@ -228,3 +231,99 @@ def steady_state_info_friction(
     φ_info = ν_micro · η_info · ΔH · W_bit / ε
     """
     return nu_micro * eta_info * delta_H * W_bit / epsilon
+
+
+# --------------------------------------------------------------------------- #
+# 6. Serial BSC Composition (Proposition: Serial BSC Composition,
+#    Corollary: Pipeline Collapse Threshold)
+# --------------------------------------------------------------------------- #
+
+def bsc_series_q_eff(
+    d: int,
+    q: float | np.ndarray,
+) -> float | np.ndarray:
+    """Effective error rate of d BSCs in series with uniform per-stage rate q.
+
+    q_eff(d, q) = (1 - (1 - 2q)^d) / 2
+
+    Parameters
+    ----------
+    d : int
+        Number of stages (pipeline depth), d >= 1.
+    q : float or array
+        Per-stage error probability in [0, 0.5].
+
+    Returns
+    -------
+    q_eff : float or array
+        Effective end-to-end error probability of the composite BSC.
+    """
+    if d < 1:
+        raise ValueError("Pipeline depth d must be >= 1")
+    q = np.asarray(q, dtype=float)
+    q_eff = (1.0 - (1.0 - 2.0 * q) ** d) / 2.0
+    return float(q_eff) if q_eff.ndim == 0 else q_eff
+
+
+def bsc_series_capacity(
+    d: int,
+    q: float | np.ndarray,
+) -> float | np.ndarray:
+    """End-to-end capacity of d BSCs in series with uniform per-stage rate q.
+
+    C_eff(d, q) = 1 - h(q_eff(d, q))
+    """
+    return 1.0 - binary_entropy(bsc_series_q_eff(d, q))
+
+
+def _binary_entropy_inverse(target_h: float) -> float:
+    """Inverse of the binary entropy function on [0, 0.5].
+
+    Returns the unique q in [0, 0.5] satisfying h(q) = target_h, where
+    target_h in [0, 1]. Uses bisection to floating-point tolerance.
+    """
+    if not 0.0 <= target_h <= 1.0:
+        raise ValueError("target_h must be in [0, 1]")
+    if target_h == 0.0:
+        return 0.0
+    if target_h == 1.0:
+        return 0.5
+    lo, hi = 0.0, 0.5
+    for _ in range(100):
+        mid = 0.5 * (lo + hi)
+        if float(binary_entropy(mid)) < target_h:
+            lo = mid
+        else:
+            hi = mid
+    return 0.5 * (lo + hi)
+
+
+def pipeline_collapse_threshold(
+    d: int,
+    C_min: float,
+) -> float:
+    """Maximum per-stage corruption rate q*(d; C_min) preserving end-to-end capacity.
+
+    q*(d; C_min) = (1 - (1 - 2 q_max)^(1/d)) / 2,    q_max = h^{-1}(1 - C_min)
+
+    The pipeline of depth d retains C_eff(d, q) >= C_min iff q <= q*(d; C_min).
+
+    Parameters
+    ----------
+    d : int
+        Pipeline depth, d >= 1.
+    C_min : float
+        Minimum acceptable end-to-end channel capacity in (0, 1).
+
+    Returns
+    -------
+    q_star : float
+        Critical per-stage error probability; the pipeline collapses (C_eff < C_min)
+        for any per-stage rate q > q_star.
+    """
+    if d < 1:
+        raise ValueError("Pipeline depth d must be >= 1")
+    if not 0.0 < C_min < 1.0:
+        raise ValueError("C_min must be in (0, 1)")
+    q_max = _binary_entropy_inverse(1.0 - C_min)
+    return (1.0 - (1.0 - 2.0 * q_max) ** (1.0 / d)) / 2.0

@@ -12,7 +12,12 @@ Run:  python scripts/simulations/verify_game_theory.py
 from __future__ import annotations
 
 import sys
+import os
 import math
+
+if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', '..'))
 
 import numpy as np
 import sympy as sp
@@ -255,25 +260,29 @@ def verify_corollary_11_1() -> None:
 def verify_sensitivity_table() -> None:
     section("5. Sensitivity Analysis — Section 3.5")
 
-    # Reproduce the entire sensitivity table
+    # Reproduce the entire sensitivity table.
+    # Friction-regime rows vary kappa (the physical knob: Second-Law repair
+    # multiplier) holding theta = 0.15. Exploitation rows vary theta holding
+    # kappa = 2. Phi, T, S all share (1+kappa) and are recomputed per row.
     regimes = [
-        # (label, Phi_val, theta_val)
-        ("Low friction (Phi=1.0)", 1.0, 0.15),
-        ("Moderate (Phi=1.5)", 1.5, 0.15),
-        ("Baseline (Phi=2.2)", 2.2, 0.15),
-        ("High friction (Phi=3.0)", 3.0, 0.15),
-        ("Very high (Phi=4.0)", 4.0, 0.15),
-        ("Cheap exploit (theta=0.05)", 2.2, 0.05),
-        ("Expensive exploit (theta=0.30)", 2.2, 0.30),
+        # (label, kappa_val, theta_val)
+        ("No repair cost (kappa=0)", 0.0, 0.15),
+        ("Low repair (kappa=1)", 1.0, 0.15),
+        ("Baseline (kappa=2)", 2.0, 0.15),
+        ("High repair (kappa=4)", 4.0, 0.15),
+        ("Very high (kappa=6)", 6.0, 0.15),
+        ("Cheap exploit (theta=0.05)", 2.0, 0.05),
+        ("Expensive exploit (theta=0.30)", 2.0, 0.30),
     ]
 
-    expected_deltas = [0.568, 0.460, 0.363, 0.293, 0.236, 0.458, 0.138]
+    expected_deltas = [0.513, 0.430, 0.363, 0.261, 0.186, 0.458, 0.138]
 
-    for (label, Phi_v, theta_v), exp_ds in zip(regimes, expected_deltas):
-        T_v = E_R * (1 - theta_v * (1 + (1 + kappa) * delta_off))
+    for (label, kappa_v, theta_v), exp_ds in zip(regimes, expected_deltas):
+        Phi_v = 1 + (1 + kappa_v) * (delta_off + delta_def)
+        T_v = E_R * (1 - theta_v * (1 + (1 + kappa_v) * delta_off))
         R_v = E_R / 2 - c
         P_v = (E_R / 2) * (1 - Phi_v / 2)
-        S_v = -theta_v * E_R * (1 + kappa) * delta_def
+        S_v = -theta_v * E_R * (1 + kappa_v) * delta_def
 
         ds_v = (T_v - R_v) / (T_v - P_v)
         check(f"{label}: delta*={exp_ds}",

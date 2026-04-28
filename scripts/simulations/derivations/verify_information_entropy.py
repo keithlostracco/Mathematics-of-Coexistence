@@ -12,7 +12,12 @@ Run:  python scripts/simulations/verify_information_entropy.py
 from __future__ import annotations
 
 import sys
+import os
 import math
+
+if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', '..'))
 
 import numpy as np
 import sympy as sp
@@ -862,6 +867,151 @@ def verify_total_variance() -> None:
 
 
 # ---------------------------------------------------------------------------
+# 18. Serial BSC Composition + Pipeline Collapse Threshold
+#     (Proposition: Serial BSC Composition, Corollary: Pipeline Collapse Threshold)
+# ---------------------------------------------------------------------------
+
+def verify_bsc_series() -> None:
+    section("18. Serial BSC Composition & Pipeline Collapse Threshold")
+
+    from modules.information import (
+        bsc_series_q_eff,
+        bsc_series_capacity,
+        pipeline_collapse_threshold,
+        binary_entropy,
+    )
+
+    # --- (a) Symbolic identity for d=2: q_eff = q1 + q2 - 2 q1 q2 ---
+    q1, q2 = sp.symbols("q1 q2", positive=True)
+    q_eff_sym = (1 - (1 - 2 * q1) * (1 - 2 * q2)) / 2
+    expected = q1 + q2 - 2 * q1 * q2
+    check("Symbolic: d=2 composition q_eff = q1 + q2 - 2 q1 q2",
+          sp.simplify(q_eff_sym - expected) == 0)
+
+    # --- (b) Boundary cases ---
+    check("q_eff(d=1, q=0.1) = q (single channel)",
+          np.isclose(bsc_series_q_eff(1, 0.1), 0.1))
+    check("q_eff(d=10, q=0) = 0 (honest pipeline)",
+          np.isclose(bsc_series_q_eff(10, 0.0), 0.0))
+    check("q_eff(d=10, q=0.5) = 0.5 (saturated)",
+          np.isclose(bsc_series_q_eff(10, 0.5), 0.5))
+
+    # --- (c) Monotone increasing in d for q in (0, 0.5) ---
+    q_test = 0.05
+    q_effs = [bsc_series_q_eff(d, q_test) for d in range(1, 21)]
+    monotone = all(q_effs[i] < q_effs[i + 1] for i in range(len(q_effs) - 1))
+    check("q_eff(d, q=0.05) strictly increasing in d", monotone)
+
+    # --- (d) Limit q_eff -> 0.5 as d -> infinity for any q > 0 ---
+    q_eff_large = bsc_series_q_eff(10_000, 0.01)
+    check("q_eff(d=10000, q=0.01) -> 0.5",
+          np.isclose(q_eff_large, 0.5, atol=1e-6),
+          f"q_eff = {q_eff_large}")
+
+    # --- (e) Numerical match: d=10, q=0.063 ---
+    # (1 - 2*0.063)^10 = 0.874^10 ≈ 0.2602
+    # q_eff ≈ 0.3699; h ≈ 0.9505; C_eff ≈ 0.0495
+    q_eff_paper = bsc_series_q_eff(10, 0.063)
+    C_eff_paper = bsc_series_capacity(10, 0.063)
+    check("q_eff(d=10, q=0.063) ≈ 0.370",
+          np.isclose(q_eff_paper, 0.370, atol=0.002),
+          f"q_eff = {q_eff_paper:.4f}")
+    check("C_eff(d=10, q=0.063) ≈ 0.05 (paper claim)",
+          np.isclose(C_eff_paper, 0.05, atol=0.005),
+          f"C_eff = {C_eff_paper:.4f}")
+
+    # --- (f) Pipeline collapse threshold round-trip ---
+    # q*(d; C_min) is the largest q for which C_eff(d, q) >= C_min.
+    for d, C_min in [(1, 0.05), (2, 0.05), (5, 0.05), (10, 0.05),
+                      (20, 0.05), (50, 0.05), (10, 0.10), (10, 0.5)]:
+        q_star = pipeline_collapse_threshold(d, C_min)
+        C_at_threshold = bsc_series_capacity(d, q_star)
+        check(f"Round-trip d={d}, C_min={C_min}: C_eff(d, q*) ≈ C_min",
+              np.isclose(C_at_threshold, C_min, atol=1e-6),
+              f"q*={q_star:.6f}, C_eff={C_at_threshold:.6f}")
+
+    # --- (g) Headline numerical claim ---
+    q_star_10 = pipeline_collapse_threshold(10, 0.05)
+    check("q*(d=10, C_min=0.05) ≈ 0.063 (paper claim)",
+          np.isclose(q_star_10, 0.063, atol=0.001),
+          f"q* = {q_star_10:.5f}")
+
+    # --- (h) Threshold table from the paper ---
+    table = [
+        (1, 0.370),
+        (2, 0.244),
+        (5, 0.118),
+        (10, 0.063),
+        (20, 0.032),
+        (50, 0.013),
+    ]
+    for d, q_star_expected in table:
+        q_star_actual = pipeline_collapse_threshold(d, 0.05)
+        check(f"q*(d={d}, C_min=0.05) ≈ {q_star_expected}",
+              np.isclose(q_star_actual, q_star_expected, atol=0.001),
+              f"q* = {q_star_actual:.4f}")
+
+    # --- (i) q*(d; C_min) strictly decreasing in d ---
+    qs = [pipeline_collapse_threshold(d, 0.05) for d in range(1, 51)]
+    decreasing = all(qs[i] > qs[i + 1] for i in range(len(qs) - 1))
+    check("q*(d; 0.05) strictly decreasing in d", decreasing)
+
+    # --- (j) Direct simulation: compose two BSCs, check effective rate ---
+    np.random.seed(7)
+    n = 500_000
+    q_a, q_b = 0.08, 0.12
+    theta = np.random.randint(0, 2, size=n)
+    flip_a = np.random.random(n) < q_a
+    flip_b = np.random.random(n) < q_b
+    y1 = theta ^ flip_a.astype(int)
+    y2 = y1 ^ flip_b.astype(int)
+    empirical = np.mean(y2 != theta)
+    formula = (1 - (1 - 2 * q_a) * (1 - 2 * q_b)) / 2
+    check("Simulation matches q_eff for non-uniform 2-stage pipeline",
+          np.isclose(empirical, formula, atol=0.005),
+          f"empirical={empirical:.4f}, formula={formula:.4f}")
+
+    # --- (k) Geometric bias-decay identity: 1/2 - q_eff = (1-2q)^d / 2 ---
+    for d in [1, 2, 5, 10, 20]:
+        for q in [0.01, 0.05, 0.1, 0.25]:
+            lhs = 0.5 - bsc_series_q_eff(d, q)
+            rhs = 0.5 * (1 - 2 * q) ** d
+            check(f"Geometric bias decay: 1/2 - q_eff(d={d}, q={q}) = (1-2q)^d / 2",
+                  np.isclose(lhs, rhs, atol=1e-12),
+                  f"lhs={lhs:.6e}, rhs={rhs:.6e}")
+
+    # --- (l) Concavity of q_eff in q for d >= 2 (curve lies above chord) ---
+    for d in [2, 5, 10, 20]:
+        q_lo, q_hi = 0.05, 0.30
+        q_mid = 0.5 * (q_lo + q_hi)
+        f_lo = bsc_series_q_eff(d, q_lo)
+        f_hi = bsc_series_q_eff(d, q_hi)
+        f_mid = bsc_series_q_eff(d, q_mid)
+        chord_mid = 0.5 * (f_lo + f_hi)
+        check(f"Concavity in q at d={d}: q_eff(midpoint) > chord midpoint",
+              f_mid > chord_mid + 1e-9,
+              f"f_mid={f_mid:.4f}, chord={chord_mid:.4f}")
+
+    # --- (m) Symbolic confirmation: d^2 q_eff / dq^2 = -2 d (d-1) (1-2q)^(d-2) ---
+    q_sym, d_sym = sp.symbols("q d", positive=True)
+    q_eff_d = (1 - (1 - 2 * q_sym) ** d_sym) / 2
+    second_deriv = sp.diff(q_eff_d, q_sym, 2)
+    expected_dd = -2 * d_sym * (d_sym - 1) * (1 - 2 * q_sym) ** (d_sym - 2)
+    check("Symbolic: d^2 q_eff/dq^2 = -2 d (d-1) (1-2q)^(d-2)  (concave for d>=2)",
+          sp.simplify(second_deriv - expected_dd) == 0)
+
+    # --- (n) Small-q linearization: q_eff(d, q) ~ d q + O((d q)^2) ---
+    for d in [5, 10, 20]:
+        q = 1e-4
+        q_eff_val = bsc_series_q_eff(d, q)
+        leading = d * q
+        rel_err = abs(q_eff_val - leading) / leading
+        check(f"Small-q linearization q_eff ~ d q at d={d}, q={q}",
+              rel_err < 1e-2,
+              f"q_eff={q_eff_val:.6e}, d*q={leading:.6e}, rel_err={rel_err:.2e}")
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -888,6 +1038,7 @@ def main() -> None:
     verify_multidim()
     verify_gaussian_channel()
     verify_total_variance()
+    verify_bsc_series()
 
     print(f"\n{'='*72}")
     print(f"  FINAL RESULTS: {PASS} passed, {FAIL} failed, {PASS + FAIL} total")
