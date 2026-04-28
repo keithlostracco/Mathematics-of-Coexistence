@@ -19,6 +19,7 @@
 % ── Theorem-like environments ─────────────────────────────────────────────────
 \usepackage{amsmath}
 \usepackage{amsthm}
+\usepackage{bbm} % blackboard-bold numerals (\mathbbm{1} for indicator functions)
 \usepackage{thmtools}
 \declaretheorem[name=Theorem]{theorem}
 \declaretheorem[name=Proposition,sibling=theorem]{proposition}
@@ -354,7 +355,7 @@ the absence of new violations, friction decays at rate
 
 The combined law of motion is:
 
-\[\phi_{t+1} = (1 - \epsilon)\,\phi_t + \eta\,v_t \cdot \mathbb{1}_{\{\text{violation at } t\}}\]
+\[\phi_{t+1} = (1 - \epsilon)\,\phi_t + \eta\,v_t \cdot \mathbbm{1}_{\{\text{violation at } t\}}\]
 
 The cascading cost of a single violation amplifies at ratios of \(10^3\)
 to \(10^4\) across the cooperative network \citep{TC-IV}: a violation of
@@ -1099,7 +1100,7 @@ payoffs.
 
 $N$ agents each choose whether to Cooperate ($C$: contribute energy $c_i > 0$ to a shared pool) or Defect ($D$: contribute nothing). The shared pool generates a return multiplied by factor $\alpha > 1$ (the efficiency gain from cooperation) and is distributed equally. Agent $i$'s payoff:
 
-$$\pi_i = \frac{\alpha \sum_{j=1}^{N} c_j \cdot \mathbb{1}[j \text{ cooperates}]}{N} - c_i \cdot \mathbb{1}[i \text{ cooperates}] - \phi \cdot \bar{E} \cdot \frac{N - n_C}{N}$$
+$$\pi_i = \frac{\alpha \sum_{j=1}^{N} c_j \cdot \mathbbm{1}[j \text{ cooperates}]}{N} - c_i \cdot \mathbbm{1}[i \text{ cooperates}] - \phi \cdot \bar{E} \cdot \frac{N - n_C}{N}$$
 
 where $n_C$ is the number of cooperators and the last term captures the friction tax from defectors (proportional to the defection rate).
 \end{definition}
