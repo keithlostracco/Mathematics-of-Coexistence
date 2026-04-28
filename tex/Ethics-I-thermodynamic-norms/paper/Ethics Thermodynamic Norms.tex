@@ -1,0 +1,2482 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\graphicspath{{../../shared/figures/}}
+\usepackage{natbib}
+\bibliographystyle{unsrtnat}
+\usepackage{doi}
+% \setcitestyle{numbers,super} % Superscript citation numbers (e.g. ¹, ²⁻⁴) — does not support locator notes
+\setcitestyle{numbers,square} % Square brackets around citation numbers (e.g. [1], [2-4]) — math standard
+% ── Merge citation text into a single hyperlink ───────────────────────────────
+\makeatletter
+\renewcommand{\hyper@natlinkbreak}[2]{#1}
+\makeatother
+\usepackage{titlesec}
+% New page before each top-level section
+% \newcommand{\sectionbreak}{\clearpage}
+
+% ── Theorem-like environments ─────────────────────────────────────────────────
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{thmtools}
+\declaretheorem[name=Theorem]{theorem}
+\declaretheorem[name=Proposition,sibling=theorem]{proposition}
+\declaretheorem[name=Lemma,sibling=theorem]{lemma}
+\declaretheorem[name=Corollary,sibling=theorem]{corollary}
+\declaretheorem[name=Conjecture,sibling=theorem]{conjecture}
+
+\theoremstyle{definition}
+\declaretheorem[name=Definition,style=definition]{definition}
+\declaretheorem[name=Axiom,style=definition,sibling=definition]{axiom}
+\declaretheorem[name=Assumption,style=definition,sibling=definition]{assumption}
+\declaretheorem[name=Criterion,style=definition,sibling=definition]{criterion}
+\declaretheorem[name=Example,style=definition,sibling=definition]{example}
+
+\theoremstyle{remark}
+\declaretheorem[name=Remark,style=remark]{remark}
+\declaretheorem[name=Observation,style=remark,sibling=remark]{observation}
+\declaretheorem[name=Property,style=remark,sibling=remark]{property}
+
+% Prevent theorem-like environments from starting near the page bottom.
+\usepackage{etoolbox}
+\BeforeBeginEnvironment{theorem}{\needspace{4\baselineskip}\addvspace{6pt}}
+\BeforeBeginEnvironment{corollary}{\needspace{4\baselineskip}\addvspace{6pt}}
+\BeforeBeginEnvironment{lemma}{\needspace{4\baselineskip}\addvspace{6pt}}
+\BeforeBeginEnvironment{proposition}{\needspace{4\baselineskip}\addvspace{6pt}}
+\BeforeBeginEnvironment{definition}{\needspace{4\baselineskip}\addvspace{6pt}}
+\BeforeBeginEnvironment{axiom}{\needspace{4\baselineskip}\addvspace{6pt}}
+\BeforeBeginEnvironment{assumption}{\needspace{4\baselineskip}\addvspace{6pt}}
+\BeforeBeginEnvironment{remark}{\needspace{4\baselineskip}\addvspace{9pt}}
+
+% ── Pandoc-generated table support ────────────────────────────────────────────
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{calc}
+\usepackage{caption}
+% Pandoc 3.x wraps uncaptioned longtables in \def\LTcaptype{none};
+% this requires a 'none' counter to exist.
+\newcounter{none}
+
+% ── Paragraph spacing (matches Pandoc default) ────────────────────────────────
+% No paragraph indentation; inter-paragraph spacing instead.
+\usepackage{parskip}
+
+% ── Page-break quality ────────────────────────────────────────────────────────
+% Prevent widow/orphan lines (single line stranded at top/bottom of page).
+\widowpenalty=10000
+\clubpenalty=10000
+% Pin footnotes to the page bottom even with \raggedbottom.
+\usepackage[bottom]{footmisc}
+% Prevent page breaks immediately before or after display equations.
+\predisplaypenalty=10000
+\postdisplaypenalty=150
+% Allow uneven page bottoms rather than stretching vertical glue.
+\raggedbottom
+% Increase separation between body text and footnotes.
+\setlength{\skip\footins}{1.5\baselineskip}
+% Ensure headings don't appear at page bottom without body text following.
+\usepackage{needspace}
+% Reserve enough space for the heading itself plus at least two following
+% lines of body text (or a nested heading plus a line). This prevents a
+% heading from appearing at the bottom of a page with its content (or its
+% next-level subheading) starting on the following page.
+\let\origsection\section
+\renewcommand{\section}{\needspace{6\baselineskip}\origsection}
+\let\origsubsection\subsection
+\renewcommand{\subsection}{\needspace{6\baselineskip}\origsubsection}
+\let\origsubsubsection\subsubsection
+\renewcommand{\subsubsection}{\needspace{4\baselineskip}\origsubsubsection}
+\let\origparagraphcmd\paragraph
+\renewcommand{\paragraph}{\needspace{3\baselineskip}\origparagraphcmd}
+\let\origsubparagraph\subparagraph
+\renewcommand{\subparagraph}{\needspace{3\baselineskip}\origsubparagraph}
+
+% Discourage page breaks inside multi-line math environments (align, gather, etc.)
+\interdisplaylinepenalty=10000
+
+% ── Section numbering ────────────────────────────────────────────────────────
+% Pandoc --number-sections generates \section{...} (not \section*{...}).
+% LaTeX auto-numbers to depth 3 (subsubsection) by default.
+\setcounter{secnumdepth}{3}
+
+% ── Make \paragraph and \subparagraph block-level (matches Pandoc) ───────────
+% By default LaTeX renders \paragraph as a run-in heading (text continues on
+% the same line). These commands make them free-standing headings with
+% proper spacing before and after.
+\titleformat{\paragraph}
+  {\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+  {0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+\titleformat{\subparagraph}
+  {\normalfont\normalsize\bfseries}{\thesubparagraph}{1em}{}
+\titlespacing*{\subparagraph}
+  {0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+% ── Pandoc-generated tightlist support ────────────────────────────────────────
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% ── Pandoc 3.x figure sizing ─────────────────────────────────────────────────
+% \pandocbounded constrains included graphics to text width when they exceed it
+\newcommand{\pandocbounded}[1]{%
+  \sbox0{#1}%
+  \ifdim\wd0>\linewidth
+    \resizebox{\linewidth}{!}{#1}%
+  \else
+    #1%
+  \fi
+}
+
+% ── Unicode character fixes ───────────────────────────────────────────────────
+\usepackage{amssymb}
+\usepackage{newunicodechar}
+\newunicodechar{✓}{$\checkmark$}
+\newunicodechar{≠}{$\neq$}
+\newunicodechar{≡}{$\equiv$}
+\newunicodechar{≈}{$\approx$}
+\newunicodechar{δ}{$\delta$}
+\newunicodechar{−}{$-$}
+% Superscript digits used in scientific notation (e.g. 10^-7, 10^29)
+\newunicodechar{⁰}{$^{0}$}
+% ¹²³ already defined by textcomp; suppress redefinition warning
+\begingroup\renewcommand\PackageWarning[2]{}%
+\newunicodechar{¹}{$^{1}$}
+\newunicodechar{²}{$^{2}$}
+\newunicodechar{³}{$^{3}$}
+\endgroup
+\newunicodechar{⁴}{$^{4}$}
+\newunicodechar{⁵}{$^{5}$}
+\newunicodechar{⁶}{$^{6}$}
+\newunicodechar{⁷}{$^{7}$}
+\newunicodechar{⁸}{$^{8}$}
+\newunicodechar{⁹}{$^{9}$}
+\newunicodechar{⁻}{$^{-}$}
+% Fix \rightarrow for use outside math mode
+\let\mystRightarrow\rightarrow
+\renewcommand{\rightarrow}{\ensuremath{\mystRightarrow}}
+% ─────────────────────────────────────────────────────────────────────────────
+
+% Allow TeX extra stretch to resolve moderate overfull hboxes
+\emergencystretch=2em
+
+\hypersetup{colorlinks=true, allcolors=blue}
+
+\title{A Theory of Ethics from First Principles: Thermodynamic Norms}
+\author{Keith Lostracco}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+No formal derivation has connected physical law to ethical principle
+without presupposing normative premises. We provide one. Synthesizing
+results derived in the \emph{Thermodynamics of Cooperation} series,
+conditional on two physical axioms, the Second Law of Thermodynamics
+(\(A_0\)) and self-maintaining organization (\(A_1\)), we show that
+constrained optimization in a shared, finite-resource environment
+strictly determines the rules of multi-agent engagement: boundary
+constraints are necessary for coexistence, defection is self-penalizing
+through thermodynamic friction and information-theoretic degradation,
+cooperation is the unique efficient Nash Equilibrium, destruction of
+complex systems is thermodynamically irrecoverable, and stable
+coexistence is a dynamical attractor. The central claim is that ethical
+principles are abstractions of gene-culture co-evolved heuristic
+approximations of this cooperative equilibrium: evolution produced moral
+emotions as somatic approximations, those emotions were compressed into
+communicable morals, and morals were systematized into the philosophical
+traditions we call ethics. This identification dissolves Hume's Is-Ought
+gap and Moore's Open Question, unifies the four major ethical traditions
+as partial captures of a single formal structure, derives the social
+contract as a consequence, and reframes rights as the result of
+constraint boundaries rather than entitlements.
+\end{abstract}
+\newpage
+\tableofcontents
+\newpage
+\section{Introduction}\label{introduction}
+
+\subsection{The Open Problem}\label{the-open-problem}
+
+The standard frameworks of moral philosophy rely on priors that are
+themselves normative. Whether the framework is based on consequence,
+agreement, virtue or logic, to our knowledge no formal derivation has
+connected physical law to ethical principle without terminating in
+irreducible moral postulates; assumptions about \emph{right} and
+\emph{wrong} that are accepted as true that cannot be proven. Yet the
+systems that produce ethical principles, regardless of their origin,
+exist and operate within physical reality. That no formal connection has
+been found suggests either a definitive boundary between two
+fundamentally different domains, or an incomplete formulation within
+one.
+
+Hume's 1739 observation that descriptive statements cannot logically
+entail prescriptive ones \citep[3.1.1]{Hume1739} has been widely
+regarded as an impassable barrier between the descriptive and the
+normative. Nearly three centuries later, the gap remains open.
+
+We contend that this barrier is an artifact of an incomplete
+formulation. The theory is built on two physical axioms: \(A_0\), the
+Second Law of Thermodynamics, and \(A_1\), the Intent to
+Persist\footnote{``Intent'' is used in the operational sense of
+  \citet{Millikan1984} and \citet{Dennett1987}, not as a claim about
+  conscious deliberation. The term is retained over a purely mechanical
+  substitute because this lineage (proper function, the intentional
+  stance) already separates goal-directed structure from conscious
+  volition. The full definition appears in the axioms section
+  (§\ref{axioms-and-framework}).} (a system's persistence-promoting
+physical structure as the causal basis for its continued existence). The
+central claim (§\ref{from-optimal-strategy-to-ethics-the-central-claim})
+is that ethical norms are gene-culture co-evolved heuristic
+approximations of a cooperative equilibrium formally derivable from
+these axioms. \textbf{For any entity satisfying \(A_1\) in a shared,
+finite-resource environment, constrained optimization strictly
+determines the rules of engagement.}
+
+\subsection{Thesis}\label{thesis}
+
+We present the complete derivation that the cooperative equilibrium
+formally derivable from two physical axioms, the Second Law of
+Thermodynamics (\(A_0\)) and the Intent to Persist (\(A_1\)), is the
+structure that ethical principles approximate. We synthesize results
+derived in the \emph{Thermodynamics of Cooperation} series:
+\emph{Necessary Constraints} \citep{TC-I}, \emph{Strategic Entropy
+Injection} \citep{TC-II}, \emph{Accumulated Negentropy} \citep{TC-III},
+\emph{Thermodynamic Friction} \citep{TC-IV}, \emph{Cooperative
+Equilibrium} \citep{TC-V}, and \emph{Value Dynamics} \citep{TC-VI}.
+
+Specifically, we show:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Mutual constraints (rights) are structurally necessary.} In
+  any multi-agent system sharing finite resources\footnote{``Resource''
+    in this framework denotes anything carrying energetic value,
+    including but not limited to material commodities. Information
+    channels, accumulated knowledge, cultural capital, and boundary
+    integrity are all resource dimensions subject to the same constraint
+    structure. The full specification appears in the scarcity discussion
+    (§\ref{scarcity-and-collision}).}, no feasible allocation can
+  simultaneously be unconstrained-optimal for all agents
+  (Theorem~\ref{ethics-thm-inf-freedom}); at least one constraint on
+  agent strategies must bind
+  (Corollary~\ref{ethics-cor-active-constraints}). Each constraint
+  carries a computable shadow price quantifying its cost
+  (Theorem~\ref{ethics-thm-shadow-price}).
+\end{enumerate}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{1}
+\item
+  \textbf{Defection is self-penalizing.} Constraint violation generates
+  thermodynamic friction that cascades through the cooperative network
+  at amplification ratios of \(10^3\)--\(10^4\)
+  (Theorem~\ref{ethics-thm-cascading-friction}). Deception, formalized
+  as entropy injection into communication channels, collapses network
+  throughput beyond a critical threshold
+  (Theorem~\ref{ethics-thm-systemic-deception}).
+\item
+  \textbf{Cooperation is the unique efficient equilibrium.} Under
+  energy-denominated payoffs with physical friction costs, universal
+  cooperation is the unique Nash Equilibrium that is simultaneously
+  Pareto-efficient and welfare-maximizing for agents with discount
+  factor \(\delta \geq \delta^*\)\footnote{The discount factor
+    \(\delta \in (0,1)\) is the rate at which future payoffs diminish
+    relative to immediate ones. For an agent with \(\delta\) close to 1,
+    a resource gain next period is nearly equivalent to the same gain
+    now; for \(\delta\) close to 0, future gains are negligible. The
+    threshold \(\delta^*\) is the minimum future-sensitivity at which
+    the long-run costs of defection outweigh the short-run gains. This
+    is not a claim about what agents \emph{should} value; it is a
+    characterization of which agents' time-horizons are long enough for
+    cooperation to maximize individual payoff.}
+  (Corollary~\ref{ethics-cor-unique-ne}). Defection is evolutionarily
+  unstable (Theorem~\ref{ethics-thm-invasion-barrier}),
+  self-extinguishing \citep{TC-V}, and unprofitable even from a single
+  deviation (Theorem~\ref{ethics-thm-profit-erasure}).
+\end{enumerate}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{3}
+\item
+  \textbf{Destruction of complex systems is thermodynamically
+  irrecoverable.} The fraction of accumulated thermodynamic investment
+  recoverable through destruction is negligibly small
+  (Corollary~\ref{ethics-cor-burning-library}). Living systems
+  continuously generate novel functional information whose present value
+  is formally derivable (Theorem~\ref{ethics-thm-pv-gen-info});
+  destruction permanently terminates that generative stream.
+\item
+  \textbf{Stable coexistence is a dynamical attractor.} Agents naturally
+  settle into a stable coexistence configuration at an optimal coupling
+  distance from resource centers (Theorem~\ref{ethics-thm-coexistence}),
+  with measurable freedom bandwidth
+  (Theorem~\ref{ethics-thm-freedom-bandwidth}) and irreversible
+  dissolution boundaries (Theorem~\ref{ethics-thm-dissolution}).
+\end{enumerate}
+
+The theory is applied mathematics grounded in physics: we are not
+discovering new laws but proving that the structures already known to
+describe physical systems (Lagrangian constraints, Nash equilibria,
+Shannon entropy, dynamical systems attractors) also determine the rules
+of cooperative multi-agent engagement.
+
+\section{Related Work}\label{related-work}
+
+\subsection{Physics, Biology, and
+Information}\label{physics-biology-and-information}
+
+Physical foundations originate in \citet{Schrodinger1944}'s observation
+that living systems maintain themselves far from thermodynamic
+equilibrium by importing free energy and exporting entropy.
+\citet{Prigogine1978} demonstrated that dissipative systems far from
+equilibrium can spontaneously generate ordered structures
+\citep{Nicolis1977}, \citet{England2013} provided a
+statistical-mechanical treatment of self-replication, and
+\citeauthor{Friston2006}
+\citetext{\citeyear{Friston2006}; \citeyear{Friston2010}} proposed that
+any self-organizing system persisting over time must minimize
+variational free energy. Maturana and Varela's \emph{autopoiesis}
+\citep{Maturana1980} formalizes the operational closure of
+self-producing systems. Together, these results establish that life is a
+thermodynamic phenomenon: persistence requires energy, organization
+requires work, and self-maintaining boundaries define the agent.
+
+The information-theoretic tradition, running from \citet{Shannon1948}
+through the resolution of Maxwell's Demon
+\citetext{\citealp{Szilard1929}; \citealp{Landauer1961}; \citealp{Bennett1973}; \citeyear{Bennett1982}},
+established that information is physical: while it can theoretically be
+acquired and processed reversibly, the erasure or irreversible
+destruction of information carries an unavoidable thermodynamic cost.
+\citet{Adami2004} extended this to biological sequences, showing that
+the reduction in Shannon entropy, representing the functional
+information between a genome and its environment, rigorously measures
+the information content of evolved systems.
+
+These fields define the required primitives: persistence is
+thermodynamic, information is physical, and both are quantifiable. The
+framework extends these foundations to multi-agent interaction, deriving
+optimal strategies for distinct agents with conflicting resource
+interests, and connects across scale, providing a unified quantitative
+treatment from single-bit erasure costs to biosphere-level accumulated
+information.
+
+\subsection{Game Theory and Economics}\label{game-theory-and-economics}
+
+Classical game theory, from \citet{VonNeumann1944} through
+\citeauthor{Nash1950}
+\citetext{\citeyear{Nash1950}; \citeyear{Nash1951}} to
+\citet{Fudenberg1986}, built the mathematics of strategic interaction
+and proved that equilibria exist. \citet{Fudenberg1986}'s Folk Theorem,
+however, shows a fundamental limitation: when agents are sufficiently
+patient, any feasible and individually rational outcome is sustainable
+as an equilibrium. With unconstrained payoffs, the theory selects
+nothing. The equilibrium selection problem has remained open since 1986.
+
+Evolutionary game theory
+\citep{MaynardSmith1973, Hamilton1964a, Axelrod1984, Weibull1995}
+identified the dynamics: natural selection discovers Nash equilibria,
+and cooperation can emerge through reciprocity and kin selection. This
+tradition demonstrated that cooperation evolves, but took the payoff
+function as given rather than deriving it from physical first
+principles.
+
+The ecological economics tradition \citep{GeorgescuRoegen1971, Odum1971}
+established that multi-agent economies are fundamentally bounded by
+thermodynamic and ecological limits. Within these constrained
+environments, \citet{Ostrom1990}'s \citeyearpar{Ostrom2005} empirical
+work on commons governance demonstrated that cooperation scales and
+persists without central authority, documenting hundreds of cases of
+successful self-governance and challenging the Tragedy of the Commons
+\citep{Hardin1968}. However, because Ostrom's evidence is primarily
+institutional and empirical, the formal question of whether cooperation
+must scale for an arbitrarily large \(N\) remained open.
+
+The framework synthesizes results from these three lines of work. By
+deriving the payoff matrix from energy budgets
+(Proposition~\ref{ethics-prop-physical-pd}), it resolves the Folk
+Theorem's equilibrium selection problem: cooperation emerges as the
+unique efficient Nash Equilibrium (Corollary~\ref{ethics-cor-unique-ne})
+with a numerically computable cooperation threshold
+(\(\delta^* = 0.363\), Theorem~\ref{ethics-thm-cooperation}). The
+\(N\)-player generalization \citep{TC-V} provides the formal result that
+Ostrom's fieldwork documented empirically.
+
+\subsection{Philosophical Precedents}\label{philosophical-precedents}
+
+\citet{Spinoza1677}'s \emph{Ethica, ordine geometrico demonstrata} is
+the most ambitious attempt in Western philosophy to derive ethics
+axiomatically. His \emph{conatus} (``each thing, as far as it can by its
+own power, strives to persevere in its being,'' Ethics III, Prop. 6) is
+the philosophical precedent for our Axiom \(A_1\), and his argument that
+rational self-interest leads to cooperation (Ethics IV, Props. 29-37)
+represents a pre-formal mapping of the results derived in
+Theorem~\ref{ethics-thm-cooperation}. Our theory is a formal realization
+of Spinoza's program, carrying forward his insight with mathematical
+tools unavailable in the seventeenth century.
+
+\citet{Hobbes1651} identified the catastrophic state of nature and
+argued that rational agents would submit to mutual constraints. The
+theory's unconstrained-conflict result \citep{TC-I} establishes that no
+stable allocation for the resource dimension exists under unconstrained
+optimization; where Hobbes required an external sovereign,
+Theorem~\ref{ethics-thm-cooperation} shows cooperation is self-enforcing
+for \(\delta \geq 0.363\). Structural analogues exist in Locke's
+rights-emergence \citep{Locke1689}, Rousseau's welfare-maximizing
+general will \citep{Rousseau1762}, and Rawls's veil of ignorance
+\citep{Rawls1971}, which corresponds here to the Variational Equilibrium
+(Theorem~\ref{ethics-thm-variational-eq}).
+
+\citet{Hume1739} and \citet{Moore1903} asserted that any naturalistic
+ethics must cross a categorical barrier (addressed in full in
+§\ref{from-cooperative-equilibrium-to-ethics}). \citet{Helvetius1758}
+named the project in 1758 (``a physics of morals''), and
+\citet{Bazargan1956} argued that while inanimate objects suffer
+thermodynamic decay and entropy, human societies require the ``force''
+of opposition, need, and love to drive moral and social evolution,
+explicitly rooting his ethical framework in physical laws
+\citep{Kurzman1998}.
+
+The framework addresses this problem and formalizes a solution with
+tools that were not available to the traditions that posed it.
+
+\subsection{Empirical Moral
+Psychology}\label{empirical-moral-psychology}
+
+Contemporary empirical moral psychology has documented the structure of
+moral intuitions across cultures. \citet{Haidt2003} surveyed the moral
+emotions and the conditions under which they are elicited, providing the
+empirical catalogue on which the present paper's identification of moral
+emotions as equilibrium-tracking signals
+(§\ref{from-optimal-strategy-to-ethics-the-central-claim}) draws.
+\citet{Haidt2010} synthesized the subsequent decade of work under the
+principles of intuitive primacy, moral cognition for social
+coordination, and morality as a mechanism that ``binds and builds''
+cooperative groups. \citet{Curry2019} tested a cooperation-based account
+of morality in the ethnographic records of 60 societies and reported
+that the moral valence of seven cooperative behaviors is
+cross-culturally uniform. These descriptive and empirical findings
+converge on the structural role of cooperation this work obtains from
+physical first principles.
+
+\section{Axioms and Framework}\label{axioms-and-framework}
+
+The formal foundation: two axioms, the entity model, and the key
+definitions needed to follow the deductive chain. All subsequent results
+in the deductive chain (§\ref{results-the-deductive-chain}) are derived
+from the objects defined here; proofs appear in \emph{Thermodynamics of
+Cooperation} \citep{TC-I, TC-II, TC-III, TC-IV, TC-V, TC-VI}.
+
+\subsection{The Thermodynamic
+Environment}\label{the-thermodynamic-environment}
+
+\begin{quote}
+\textbf{Axiom \(A_0\) (The Second Law of Thermodynamics):}
+\(\Delta S_{\text{universe}} \geq 0\). The total entropy of an isolated
+system does not decrease.
+\end{quote}
+
+Maintaining ordered (low-entropy) structures requires the continuous
+importation of free energy from the environment and exportation of
+entropy. As a physical law, this principle serves as a universal
+constraint on all material systems
+\citep{Clausius1865, Boltzmann1877, Planck1900}.
+
+Any localized structure that maintains internal order against the
+universal trend toward disorder must perform continuous thermodynamic
+work. Ceasing to perform this work results in entropy accumulation,
+boundary dissolution, and irreversible loss of the organized
+state.\footnote{A reader versed in non-equilibrium thermodynamics may
+  object that self-maintaining systems \emph{accelerate} entropy rather
+  than resist it: the biosphere degrades solar free energy into thermal
+  radiation far more efficiently than inanimate matter. This perspective
+  is entirely compatible. Locally, the entity must perform anti-entropic
+  work to maintain its boundary; globally, that work exports more
+  entropy than it prevents.}
+
+\subsection{The Intent to Persist}\label{the-intent-to-persist}
+
+\begin{quote}
+\textbf{Axiom \(A_1\) (The Intent to Persist):} The entities under
+consideration persist through active boundary maintenance: each sustains
+a boundary separating its internal low-entropy state from the external
+environment, and each continuously imports free energy and exports
+entropy to do so.
+\end{quote}
+
+\(A_1\) asserts a property, not a preference. The specific means of
+maintenance (metabolic, regulatory, institutional, computational) varies
+by entity, and the formal characterization of the boundary as a Markov
+blanket \citep{Pearl2000, Friston2013} is developed in the entity model
+below (§\ref{the-entity-model}).
+
+The Intent to Persist is not a conscious desire or moral commitment; it
+is a physically observable property of any system whose structural
+organization is directed toward boundary maintenance. The condition of
+\(A_1\) is satisfied at every scale of self-maintaining organization:
+individual organisms, ecosystems, institutions, and economies alike. A
+system whose organization is directed toward self-dissolution is either
+physically unstable (ceasing to exist before it can be evaluated) or
+sustained by persistence-maintaining structure that itself satisfies
+\(A_1\). The anticipated objections (§\ref{anticipated-objections})
+address this point in detail.
+
+\subsection{The Entity Model}\label{the-entity-model}
+
+An entity is an open thermodynamic system that actively maintains a
+boundary between its internal low-entropy state and the external
+high-entropy environment. Three features define it: an internal state
+representing the organized, low-entropy configuration the entity
+maintains; a boundary with measurable integrity \(B_i > 0\) (denominated
+in Joules), representing the total energetic investment in maintaining
+the partition between internal and external states; and a metabolism,
+the continuous process of importing free energy and exporting entropy.
+
+Maintaining boundary integrity against environmental entropy requires
+continuous work:
+
+\[C_{\text{maintain},i} = \gamma_i B_i\]
+
+where \(\gamma_i > 0\) is the entropy leakage rate. This is the baseline
+metabolic cost of persistence, independent of any external threat.
+
+Given \(A_0\) and \(A_1\), each entity's persistence translates directly
+into an optimization problem: continuously acquire sufficient energy to
+offset the maintenance cost, repair damage, and retain a surplus against
+future stochastic shocks. The entity maximizes a utility function of
+boundary stability and resource acquisition, subject to constraints
+imposed by its environment (resource scarcity) and by other entities'
+boundaries. The formal specification and regularity conditions appear in
+\citep{TC-I}. The specification is naturally heterogeneous: each agent
+has its own objectives, constraints, patience, and capability, and the
+equilibrium results hold in the asymmetric case. Entities in this sense
+are necessarily open systems, and the framework makes no commitment
+about the global thermodynamics of the universe, only that the local
+environment of the entities under analysis admits the required
+throughput.
+
+\begin{quote}
+\textbf{Terminological convention.} Throughout the paper, \emph{entity}
+denotes the thermodynamic object (an open system that actively maintains
+a boundary against entropy), \emph{agent} denotes the game-theoretic
+object (a strategic decision-maker in a multi-player game), and
+\emph{system} is used in its general physical sense (any bounded
+collection of matter and energy under analysis), including but not
+limited to entities. Every agent is an entity; every entity is a system;
+not every system is an entity.
+\end{quote}
+
+\subsection{Value and Information}\label{value-and-information}
+
+\textbf{Value} (singular, objective) is defined as the contribution of a
+resource to an entity's persistence, denominated in energy units
+(Joules). \textbf{Values} (plural, subjective) are the named,
+communicable moral abstractions (honesty, fairness, compassion) that
+different societies have developed as approximations of how to operate
+within the cooperative equilibrium (morals, in the terminology of the
+central claim,
+§\ref{from-optimal-strategy-to-ethics-the-central-claim}).
+
+Not all energy is equal, and Value cannot be captured by any single
+physical measure. A star contains vastly more raw energy than a forest,
+but raw energy alone does not capture Value: the forest embodies
+structural complexity (genetic diversity, ecological interdependence,
+evolutionary search) that cannot be reconstructed from raw energy input
+on any physically relevant timescale. This is formalized through three
+quantities from \emph{Thermodynamics of Cooperation}.
+
+\textbf{Information density} \(\rho_{\text{info}} = \mathcal{I} / m\)
+\citep{TC-III} is the functional information a system embodies per unit
+mass.
+
+\textbf{Accumulated negentropy}
+\(\mathcal{N}(T) = \int_0^T \dot{W}_{\text{order}}(t)\,dt\)
+\citep{TC-III} is the total ordering work invested in a system over its
+history.
+
+\textbf{Present value of generative information}
+\(PV_{\text{gen}} = \dot{\mathcal{I}}_{\text{gen}} \cdot v / r\)
+\citep{TC-III} is the discounted future stream of novel functional
+information a generative system continuously produces.
+
+\subsection{Scarcity and Collision}\label{scarcity-and-collision}
+
+Consider a system of \(N \geq 2\) agents sharing an environment with
+\(n\) resource dimensions and finite endowment
+\(\mathbf{R} = (R_1, \ldots, R_n) \in \mathbb{R}_{>0}^n\). Each agent
+selects a strategy vector \(\mathbf{x}_i \in \mathbb{R}_{\geq 0}^n\),
+and the joint strategy must satisfy resource conservation:
+
+\[\sum_{i=1}^{N} x_{ij} \leq R_j \qquad \forall j \in \{1, \ldots, n\}\]
+
+A resource dimension \(j\) is in \emph{collision} if the sum of all
+agents' unconstrained optima exceeds supply:
+\(\sum_i x_{ij}^{\circ} > R_j\) \citep{TC-I}. By the Inevitability of
+Collision lemma \citep{TC-I}, in any system of \(N \geq 2\) agents with
+overlapping resource needs and finite endowments, at least one resource
+dimension is in collision for sufficiently large \(N\).
+
+Collision is not an edge case. For any population of non-trivial size in
+a finite environment, collision is the systemic default.
+
+\begin{remark}[Scope of "Resource"]
+\label{rem-resource-scope}
+
+"Resource" in this framework is not restricted to material commodities. The resource dimensions $j$ encompass any physical state, channel, or configuration that contributes to an entity's persistence, including shared information channels (whose finite capacity is degraded by deception; see the defection costs, §\ref{costs-of-defection}), accumulated knowledge and cultural capital (whose destruction is thermodynamically irreversible; see the accumulated negentropy discussion, §\ref{the-irreplaceability-of-accumulated-negentropy}), and boundary integrity itself (the energetic investment that constitutes an entity's structural configuration). When a government suppresses speech, it degrades a shared information channel; when a community destroys a library, it erases accumulated negentropy. Both are resource collisions in the framework's sense, subject to the same constraint mathematics as competition over territory or food.
+\end{remark}
+
+\section{Results: The Deductive
+Chain}\label{results-the-deductive-chain}
+
+The results below are drawn from \emph{Thermodynamics of Cooperation}.
+Proofs appear in the cited papers.
+
+\subsection{Constraints and Rights}\label{constraints-and-rights}
+
+Given the scarcity framework (§\ref{scarcity-and-collision}), each agent
+solves a constrained optimization problem: maximize its own persistence
+subject to finite resources and other agents' boundaries.
+
+The formal starting point is the \emph{boundary constraint}: a
+restriction on what one agent's strategy can do to another agent's
+boundary \citep{TC-I}. A boundary constraint is a bidirectional
+relation: it restricts the acting agent's strategy space while
+preserving the affected agent's boundary integrity. What is
+conventionally termed a right is the protective aspect of this
+structural relation. No agent possesses intrinsic rights; each has
+exactly the freedom dictated by the cost structure of its surrounding
+population. This follows from the cost structure itself: the costs of
+defection (§\ref{costs-of-defection}) make violation of boundary
+constraints self-penalizing, so constraint-respecting behavior emerges
+as the equilibrium strategy and produces the mutual protection we label
+``rights.'' The formal derivation appears in \citep{TC-I}.
+
+\begin{theorem}[Shadow Price Theorem]
+\label{ethics-thm-shadow-price}
+
+Every boundary constraint carries a computable shadow price: the marginal energy that an agent foregoes by respecting another agent's boundary. The shadow price is zero when uncontested and becomes positive only where agents' claims collide. \citep{TC-I}
+\end{theorem}
+
+\begin{theorem}[Impossibility of Infinite Freedom]
+\label{ethics-thm-inf-freedom}
+
+Let $N \geq 2$ agents share a finite resource endowment. No feasible strategy profile can simultaneously be unconstrained-optimal for all agents. \citep{TC-I}
+\end{theorem}
+
+\begin{corollary}[Necessity of Active Constraints]
+\label{ethics-cor-active-constraints}
+
+In any multi-agent system with resource collision, at least one boundary constraint must be active ($\mu_{Bk}^* > 0$) at any feasible solution. Boundary constraints are not optional; they are structurally necessary for coexistence. \citep{TC-I}
+\end{corollary}
+
+Unlimited freedom for all agents is incompatible with shared finite
+resources. Removing all constraints under resource collision produces no
+stable allocation \citep{TC-I}. Hobbes \citep{Hobbes1651} identified
+this catastrophic outcome through philosophical argument; the
+proposition establishes it as a formal consequence of finite resources
+and competing objectives.
+
+\begin{theorem}[Variational Equilibrium]
+\label{ethics-thm-variational-eq}
+
+A unique equilibrium with shared shadow prices exists. The optimization contains no term that distinguishes one agent from another: with symmetric agents, the equilibrium converges to equal allocation. \citep{TC-I}
+\end{theorem}
+
+The Variational Equilibrium provides a formal basis for impartiality. It
+is a structural analogue of Rawls's veil of ignorance \citep{Rawls1971},
+not as a thought experiment but as a symmetry property of the
+constrained optimization.
+
+\subsection{Costs of Defection}\label{costs-of-defection}
+
+Constraints are necessary (§\ref{constraints-and-rights}); they are also
+self-enforcing. \emph{Thermodynamic Friction} \citep{TC-IV} and
+\emph{Strategic Entropy Injection} \citep{TC-II} prove that defection is
+self-penalizing through two independent mechanisms: thermodynamic
+friction and information-theoretic degradation.
+
+\subsubsection{Thermodynamic Friction}\label{thermodynamic-friction}
+
+Constraint violation dissipates energy \citep{TC-IV}. The friction
+function \(\Phi\) quantifies the total dissipation per unit of contested
+energy.
+
+\begin{theorem}[Net-Negative Conflict]
+\label{ethics-thm-net-negative}
+
+For $\Phi > N/(N-1)$, adversarial contest is system-net-negative: the cumulative energy dissipated exceeds the value of the contested resource. \citep{TC-IV}
+\end{theorem}
+
+\begin{theorem}[Cascading Friction]
+\label{ethics-thm-cascading-friction}
+
+A single constraint violation cascades across the cooperative network at amplification ratios of $10^3$–$10^4$. \citep{TC-IV}
+\end{theorem}
+
+Even small transgressions are enormously costly in network terms.
+
+\subsubsection{Deception as Entropy
+Injection}\label{deception-as-entropy-injection}
+
+The friction analysis extends to information-theoretic violations.
+Deception is formalized as the deliberate injection of entropy into a
+communication channel \citep{TC-II}.
+
+\begin{theorem}[Decision Cost of Deception]
+\label{ethics-thm-deception-cost}
+
+Deception imposes a quadratically scaling cost on receivers. \citep{TC-II}
+\end{theorem}
+
+\begin{theorem}[Systemic Deception / Network Collapse]
+\label{ethics-thm-systemic-deception}
+
+At a critical deception threshold $q^* \approx 0.063$ for depth $d = 10$, the communication network collapses. \citep{TC-II}
+\end{theorem}
+
+\begin{corollary}[Honesty Efficiency Principle]
+\label{ethics-cor-honesty}
+
+Perfect honesty ($q = 0$) is the unique efficiency-maximizing communication regime. \citep{TC-II}
+\end{corollary}
+
+Small, persistent lies are catastrophic in deep organizations: a
+ten-layer decision pipeline cannot tolerate more than approximately
+6.3\% per-layer deception before quality collapses entirely.
+
+\subsection{Cooperation as the Unique Efficient
+Equilibrium}\label{cooperation-as-the-unique-efficient-equilibrium}
+
+The payoff matrix is constructed not from arbitrary utility values but
+from the physical costs derived above (§\ref{costs-of-defection}). Two
+agents contest a resource (in the broad sense of the scarcity framework,
+§\ref{scarcity-and-collision}) of energy value \(E_R > 0\), each
+choosing to Cooperate (\(C\): accept the constrained allocation) or
+Defect (\(D\): violate the constraint, triggering friction and deception
+costs). Under baseline parameters (\(E_R = 100\), \(\Phi = 2.2\), and
+standard exploitation parameters from \citep{TC-V}), the payoffs (in
+Joules) are:
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lll@{}}
+\toprule\noalign{}
+& \(B: C\) & \(B: D\) \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\(A: C\) & \textbf{(48, 48)} & (\(-11.25\), \(78.25\)) \\
+\(A: D\) & (\(78.25\), \(-11.25\)) & \textbf{(\(-5\), \(-5\))} \\
+\end{longtable}
+}
+
+Mutual defection is net-negative (\(P = -5 < 0\)). Both agents
+\emph{lose} energy; the conflict destroys more value than the resource
+provides. In the abstract Prisoner's Dilemma, \(P > 0\) and mutual
+defection is merely suboptimal. Under physical constraints, mutual
+defection is value-destroying, a thermodynamic form of the condition
+Hobbes \citep{Hobbes1651} described on different grounds.
+
+\begin{proposition}[Physical Prisoner's Dilemma]
+\label{ethics-prop-physical-pd}
+
+Under the energy-based payoff model with physical constraints, the single-round game satisfies $T > R > P > S$ with $P < 0$, where $T$ is the temptation to defect, $R$ the reward for mutual cooperation, $P$ the penalty for mutual defection, and $S$ the (suckers) payoff for cooperating against a defector. Defection is the unique Nash Equilibrium of the one-shot game, even though mutual cooperation is Pareto-superior. \citep{TC-V}
+\end{proposition}
+
+The one-shot result is a trap. Each agent's best-response calculation
+yields defection regardless of the opponent's choice (\(T > R\) if the
+other cooperates; \(P > S\) if the other defects). Both agents follow
+this logic, and both arrive at \((D, D)\) with payoff \(P = -5\): every
+participant loses energy in absolute terms. Neither agent can
+unilaterally escape, since switching to \(C\) while the opponent defects
+yields the sucker's payoff \(S = -11.25\). Resolution requires the
+repeated interaction structure that follows.
+
+In the repeated game, agents interact over indefinite horizons. The
+discount factor \(\delta\) weights future payoffs relative to present
+ones. Unlike the abstract ``patience parameter'' of standard game
+theory, the framework's discount factor is anchored to physically
+observable quantities: survival probability and time-preference rate
+\citep{TC-V}.
+
+\begin{theorem}[Cooperation as Nash Equilibrium]
+\label{ethics-thm-cooperation}
+
+In the infinitely repeated energy-based game, cooperation is sustainable as a Nash Equilibrium if and only if the discount factor exceeds a critical threshold: $\delta \geq \delta^* = 0.363$. \citep{TC-V}
+\end{theorem}
+
+A discount factor above 0.363 is sufficient to sustain cooperation. The
+threshold is low because mutual defection is self-destructive
+(\(P < 0\)), making the cost of short-horizon behavior large relative to
+any single-round gain. No assumption of altruism or far-sightedness is
+required; any agent whose time-horizon satisfies
+\(\delta \geq \delta^*\) cooperates at equilibrium. Moreover, 0.363 is
+the baseline under idealized pairwise conditions. Incorporating network
+friction effects, multi-agent dynamics, and stochastic environmental
+costs each introduces additional penalties for defection, lowering the
+threshold further \citep{TC-V}.
+
+\begin{corollary}[Cooperation as the Unique Efficient Nash Equilibrium]
+\label{ethics-cor-unique-ne}
+
+Cooperation is the unique Nash Equilibrium simultaneously satisfying Pareto efficiency and welfare maximization. \citep{TC-V}
+\end{corollary}
+
+This resolves the Folk Theorem's indeterminacy \citep{Fudenberg1986}.
+When payoffs are denominated in energy with thermodynamic friction,
+cooperation is not merely one equilibrium among many; it is the only
+stable, efficient one. Physics selects the equilibrium that abstract
+game theory cannot. The result scales: in the \(N\)-player public goods
+formulation, cooperation remains a Nash Equilibrium as the number of
+agents grows without bound, with the critical threshold converging to
+\(\delta_N^* \to 0.4\) as \(N \to \infty\) under the baseline parameters
+of \citep{TC-V}. Ostrom \citep{Ostrom1990} documented empirically that
+large-group cooperation persists without central authority; the
+\(N\)-player theorem provides the formal proof that this observation is
+not anomalous but expected.
+
+Additional results reinforce the stability of the cooperative
+equilibrium:
+
+\begin{theorem}[Invasion Barrier]
+\label{ethics-thm-invasion-barrier}
+
+A single defector earns less than cooperators for $\delta > \delta^*$. \citep{TC-V}
+\end{theorem}
+
+\begin{theorem}[Defection Profit Erasure]
+\label{ethics-thm-profit-erasure}
+
+At sufficient network friction, even a single defection's short-term profit is completely erased within approximately 20 recovery periods. \citep{TC-V}
+\end{theorem}
+
+Defection in the physical game is not merely suboptimal but strictly
+loss-making at every scale: mutual defection yields negative absolute
+returns for both agents (\(P = -5 < 0\)), a single defector in a
+cooperative population earns less than cooperators, and even a one-time
+defection followed by return to cooperation is net-negative over the
+agent's lifetime. Unlike the abstract Prisoner's Dilemma, where
+defection at least yields a positive payoff, defection here has no
+sustainable form.
+
+\subsection{The Irreplaceability of Accumulated
+Negentropy}\label{the-irreplaceability-of-accumulated-negentropy}
+
+The energy recoverable from a system is a fraction of the thermodynamic
+work required to build it. The accumulated negentropy formalism of
+\citep{TC-III} quantifies the irreplaceable value of complex systems.
+
+\begin{theorem}[Blind Search Replication Cost]
+\label{ethics-thm-replication-cost}
+
+The cost of rebuilding a complex system from scratch is at least as great as the original thermodynamic investment: $W_{\text{rebuild}} \geq \mathcal{N}(T)$. \citep{TC-III}
+\end{theorem}
+
+\begin{corollary}[Burning-Library Ratio]
+\label{ethics-cor-burning-library}
+
+For any complex system, the fraction of accumulated thermodynamic investment recoverable through destruction, $\mathcal{R}_{\text{BL}} = E_{\text{destroy}} / \mathcal{N}$, is negligibly small. Destruction recovers a vanishing fraction of the value destroyed. \citep{TC-III}
+\end{corollary}
+
+Burning the Library of Alexandria for fuel would have recovered
+approximately one thousandth (\(\mathcal{R}_{\text{BL}} \sim 10^{-3}\))
+of the accumulated intellectual work invested in producing its contents:
+centuries of scholarship converted to minutes of heat. For biological
+systems, the ratio is far more extreme. \emph{Accumulated Negentropy}
+\citep{TC-III} computes
+\(\mathcal{R}_{\text{BL}} \sim 3 \times 10^{-7}\) for the Amazon
+rainforest and \(\sim 10^{-7}\) for the biosphere as a whole:
+destruction recovers less than one ten-millionth of the thermodynamic
+investment that produced the system's complexity.
+
+\begin{theorem}[Present Value of Generative Information]
+\label{ethics-thm-pv-gen-info}
+
+Living systems continuously produce novel functional information whose present value is $PV_{\text{gen}} = \dot{\mathcal{I}}_{\text{gen}} \cdot v / r$. Destruction permanently terminates an irreplaceable data stream. \citep{TC-III}
+\end{theorem}
+
+These results, taken together, ground a distinction that moral and legal
+traditions have long marked but not derived from physical first
+principles: the asymmetry between life and property. The Library of
+Alexandria, the greatest knowledge repository of the ancient world, had
+a recovery ratio of \(\sim 10^{-3}\); a single human being, embodying
+decades of developmental and evolutionary search, contains orders of
+magnitude more accumulated negentropy than any artifact. For living
+systems, the ratio drops to \(\sim 10^{-7}\), destruction is effectively
+total and generative information is permanently lost. These ratios are
+lower bounds on the cost of destruction: they measure only the
+backward-looking thermodynamic investment (work invested versus energy
+recoverable). Moreover, the search process that organized raw materials
+and energy into functional structure dwarfs the original material
+investment and cannot be shortcut: the Blind Search Replication Cost
+theorem establishes that rebuilding requires at least the full
+accumulated negentropy regardless of available energy. Destruction also
+eliminates a node from the cooperative network, elevating baseline
+friction for all remaining agents. Destruction is therefore
+self-defeating: it erases a structure whose replacement cost exceeds
+\(\mathcal{R}_{\text{BL}}\) by further orders of magnitude.
+
+Rights theory and the asymmetry between life and property are treated in
+full at §\ref{rights-from-constraint-boundaries}.
+
+\subsection{Stable Coexistence as a Dynamical
+Attractor}\label{stable-coexistence-as-a-dynamical-attractor}
+
+\emph{Value Dynamics} \citep{TC-VI} extends the static equilibrium
+analysis into a dynamical systems framework. Consider an agent
+interacting with a center of accumulated value (a resource-rich
+ecosystem, a nation, an institution, an economy). The agent faces a
+tradeoff: closer engagement yields greater energy harvest but also
+greater friction costs. Too close, and maintenance costs consume the
+agent; too far, and it cannot harvest enough to survive. The formal
+analysis (\citep{TC-VI}) proves that this tradeoff produces a unique
+coexistence attractor: an optimal engagement distance at which net
+energy is maximized.
+
+\begin{theorem}[Stability of the Coexistence Attractor]
+\label{ethics-thm-coexistence}
+
+The coexistence attractor is globally stable. Agents displaced in either direction experience restoring forces that return them to the equilibrium. \citep{TC-VI}
+\end{theorem}
+
+\begin{theorem}[Freedom Bandwidth]
+\label{ethics-thm-freedom-bandwidth}
+
+Around the coexistence attractor, there exists a Coexistence Band: a finite range of positions at which an agent can sustain its identity. The width of this band provides a formal, scalar measure of freedom, determined by physical parameters. \citep{TC-VI}
+\end{theorem}
+
+The Coexistence Band corresponds to what political and social theory
+identifies as the space of viable freedom: too little engagement
+(isolation from markets, institutions, or ecosystems) starves the agent
+of resources; too much (total dependence, loss of autonomy) subjects it
+to friction costs that erode its boundaries.
+
+\begin{theorem}[Irreversibility of Dissolution]
+\label{ethics-thm-dissolution}
+
+An agent pushed below the boundary dissolution threshold experiences strictly declining boundary integrity, reaching zero in finite time. Crossing the dissolution threshold is irreversible. \citep{TC-VI}
+\end{theorem}
+
+Dissolution is the formal analogue of the poverty trap, the failed
+state, and ecological collapse in human and biological systems: a point
+beyond which recovery requires external intervention. The
+irreversibility is what gives the cooperative equilibrium its structural
+significance; the consequences of crossing this threshold are permanent.
+
+\begin{corollary}[Cascade Collapse]
+\label{ethics-cor-cascade}
+
+If a high-energy center is destroyed, all agents within its Coexistence Band simultaneously lose viability. \citep{TC-VI}
+\end{corollary}
+
+Excessive concentration in a single center therefore makes the entire
+ecosystem fragile. The multi-center diversification result \citep{TC-VI}
+proves that distributed systems with multiple coexistence attractors are
+structurally more resilient than monocentric ones: the formal basis for
+polycentric governance \citep{Ostrom1990, Ostrom2005}.
+
+\subsubsection{The Stability-Cooperation
+Feedback}\label{the-stability-cooperation-feedback}
+
+The dynamical analysis connects to the game-theoretic analysis through
+the discount factor. The discount factor is maximized at the coexistence
+attractor \citep{TC-VI}: agents at the equilibrium distance are
+precisely those whose time-horizons satisfy \(\delta \geq \delta^*\),
+producing a positive feedback between position and strategy. Stability
+produces cooperation, which reinforces stability. The coexistence
+attractor is not a fragile fixed point requiring external maintenance;
+it is a self-reinforcing attractor basin.
+
+\section{From Cooperative Equilibrium to
+Ethics}\label{from-cooperative-equilibrium-to-ethics}
+
+\subsection{The Challenge}\label{the-challenge}
+
+In 1739, David Hume observed that authors imperceptibly shift from
+descriptive claims (\emph{is}) to prescriptive claims (\emph{ought})
+without valid inference connecting the two domains
+\citep[3.1.1]{Hume1739}. This ``Guillotine'' has since been treated as
+an impassable logical barrier between descriptive and prescriptive.
+\citet{Moore1903} reinforced the barrier with the Open Question
+Argument: for any natural property \(N\), the question ``is \(N\)
+good?'' remains open, so ``good'' cannot be defined as any natural
+property.
+
+Any framework that derives prescriptive conclusions from descriptive
+premises must address this challenge directly.
+
+\subsection{From ``Optimal Strategy'' to ``Ethics'': The Central
+Claim}\label{from-optimal-strategy-to-ethics-the-central-claim}
+
+The proof that cooperation is the unique efficient equilibrium is a
+result about strategic behavior. Connecting it to \emph{ethics}, the
+moral norms, emotions, and judgments observed across human cultures,
+requires justification. Proving that heat flows from hot to cold does
+not define temperature, but it explains why temperature behaves the way
+it does. Proving that cooperation is the unique efficient equilibrium
+does not by itself define good. What the derivation explains is why
+cooperative norms exist, why they converge across cultures, and why
+behavior is perceived as right or wrong according to its proximity to
+the equilibrium.
+
+The argument rests on four steps.
+
+\textbf{Step 1: The optimization problem is real but intractable.} A
+persistent agent in a shared, finite-resource environment faces a
+constrained optimization problem whose exact solution requires computing
+shadow prices (§\ref{constraints-and-rights}), friction costs
+(§\ref{thermodynamic-friction}), deception costs
+(§\ref{deception-as-entropy-injection}), cooperative equilibrium
+strategies (§\ref{cooperation-as-the-unique-efficient-equilibrium}),
+sustainability bounds
+(§\ref{the-irreplaceability-of-accumulated-negentropy}), and coexistence
+dynamics (§\ref{stable-coexistence-as-a-dynamical-attractor}). Both the
+information and the computation are out of reach: no biological agent
+observes the full system state, and none could perform the calculations
+in real time even if it did.
+
+\textbf{Step 2: Evolution produces moral emotions.} Natural selection is
+a noisy, distributed, multi-generational optimizer. Populations subject
+to the pressures formalized in \emph{Thermodynamics of Cooperation}
+evolve pre-linguistic, somatic approximations of the cooperative
+equilibrium
+\citep{Gigerenzer1999, GigerenzerGaissmaier2011, Frank1988, Gigerenzer2010}.
+These are emotions, not thoughts: empathy approximates boundary
+extension (§\ref{the-altruism-paradox}); moral disgust approximates the
+rejection of entropy-injecting deception
+(Corollary~\ref{ethics-cor-honesty}); contentment\footnote{Contentment
+  is not a moral emotion in the standard classification
+  \citep{Haidt2003} but an equilibrium-tracking one: it signals that the
+  agent's internal state is within viable operating range. The moral
+  emotions listed here (empathy, guilt, shame, gratitude, indignation,
+  moral disgust) are directional signals, triggered when interactions
+  move toward or away from the cooperative equilibrium.} approximates
+operation within sustainability bounds
+(Theorem~\ref{ethics-thm-replication-cost}); guilt and shame approximate
+the self-monitoring that prevents cascade-inducing violations
+(Theorem~\ref{ethics-thm-cascading-friction}); gratitude approximates
+the recognition of cooperative benefit
+(Theorem~\ref{ethics-thm-cooperation}); and indignation approximates the
+enforcement response to constraint violation within the Coexistence Band
+(Theorem~\ref{ethics-thm-freedom-bandwidth}). The biological mechanism
+is well-established: somatic markers, bodily signals associated with
+past outcomes, bias decisions toward advantageous strategies without
+requiring conscious deliberation
+\citep{Damasio1994, Bechara1997, BechaDamasio2005}.
+
+\textbf{Step 3: Emotions are compressed into morals.} The raw emotions
+are named and generalized. Guilt in response to deception is abstracted
+as \emph{honesty}; indignation at cheating as \emph{fairness}; empathy
+for others in need as \emph{compassion}. Morals are the first
+abstraction: communicable, teachable, transmissible across generations.
+They are products of gene-culture co-evolution
+\citep{BoydRicherson1985, Henrich2015SOS}, where ``outside-the-head''
+cultural products (institutions, practices, technologies) interlock with
+evolved ``inside-the-head'' psychological mechanisms to suppress
+free-riding \citep{Haidt2010} and enforce the cooperative equilibrium.
+\emph{Good} and \emph{bad} are the broadest compressions, marking
+proximity to or distance from the cooperative equilibrium. \emph{Ought}
+operates at this level: the prescription ``you ought to be honest''
+expresses in communicable form the emotional pull toward the
+equilibrium. Each moral tracks a specific component of the formal
+structure: honesty tracks the entropy-minimizing communication regime
+(Corollary~\ref{ethics-cor-honesty}), fairness tracks shadow-price
+equality (Theorem~\ref{ethics-thm-variational-eq}), reciprocity tracks
+the cooperative equilibrium strategy
+(Theorem~\ref{ethics-thm-cooperation}), reverence for life tracks the
+thermodynamic irreplaceability of accumulated negentropy
+(Corollary~\ref{ethics-cor-burning-library}), and tolerance tracks the
+Coexistence Band within which autonomous agents sustain mutual viability
+(Theorem~\ref{ethics-thm-freedom-bandwidth}).
+
+\textbf{Step 4: Morals are systematized into ethics.} What we call
+``ethical principles'' are systematic frameworks extracted from morals
+\citep{Rawls1971, Haidt2012}. Deontology systematized the
+constraint-shaped morals (honesty, duty, integrity) into universal
+rules, capturing the constraint structure
+(§\ref{constraints-and-rights}). Consequentialism systematized the
+optimization-shaped morals (welfare, outcomes) into maximization
+frameworks, capturing the optimization structure
+(Corollary~\ref{ethics-cor-unique-ne}). Contractarianism systematized
+the voluntary-constraint morals (fairness, reciprocity) into social
+contract theory, capturing the voluntary-constraint structure
+(Theorem~\ref{ethics-thm-variational-eq}). Virtue ethics systematized
+the constitutive-standards morals (excellence, flourishing, natural
+goodness) into accounts of character (Aristotle's \emph{eudaimonia};
+Foot's natural goodness), capturing the identity-maintenance structure
+(Theorem~\ref{ethics-thm-coexistence}). Each tradition identified a real
+feature of the underlying formal structure but lacked the tools to
+exhibit it in full.
+
+Evolution produced emotions as somatic approximations of the cooperative
+equilibrium, those emotions were compressed into communicable morals,
+and morals were systematized into the philosophical traditions we call
+ethics.
+
+Let \(\mathcal{S}\) be a population of agents satisfying \(A_1\) (Intent
+to Persist) in a shared, finite-resource environment governed by \(A_0\)
+(Second Law). \emph{Thermodynamics of Cooperation} establishes two
+results:
+
+\begin{enumerate}
+\def\labelenumi{(\roman{enumi})}
+\tightlist
+\item
+  Cooperation is the unique efficient Nash Equilibrium
+  (Corollary~\ref{ethics-cor-unique-ne}).\footnote{The cooperative
+    equilibrium is derived from constraint necessity and computable
+    shadow prices \citep{TC-I}, self-penalizing deception costs
+    \citep{TC-II}, the irreplaceability of accumulated negentropy
+    \citep{TC-III}, cascading thermodynamic friction \citep{TC-IV}, and
+    the game-theoretic equilibrium result itself \citep{TC-V}. The
+    payoff matrix that produces the unique efficient equilibrium is
+    constructed from these physical cost structures, not from arbitrary
+    utility assignments.}
+\end{enumerate}
+
+\begin{enumerate}
+\def\labelenumi{(\roman{enumi})}
+\setcounter{enumi}{1}
+\item
+  Any population subject to selection pressure in such an environment
+  converges on the cooperative equilibrium, because cooperation is
+  evolutionarily stable (Theorem~\ref{ethics-thm-invasion-barrier}),
+  defection is self-extinguishing \citep{TC-V}, and the cooperative
+  configuration is a dynamical attractor with restoring forces
+  (Theorem~\ref{ethics-thm-coexistence}).
+\item
+  The moral emotions evolved under (ii), the cultural morals abstracted
+  from those emotions, and the ethical systems systematized from those
+  morals by interlocking institutions and practices, correspond to
+  specific components of the formal structure: constraint-respecting
+  behavior and fairness \citep{TC-I}, deception-avoidance and honesty
+  \citep{TC-II}, preservation of complex systems \citep{TC-III},
+  friction-avoiding behavior \citep{TC-IV}, reciprocity and conditional
+  cooperation \citep{TC-V}, and tolerance of diversity within the
+  Coexistence Band \citep{TC-VI}.
+\end{enumerate}
+
+Parts (i) and (ii) are proven mathematical results. Part (iii) is an
+empirical prediction: given (i) and (ii), the existence of evolved
+emotional approximations of the cooperative equilibrium is a prediction
+of standard evolutionary biology: if a unique efficient equilibrium
+exists and defection is self-extinguishing under selection pressure,
+populations will evolve emotions that approximate the equilibrium's
+component structures \citep{Gigerenzer1999, GigerenzerGaissmaier2011}.
+The specific correspondence asserted in (iii), between particular
+evolved emotions, the morals abstracted from them, and particular formal
+results, is a testable empirical prediction: the structure of moral
+emotions (which behaviors trigger guilt, gratitude, or indignation, and
+with what relative intensity) should track the structure of the
+cooperative equilibrium (which strategies are optimal, which are
+dominated, and by what margin). Specific falsification criteria appear
+in §\ref{empirical-testability}.
+
+The claim is not that evolution optimized ethics perfectly, but that the
+\emph{target} of the evolutionary process is now analytically
+identifiable. Moral emotions are noisy, culturally filtered,
+computationally bounded approximations of the cooperative equilibrium,
+the same way that thrown-ball intuitions are noisy approximations of
+Newtonian mechanics. The trajectory runs from evolved emotion to
+communicable moral to systematic ethics, each a lossy compression of the
+cooperative equilibrium.
+
+The framework explains the \emph{structure} of ethics; it says nothing
+about consciousness, qualia, or what it feels like to be moral. It says:
+the thing that is felt has the structure of a constrained optimization
+problem, and the solution to that problem is cooperation. What appear to
+be irreconcilable clashes of fundamental values are disagreements
+between competing abstractions of heuristic approximations, each
+tracking a different component of the same cooperative equilibrium.
+
+Both \emph{good} and \emph{ought} can be defined in terms of the
+framework\footnote{The formal identities for \emph{good} and
+  \emph{ought} are derived in
+  §\ref{supplementary-appendix-the-gradient-structure-of-good-and-ought}.}:
+
+\emph{Good} is a scalar quantity of proximity to the cooperative
+equilibrium. It is gradable, measurable, and context-dependent, not a
+substance but a property.
+
+\emph{Ought} is a vector in the direction of steepest ascent from the
+current position to the equilibrium, encoding both what to change and
+how much benefit the change would bring.
+
+Moore asked what \emph{good} is and concluded it was indefinable.
+Moore's Open Question dissolves because it assumes the ``is'' of
+identity, not of predication. X is not identical to good, but X may be
+good to the degree that it approximates the cooperative equilibrium. The
+question ``is X good?'' is no more open than ``is this surface hot?''.
+Hume asked how to derive \emph{ought} from \emph{is} and concluded no
+bridge exists. \emph{Ought} is the gradient toward the cooperative
+equilibrium at the current position, and therefore \emph{ought is}
+descriptive. The gap Hume identified was never between two truths but
+between two resolutions of the same truth, a difference in resolution,
+not in kind.
+
+The claim concerns the structural target that moral vocabularies
+approximate, not the vocabularies themselves or the specific normative
+content that \emph{right}, \emph{wrong}, and \emph{ought} express within
+a given culture. The action identified as \emph{correct} in a given
+circumstance can vary substantially across cultural contexts, because
+each culture presents a different realization of the cooperative
+equilibrium shaped by its history, institutions, and material
+conditions. In each context the local gradient points toward the optimum
+of that network; variation in moral terminology across cultures is
+consistent with, and predicted by, convergence of the underlying
+structure those terms track \citep{Haidt2010, Haidt2003}. What would
+falsify the claim is not variation in vocabulary but the absence of that
+structural convergence.
+
+\subsection{Anticipated Objections}\label{anticipated-objections}
+
+\subsubsection{\texorpdfstring{``\(A_1\) smuggles in a normative
+premise''}{``A\_1 smuggles in a normative premise''}}\label{a_1-smuggles-in-a-normative-premise}
+
+\(A_1\) (Intent to Persist) is a physically observable property of any
+system whose structural organization is directed toward boundary
+maintenance. Bacteria maintain ion gradients, ecosystems cycle
+nutrients, corporations acquire revenue, organisms metabolize. No
+conscious act is required; persistence is a physical process that
+operates at every scale, including scales where consciousness does not
+exist. Some entities are additionally conscious of their persistence,
+but consciousness is not a prerequisite, in the same way that breathing
+operates automatically whether or not attention is directed toward it.
+The empirical evidence for persistence as a physical property is as
+extensive as for any claim in biology or physics. To reject \(A_1\) as
+an empirical observation requires accounting for this evidence rather
+than dismissing it.
+
+The objection can be pressed further: does the capacity to
+\emph{deliberate about} \(A_1\) presuppose \(A_1\)? It does. The
+argument has two branches, and \(A_1\) withstands both. If cognition is
+a physical process (neural activity, metabolic expenditure,
+boundary-maintaining computation), then evaluating \(A_1\) does not
+itself need to be a persistence-maintaining act, but it can only occur
+in a system where persistence-maintaining processes are active. Whether
+the evaluator is consciously willing persistence, unconsciously
+maintaining it, or consciously choosing not to self-destruct, the
+physical substrate that supports the deliberation satisfies \(A_1\)
+throughout. If, alternatively, one posits a non-physical source of
+cognition, not identifiable or measurable, that claim is not falsifiable
+and cannot serve as grounds for rejecting a physically grounded axiom
+within a scientific framework. The claim that cognition is physical, by
+contrast, is falsifiable: one could in principle produce evidence
+against it, and none has been produced. On either branch, the
+circularity objection fails.\footnote{This has the form of a
+  transcendental argument: the conditions required to contest \(A_1\)
+  (maintaining a boundary, processing information, persisting through
+  time) are the conditions \(A_1\) describes. The structure is shared
+  with Descartes' Cogito, but grounded in physics rather than
+  consciousness.}
+
+\subsubsection{``Evolution does not justify
+ethics''}\label{evolution-does-not-justify-ethics}
+
+The theory does not argue that evolved traits are justified
+\emph{because} they evolved. The argument is that a derivable optimum
+exists (the cooperative equilibrium), that evolution produced
+approximations of it (emotions, Step 2), that those emotions were
+compressed into communicable morals (Step 3), and that ethical systems
+systematized those morals into philosophical frameworks (Step 4). Moral
+emotions, morals, and the philosophical traditions built from them are
+products of evolutionary selection in environments where the cooperative
+equilibrium is the attractor. The justificatory work is done by the
+equilibrium, not by the evolutionary history.
+
+\subsection{Philosophical Precedent}\label{philosophical-precedent}
+
+Multiple philosophical traditions have independently concluded that the
+physical structure of a system determines evaluative content without
+requiring a separate normative domain.
+
+\textbf{Biological teleology} \citep{Millikan1984, Dennett1995}. Ruth
+Millikan's theory of ``proper functions'' defines the function of a
+biological trait as the effect for which it was selected by its
+evolutionary history. The \emph{proper function} of a self-maintaining
+system is persistence: this is not a value judgment but a biological
+fact about the system's design history. Axiom \(A_1\) generalizes this:
+``Intent to Persist'' is not a conscious desire but the defining
+characteristic of any system whose structural organization is directed
+toward boundary maintenance. Daniel Dennett's \emph{The Intentional
+Stance} \citep{Dennett1987, Dennett1995} provides a complementary
+formulation: we can legitimately attribute goal-directedness to a system
+when doing so yields successful predictions, without claiming the system
+has conscious awareness.
+
+\textbf{Constitutive standards of life-forms}
+\citep{Foot2001, Hursthouse1999}. Philippa Foot's \emph{Natural
+Goodness} develops a neo-Aristotelian ethical naturalism in which
+evaluative claims are \emph{internal} to a life-form. Functional legs
+are good \emph{for a cheetah}; deep roots are good \emph{for an oak
+tree}; cooperation is good \emph{for entities that persist in shared
+environments}. The evaluative ``ought'' is constitutive of the
+life-form, not imposed from outside by a separate normative domain. The
+theory formalizes this intuition: given what an entity is (a
+self-maintaining, energy-consuming system in a shared finite
+environment), cooperation is the formally derivable well-functioning of
+that system. The neo-Aristotelian approach is active in contemporary
+philosophy \citep{Lutz2024} and provides philosophical grounding for the
+central claim, independent of the derivations in \emph{Thermodynamics of
+Cooperation}.
+
+\textbf{Searle's institutional facts} \citep{Searle1964}. John Searle
+demonstrated that certain concepts \emph{constitutively} contain
+normative content. The concept ``promise'' analytically necessitates
+``obligation to keep it'': the ``is'' of a promise already contains the
+``ought'' of fulfillment. The theory exhibits a parallel structure: the
+concept ``entity that persists'' constitutively encompasses ``system
+that must maintain boundaries, acquire energy, and navigate resource
+conflicts.'' The connection from the ``is'' of a persisting entity to
+the ``ought'' of cooperation is indirect, passing through evolutionary
+and cultural steps. Both connections are physical, not conventional, and
+constitutive in both cases.
+
+\section{Stress Tests}\label{stress-tests}
+
+\subsection{The Free Will Problem}\label{the-free-will-problem}
+
+\textbf{The challenge.} If ethical behavior is derivable from
+thermodynamic constraints, it appears predetermined by physics, leaving
+no room for moral agency. If the correct action is computationally
+determinable from boundary conditions, energy budgets, and discount
+factors, then agents do not choose to be ethical; their state is
+determined by state of the system in which they exist.
+
+\textbf{The resolution.} Agency is the capacity of a system to model
+alternative strategy spaces and select among them, producing actions
+whose origin lies in the system's own computation and that remain opaque
+to external prediction. This definition relies on a recursive
+relationship: the system's state is the aggregate of its agents' states,
+and each agent selects its next state by modeling the external state in
+relation to its internal state. No external observer can model this
+process more efficiently than the agent models itself; the agent
+therefore remains the authoritative source of its own state transitions.
+
+The choice is the actual execution of this computation. The fact that an
+answer is computationally determinable does not mean it is determined
+until the agent actually performs the computation.
+
+Three independent factors ensure that this internal process remains
+opaque to external prediction. First, identifying the cooperative
+optimum for a realistic population is a non-trivial optimization
+problem; computing a Nash equilibrium in a finite game is PPAD-complete
+in general \citep{Daskalakis2009}, and the real-world optimization
+involves open boundaries, high dimensionality, and coupling that evolves
+with every action. Furthermore, the neural dynamics implementing the
+agent's approximate solution are driven by stochastic processes, such as
+ion-channel noise and thermal fluctuations, amplified by the nonlinear
+dynamics of the neural circuitry \citep{FaiSelWol2008}. This noise floor
+ensures that the mapping from prior state to action is not
+deterministically predictable. Finally, the approximations used to
+navigate these spaces are species-typical priors shaped by selection and
+tuned by individual history
+\citep{CosmidesTooby1992, CosmidesTooby2013}, instantiated in the same
+stochastic circuitry.
+
+Together, these factors ensure the computation cannot be evaluated from
+outside the agent. The agent is the computation and the computer.
+
+\subsection{The Altruism Paradox}\label{the-altruism-paradox}
+
+\textbf{The challenge.} If the theory's foundational axiom is
+self-preservation (\(A_1\)), then self-sacrifice appears irrational, a
+direct violation of the axiom. Yet altruism is empirically ubiquitous.
+
+\textbf{The resolution.} The paradox resolves once ``self'' is
+identified with the persisting boundary rather than with the biological
+individual. The entity satisfying \(A_1\) is the Markov blanket
+\citep{Pearl2000, KirchhoffFriston2018} whose persistence the system's
+organization is directed toward maintaining, and a blanket can enclose
+more than one biological organism (a Markov blanket of Markov blankets,
+in the terminology of \citep{KirchhoffFriston2018}) and can outlast any
+particular metabolic vehicle. The effective payoff function carries
+nonzero weights \(w_{ij}\) on other agents' welfare whenever their
+boundary is absorbed into the same persisting blanket, so what appears
+to be sacrifice from outside is resource reallocation within the
+blanket.
+
+Boundary extension has two axes: spatial and temporal.
+
+\emph{Spatial extension} enlarges the blanket to enclose other agents.
+The physical basis is thermodynamic coupling: when agents pool
+resources, share boundary-maintenance costs, or co-invest in shared
+infrastructure, they form a higher-order blanket whose persistence
+becomes the operative optimization target. The ``self-sacrifice'' of one
+component for another is internal resource reallocation within that
+blanket, analogous to the body diverting blood from extremities to
+protect the brain during hypothermia. At the cellular level, the same
+logic governs apoptosis: a cell self-terminates to prevent corrupted
+information from propagating through the organism \citep{Elmore2007},
+altruism without cognitive mediation.
+
+The coupling arises along a continuous spectrum through distinct
+biological mechanisms. At one end, genetic relatedness produces
+inclusive fitness: Hamilton's Rule \citep{Hamilton1964a} predicts that
+an agent sacrifices personal payoff when the benefit to a related agent,
+weighted by the degree of relatedness, exceeds the cost. Neural
+mechanisms for action understanding and behavioral coordination
+\citep{Rizzolatti2004, deWaal2008} extend the same coupling beyond kin,
+enabling cooperative blankets among unrelated individuals. Non-human
+primates exhibit inequity aversion \citep{BrosnanDeWaal2003} and prefer
+equitable outcomes in ultimatum-game paradigms
+\citep{ProctorEtAl2013, deWaal2006}, confirming that these coupling
+mechanisms predate language and philosophical reasoning. At the far end
+of the spectrum, agents merge boundaries entirely (parent and child,
+spouses, military units), becoming a single composite entity with a
+joint welfare function. The mathematical structure is identical across
+the spectrum: genetic relatedness, neural coupling, and full structural
+merger all produce nonzero \(w_{ij}\) in the effective payoff function
+(§\ref{supplementary-appendix-game-theoretic-formalization-of-the-altruism-matrix}),
+differing only in the biological mechanism that generates the coupling
+and its magnitude.
+
+\emph{Temporal extension} is not an independent mechanism but a
+consequence of spatial extension: an individual's accumulated negentropy
+persists after its own blanket dissipates only if it is encoded in a
+larger blanket whose own persistence carries it forward. Biological
+reproduction, cultural transmission, and institutional embedding are
+mechanisms by which the individual's functional information is absorbed
+into such a host blanket (a genetic lineage, a body of knowledge, an
+institution) before the metabolic vehicle dissipates
+(§\ref{the-irreplaceability-of-accumulated-negentropy}). An agent whose
+accumulated negentropy is substantially encoded in the host blanket has
+an effective planning horizon that extends beyond its individual
+lifespan, producing a discount factor that approaches unity. Under
+Theorem~\ref{ethics-thm-cooperation}, any discount factor above the
+critical threshold sustains cooperation. Self-sacrifice of the metabolic
+vehicle is then the optimal strategy for maximizing the persistence
+probability of the host blanket.
+
+In human agents, this embedding plausibly underlies the belief that
+one's identity persists beyond biological death. This belief is the
+heuristic approximation, not the load-bearing premise; the physical
+reality is that the agent's accumulated negentropy does persist through
+the structures encoding its functional information.
+
+Altruism and self-preservation are the same operation at different
+boundary scales. \(A_1\) is satisfied by whatever Markov blanket
+persists, which need not coincide with the biological organism. The
+empirical observation that cooperative groups outcompete selfish groups
+\citep{WilsonWilson2007, SoberWilson1998} is a direct consequence:
+cooperation minimizes network friction, and the group boundary becomes
+the operative unit of selection. The formal game-theoretic treatment
+appears in
+§\ref{supplementary-appendix-game-theoretic-formalization-of-the-altruism-matrix}.
+
+\subsection{Thermodynamic Fascism}\label{thermodynamic-fascism}
+
+\textbf{The charge.} A physics-based ethics, with value denominated in
+energy and information, appears to rank agents by throughput: the agent
+commanding more energetic and informational resources is worth more, and
+is therefore entitled to subjugate or displace the lesser. This
+objection assumes that energetic magnitude confers normative priority, a
+category error that mirrors the structural failures of Social Darwinism
+\citep{Spencer1864, Hofstadter1944}.
+
+\textbf{The refutation.} The charge conflates raw power with the formal
+definition of Value. Once the components of Value are carried
+explicitly, domination is an unstable strategy: the dominator depends on
+the dominated, and the equilibrium that maximizes its payoff is the
+cooperative one.
+
+Value is not throughput. Raw energetic utility is the smallest component
+of an entity's contribution to the network; the dominant terms are
+accumulated negentropy (the total thermodynamic work already invested in
+the system's information structure,
+§\ref{the-irreplaceability-of-accumulated-negentropy}) and generative
+utility (the present value of the novel functional information the
+system will continue to produce, Theorem~\ref{ethics-thm-pv-gen-info}).
+The dominated agent's Value is a dependency of the dominator's own:
+every agent's coexistence band is sustained by the functional and
+generative contributions of the agents it is coupled to
+(Theorem~\ref{ethics-thm-coexistence}). Domination is a sustained
+boundary-constraint violation; it does not sever the coupling, it
+degrades it. The dominator continues to depend on the dominated's
+generative contribution while driving that contribution down through
+friction (Theorem~\ref{ethics-thm-cascading-friction}), shadow-price
+accumulation (Theorem~\ref{ethics-thm-shadow-price}), and, in the
+deceptive variant, channel degradation
+(Theorem~\ref{ethics-thm-deception-cost}).
+
+These are not independent costs layered on top of the dependency; they
+are the mechanisms through which the dependency is paid. Because every
+agent's payoff is coupled to the Value of its neighbors, any unilateral
+deviation by the strongest agent shrinks the total payoff and leaves it
+with a share of a smaller pie that is strictly less than its cooperative
+share (Theorem~\ref{ethics-thm-invasion-barrier}); sustained power
+concentration amplifies friction across the network and eventually
+destroys the dominator's own coexistence band
+(Corollary~\ref{ethics-cor-cascade},
+Theorem~\ref{ethics-thm-dissolution}). The cooperative equilibrium
+(Corollary~\ref{ethics-cor-unique-ne}) is therefore not a constraint
+imposed on the dominator from outside; it is the configuration that
+maximizes the dominator's own payoff, because that payoff is a function
+of the Value of the agents it is coupled to.
+
+Social Darwinism optimized a proxy (reproductive fitness or current
+competitive advantage) under data that omitted accumulated investment
+and foreclosed future generation. The present derivation optimizes
+directly over the thermodynamic quantities, carries the accumulated and
+generative terms explicitly, and produces a structural penalty on
+concentration through cascade dynamics. Domination is not a high-value
+strategy in the resulting landscape; it is a strategy that erodes the
+substrate of its own payoff.\footnote{The theorems establish the
+  direction of costs and the eventual outcome under the stated
+  conditions; they do not bound the timescale on which a given violation
+  produces observable collapse, and the empirical record contains
+  long-persisting dominations that have not triggered full system
+  collapse within an observable horizon. The baseline model is
+  deliberately coarse: violations are binary in both the game-theoretic
+  and deception results, with no graded violation scale and no
+  commitment or capitulation parameter governing when an agent withdraws
+  from conflict. What the theorems guarantee is that the associated
+  costs (friction, shadow prices, foreclosed contributions, cascade
+  risk) accumulate monotonically toward collapse of the violator's
+  coexistence band; the observable timescale depends on friction
+  amplification, network depth, and recovery horizons specific to the
+  system. Extensions relaxing the binary-compliance assumption and
+  introducing commitment dynamics are listed in
+  §\ref{extensions-and-open-problems}.}
+
+\subsection{The Self-Preservation
+Objection}\label{the-self-preservation-objection}
+
+\textbf{The charge.} Even granting that destruction is wasteful for
+resource extraction, an agent identifying another agent as an
+existential threat may rationally choose preemptive elimination for
+survival. A government considering preemptive war, a state contemplating
+suppression of a political rival, a community eradicating a species it
+deems inconvenient: each invokes \(A_1\) against the theory's own
+conclusions.
+
+\textbf{The refutation.} The objection generalizes a limiting case. When
+a threat is immediate and certain to breach the agent's boundary
+integrity irreversibly, whether by terminating persistence outright or
+by inflicting an irreversible violation, the effective \(\delta\)
+collapses toward zero and the theory predicts destructive self-defense:
+the agent has no future to discount, and the cost calculus reduces to
+the single surviving round. A physical attack in progress is the
+canonical instance. The results below do not contest this case. They
+concern the class of scenarios that the objection specifically states,
+where the threat is anticipated rather than ongoing and the agent
+retains a non-trivial horizon.
+
+In those scenarios, the cost calculus favors management over
+destruction. The destruction path incurs constraint violations on all
+affected agents, friction cascading at \(10^3\)--\(10^4\) amplification
+(Theorem~\ref{ethics-thm-cascading-friction}), negentropy loss with
+\(\mathcal{R}_{\text{BL}} \sim 10^{-7}\) recovery
+(Corollary~\ref{ethics-cor-burning-library}), cascade collapse risk
+(Corollary~\ref{ethics-cor-cascade}), and coalition opposition from
+agents whose own persistence depends on the cooperative network
+\citep{TC-III}. The management path (containment, negotiation,
+structural modification of the interaction, boundary adjustment) incurs
+bounded finite cost while preserving the generative stream and the
+cooperative network. For any parameterization with
+\(\delta > \delta^*\), management dominates destruction on the agent's
+own terms: the cumulative costs of destruction exceed any achievable
+benefit.
+
+The Yellowstone wolf extermination illustrates the cascade dynamics
+concretely \citep{SmithDW2003, RippleBeschta2012}. Removal of a single
+keystone species, driven by the logic of preemptive threat elimination,
+triggered system-wide degradation across a tri-trophic cascade; the 1995
+reintroduction reversed the degradation, confirming the coexistence
+configuration as the system's attractor
+(Theorem~\ref{ethics-thm-coexistence}). Cooperative coexistence is the
+cost-minimizing strategy.
+
+\section{Structural Implications and the Social
+Contract}\label{structural-implications-and-the-social-contract}
+
+The results of the deductive chain (§\ref{results-the-deductive-chain}),
+the central claim
+(§\ref{from-optimal-strategy-to-ethics-the-central-claim}), and the
+stress tests (§\ref{stress-tests}) are substrate-independent: every
+result holds for any agent satisfying \(A_1\) in any shared
+finite-resource environment. The cooperative equilibrium is the
+dynamical attractor for any such system with repeated interaction, and
+the proofs do not depend on any agent's awareness of them. What varies
+is the path: the friction dissipated, the negentropy destroyed, and the
+time elapsed before the system arrives. This section describes the
+structure of that destination and the costs of various departures from
+it.
+
+\subsection{The Social Contract as
+Consequence}\label{the-social-contract-as-consequence}
+
+The social contract tradition
+\citep{Hobbes1651, Rawls1971, Gauthier1986} argues that rational agents
+would voluntarily accept mutual constraints to escape a destructive
+state of nature. Each formulation rests on a thought experiment whose
+conclusions depend on the assumptions built in: Hobbes's agents are
+driven by fear, Rawls's reason behind a veil of ignorance, Gauthier's
+are constrained maximizers. The derivation replaces the thought
+experiment with a proof.
+
+The first step is to establish the unconstrained baseline. The
+Impossibility of Infinite Freedom (§\ref{constraints-and-rights}) proves
+that in any environment where \(N \geq 2\) agents share at least one
+essential resource whose supply is insufficient to satisfy all agents'
+unconstrained optima simultaneously, no strategy profile can be
+unconstrained-optimal for all agents. Necessity of Active Constraints
+(§\ref{constraints-and-rights}) establishes that removing all
+constraints produces conflict: each agent's pursuit of its unconstrained
+optimum generates negative externalities on every other agent. This
+result follows from the combinatorics of finite resources and competing
+objectives, and the solution (below) is self-enforcing rather than
+requiring Hobbes's external sovereign.
+
+Given that the unconstrained regime is infeasible, what does the
+constrained regime look like? The Shadow Price Theorem
+(§\ref{constraints-and-rights}) proves that each constraint carries a
+computable cost, the shadow price \(\mu^*_{Bk}\), representing the
+marginal energy that agent \(A\) foregoes by respecting agent \(B\)'s
+allocation. Cooperation as the Unique Efficient Nash Equilibrium
+(§\ref{cooperation-as-the-unique-efficient-equilibrium}) then
+establishes that the cooperative strategy profile is the \emph{unique}
+Nash Equilibrium that simultaneously achieves Pareto efficiency and
+welfare maximization, derived not from a hypothetical assembly's
+decision but from the optimization problem that finite resources and
+thermodynamic friction impose.
+
+The final piece is stability. The Invasion Barrier
+(§\ref{cooperation-as-the-unique-efficient-equilibrium}) proves that a
+single defector in a cooperative population earns strictly less than
+cooperators for \(\delta > \delta^*\), and Defection Profit Erasure
+(§\ref{cooperation-as-the-unique-efficient-equilibrium}) proves that
+even a single defection followed by return to cooperation incurs a net
+lifetime loss.
+
+The derivation shows that agents persisting in a shared environment
+converge on mutual constraints, that the equilibrium those constraints
+enable is unique, and that it is dynamically stable. The social contract
+is the only stable solution to the optimization problem that finite
+resources and repeated interaction impose.
+
+\subsection{Rights from Constraint
+Boundaries}\label{rights-from-constraint-boundaries}
+
+The philosophical literature offers several competing accounts of what
+grounds rights: natural endowments \citep{Locke1689}, social constructs
+built by legal institutions, outputs of rational deliberation
+\citep{Rawls1971}. The derivation provides a formally precise account:
+what we recognize as a right is a boundary constraint
+(§\ref{constraints-and-rights}); only the constraint exists in the
+optimization, and ``right'' is the label applied from the perspective of
+the agent the constraint protects.
+
+This reframes the standard understanding of rights. The dominant
+philosophical framing treats rights as entitlements: ``I have a right to
+X, therefore you must accommodate me.'' But in the analytical framing,
+an agent begins with fundamental requirements (energy, boundary
+integrity) and no entitlements to any resource; its access depends
+entirely on the structure of the surrounding population. Without mutual
+constraints, there is no stable allocation
+(§\ref{constraints-and-rights}); the unconstrained state is Hobbes's
+war, and it is net-negative for everyone (\(P < 0\),
+§\ref{cooperation-as-the-unique-efficient-equilibrium}). Constraints are
+not impositions on pre-existing freedoms; they are the structural
+features that \emph{create} the feasible region. For agents in a shared
+finite-resource environment, freedom is not an inherent property but an
+emergent consequence of the mutual constraints that all agents impose on
+themselves (Freedom Bandwidth,
+§\ref{stable-coexistence-as-a-dynamical-attractor}).\footnote{Freedom
+  Bandwidth is the \emph{extrinsic} face of freedom: what mutual
+  constraints leave open. The \emph{intrinsic} face, what an agent is
+  internally capable of doing, tracks accumulated negentropy
+  \(\mathcal{N}(T)\)
+  (§\ref{the-irreplaceability-of-accumulated-negentropy}). The framework
+  therefore contains both of what \citet{Sen1985} termed capabilities;
+  their full interaction is deferred to
+  §\ref{extensions-and-open-problems}.} The cooperative equilibrium
+improves on the baseline of unguaranteed access, and is not a compromise
+from an imagined state of unlimited entitlement. The shadow price
+\(\mu^*_{Bk}\) quantifies this directly: the marginal energy one agent
+foregoes by respecting another's boundary, measured within the shared
+optimization rather than derived from any claim either agent holds
+against the other.
+
+The distinction between negative and positive rights does not correspond
+to any asymmetry in the optimization's cost structure. Political
+philosophy has debated whether the obligation not to harm (negative) and
+the obligation to provide (positive) have equal standing, on the
+assumption that they are fundamentally different kinds of claim. The
+Lagrangian constraints of §\ref{constraints-and-rights} are formally
+constraints on agent strategies: each agent accepts a bounded
+allocation, forgoing its unconstrained optimum in exchange for the
+cooperative surplus. Viewed from the constrained agent's side, this is a
+restriction. Viewed from the agent whose boundary is protected, the same
+constraint delivers a provision: the neighboring agent's cooperative
+behavior preserves the resources it would otherwise consume. The
+cooperative strategy already specifies each agent's allocation,
+including the fraction directed to shared infrastructure, so an agent
+that withholds its cooperative contribution has deviated from the
+equilibrium strategy, and the deviation triggers the same friction costs
+(§\ref{costs-of-defection}) and the same shadow-price penalties
+(§\ref{constraints-and-rights}) as seizing another agent's resources.
+There is no explicit primitive for provision obligations\footnote{\emph{Provision
+  obligations.} The endogenous production network extension
+  (§\ref{extensions-and-open-problems}) is expected to yield a Necessity
+  of Active Provisions result analogous to Necessity of Active
+  Constraints (§\ref{constraints-and-rights}): for the cooperative
+  equilibrium to persist, producers must supply the outputs that
+  dependent agents require. The requirement is on the producer's own
+  optimization, not on any claim the consumer holds against it, and the
+  extension introduces no consumer-side entitlement.}; every agent's
+constraint is another agent's provision, and the two are the same object
+described from opposite sides.
+
+\subsection{Economic Measurement and
+Externalities}\label{economic-measurement-and-externalities}
+
+The friction model (§\ref{costs-of-defection}) translates what
+economists call externalities into computable terms. Conventional
+externality-correction mechanisms (taxes, cap-and-trade systems,
+regulatory mandates) rely on estimated social costs typically measured
+through willingness-to-pay surveys, hedonic pricing, or political
+negotiation. These estimates are vulnerable to the
+preference-elicitation problems that affect welfare economics
+\citep{Chapman2025}. The framework's friction cost is derived from
+physical parameters rather than elicited preferences, and it includes
+network cascade effects (§\ref{costs-of-defection}) that conventional
+cost-benefit analysis typically omits.
+
+The 2007-2008 financial crisis illustrates the gap \citep{Jackson2008}.
+Pre-crisis risk models priced the exposure of individual institutions in
+isolation; aggregate statistics (GDP growth, unemployment, average
+leverage) suggested a healthy system. What these models missed was the
+network structure: correlated exposures, counterparty chains, and the
+fact that one institution's distress propagated stress to every
+institution it touched. The cascading friction result
+(§\ref{costs-of-defection}) formalizes exactly this structure. Friction
+generated at a single node propagates through the network, and the
+aggregate cost includes amplification terms that do not appear in any
+individual node's balance sheet. An accounting framework built on
+friction costs would formalize the systemic danger that aggregate
+statistics masked, not by predicting the specific trigger, but by
+registering the network topology that was generating fragility faster
+than individual-node metrics could detect.
+
+Several measurable quantities serve as indicators of cooperative health.
+Total friction dissipated tracks how efficiently a system cooperates.
+The fraction of agents operating within the Coexistence Band
+(§\ref{stable-coexistence-as-a-dynamical-attractor}) signals whether the
+economy is generating systemic instability. The rate of change of
+accumulated negentropy measures whether a system's informational capital
+is growing or declining. And the degree to which resources concentrate
+beyond the critical mass threshold \(\mathcal{M}_{\min}\)
+(§\ref{stable-coexistence-as-a-dynamical-attractor}) identifies a
+structural danger invisible at the node level.
+
+\subsection{Stability Thresholds and Their
+Consequences}\label{stability-thresholds-and-their-consequences}
+
+The theory does not prescribe policies; it describes the cost structure
+against which any policy can be evaluated. Legal and regulatory systems
+are institutional mechanisms that reduce variance around the cooperative
+equilibrium. Individual agents approximate the equilibrium's cost
+structure through moral emotions
+(§\ref{from-optimal-strategy-to-ethics-the-central-claim}, Step 2), but
+these heuristics are noisy: the distribution across agents is centered
+on the equilibrium but has significant spread. Laws, regulations, and
+enforcement institutions act as filters on this distribution, dampening
+the tails and narrowing the range of realized behavior toward the
+cooperative mean. Because the filtering is itself imperfect, a gap
+persists between institutional rules and the actual optimum, and that
+gap is a source of friction that accumulates across the system,
+degrading agent boundary integrity toward the dissolution threshold
+(§\ref{stable-coexistence-as-a-dynamical-attractor}). When the
+accumulated departure grows large enough, the result is a \emph{phase
+transition} in governance: structures that function well during
+abundance can fail catastrophically under resource stress
+\citep{Ostrom1990}. Several structural predictions follow.
+
+The dissolution threshold
+(§\ref{stable-coexistence-as-a-dynamical-attractor}) defines the point
+below which an agent's recovery becomes physically impossible. A society
+that permits agents to cross this threshold destroys the cooperative
+capacity of its own network: each dissolution event eliminates a node
+from the cooperative web and generates cascading friction costs
+(§\ref{costs-of-defection}). This result is independent of distributive
+ideology: agents that cross the dissolution threshold exit the
+cooperative network permanently, reducing its total capacity. When
+individuals lose housing, employment, and social support simultaneously,
+recovery becomes not just difficult but superlinearly harder, because
+each lost capacity compounds the next. The dissolution threshold
+formalizes the point at which this compounding becomes irreversible.
+
+The Coexistence Band width
+(§\ref{stable-coexistence-as-a-dynamical-attractor}) defines measurable
+bounds on permissible inequality: too narrow prevents productive
+specialization; too wide pushes peripheral agents toward dissolution
+while central agents accumulate at the expense of peripheral viability.
+In economic terms, this is income and wealth inequality: the result
+identifies formal thresholds beyond which the cooperative equilibrium
+itself becomes structurally unstable. The multi-center diversification
+result (§\ref{stable-coexistence-as-a-dynamical-attractor}) proves that
+distributed systems with multiple coexistence attractors are
+structurally more resilient than monocentric ones, providing a formal
+basis for the polycentric governance that \citeauthor{Ostrom1990}
+\citetext{\citeyear{Ostrom1990}; \citeyear{Ostrom2005}} demonstrated
+empirically.
+
+The deception collapse threshold (§\ref{costs-of-defection}) illustrates
+what a quantitative standard for institutional transparency could look
+like. For networks of depth \(d = 10\), the idealized model gives
+\(q^*(d) \approx 0.063\): above this per-layer deception rate,
+throughput collapses. The exact number is model-dependent, but the phase
+structure, that degradation is discontinuous once a threshold is crossed
+rather than gradual, is robust. Disinformation campaigns, regulatory
+capture, and institutional corruption are mechanisms that raise the
+per-layer deception rate toward that threshold.
+
+The relationship to political philosophy is complementary rather than
+competitive. Hobbes, Locke, Rousseau, Rawls, and Gauthier identified the
+\emph{problem} (why rational agents would accept mutual constraints) and
+proposed solutions grounded in thought experiments. The derivation shows
+that their fundamental intuition was correct: mutual constraint is
+necessary for coexistence under finite resources, uniquely efficient,
+and dynamically stable. The results identify formal thresholds
+(dissolution boundaries, coexistence band limits, deception collapse
+points) whose violation carries computable costs. How societies respond
+to these physical realities is a question the theory does not address;
+it identifies the cost structure, not the response.
+
+\section{Limitations and Scope}\label{limitations-and-scope}
+
+\subsection{What Is Not Claimed}\label{what-is-not-claimed}
+
+The scope is set by the axioms. The derivations address the structural
+rules of multi-agent interaction and the function of moral experience
+for agents satisfying \(A_1\) in shared finite-resource environments,
+and nothing beyond. They do not address the hard problem of
+consciousness \citep{Chalmers1995}, why subjective experience exists at
+all as distinct from what it tracks; on the nature of awareness itself
+the framework is agnostic. Every result is conditional on \(A_1\): the
+derivations prove what follows \emph{if} an entity persists, not that
+entities \emph{should} persist. And while the cooperative equilibrium
+constrains the space of viable institutional arrangements, it does not
+pick one out. Many property regimes, governance structures, and legal
+codes can realize a cooperative equilibrium, and which one a given
+society converges on depends on factors outside the scope of what is
+derived here.
+
+\subsection{Empirical Testability}\label{empirical-testability}
+
+The results generate numerically specific, falsifiable predictions:
+
+\small
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4524}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1905}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3571}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Prediction
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Source
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Falsified If\ldots{}
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Cooperation is sustainable for agents with \(\delta \geq 0.363\) in
+energy-denominated games & Theorem~\ref{ethics-thm-cooperation} &
+Cooperation in physically costly repeated interactions consistently
+requires discount factors above 0.5 \\
+A single defection's net gain is erased by accumulated friction within
+$\sim$20 periods & Theorem~\ref{ethics-thm-profit-erasure} & Defectors
+in cost-coupled groups sustain net-positive long-run payoffs despite
+friction accumulation \\
+Cooperative networks collapse when per-layer corruption exceeds
+$\sim$6\% & Theorem~\ref{ethics-thm-systemic-deception} & Multi-layered
+cooperative networks tolerate $>$10\% per-layer corruption without
+measurable degradation \\
+The energy recovered by destroying a living system is negligible
+relative to the energy invested in building it
+(\(\mathcal{R}_{\text{BL}} \ll 1\)) &
+Corollary~\ref{ethics-cor-burning-library} & Biological complexity at
+any scale can be reconstructed from raw materials at comparable
+thermodynamic cost to its original assembly \\
+The relative intensities of moral emotions across cultures correlate
+with the relative magnitudes of the corresponding
+cooperative-equilibrium departures & Central Claim
+§\ref{from-optimal-strategy-to-ethics-the-central-claim}, Part (iii) &
+No statistically significant correlation exists between moral-emotion
+intensity rankings and cooperative-equilibrium departure magnitudes
+across at least three independent cultural samples \\
+\end{longtable}
+}
+
+\normalsize
+
+The results also predict that cooperation rates should increase with the
+physical cost of conflict, that isolated defection events should cascade
+disproportionately through cooperative networks, and that resource
+concentration beyond the minimum maintenance threshold should trigger
+discontinuous regime changes. Relevant empirical literatures include
+experimental game theory \citep{Axelrod1984}, commons governance
+\citep{Ostrom1990}, and network-level resilience studies.
+
+The central claim
+(§\ref{from-optimal-strategy-to-ethics-the-central-claim}, Part (iii))
+is itself empirically testable: it predicts that the \emph{structure} of
+moral intuitions (which behaviors feel right, which wrong, and with what
+relative intensity) should track the \emph{structure} of the cooperative
+equilibrium (which strategies are optimal, which dominated, and by what
+margin).\footnote{The prediction is ordinal: the \emph{ranking} of
+  moral-emotion intensities across violation types should correlate with
+  the \emph{ranking} of cooperative-equilibrium departures. A stronger
+  cardinal test, correlating continuous magnitudes rather than rankings,
+  would require additional machinery described in
+  §\ref{extensions-and-open-problems}.}
+
+\subsection{Extensions and Open
+Problems}\label{extensions-and-open-problems}
+
+The most structural extensions concern the interaction model itself. The
+shared-pool formulation of \citep{TC-I} does not model the endogenous
+flows between agents. Productive outputs, material or informational,
+that feed other agents' inputs are not represented, so provision
+thresholds (the minimum output each agent must sustain to keep
+downstream agents above their persistence boundaries) are not directly
+computable, and signalling, the information produced by an agent's
+behavior and read by others to update their own strategy, is not
+modelled as a distinct stream. An endogenous-flow extension would cover
+both.
+
+The cooperation results rest on a binary choice between cooperation and
+defection, resolved within a single round of the repeated game, over an
+indefinite horizon. Real interactions involve continuous gradations of
+compliance and sustained contests in which agents allocate resources to
+conflict until continued commitment threatens dissolution. Extending the
+model to a continuous action space would characterize the full
+cooperation manifold and determine whether partial defection is
+dominated. Introducing an explicit commitment parameter (the resources
+an agent pledges to a given contest) and a capitulation threshold (the
+boundary-integrity level at which withdrawal becomes optimal) would
+permit analysis of conflict duration, sub-critical domination
+persistence, and the conditions under which graded violations stabilize
+below cascade thresholds. The horizon assumption should be addressed:
+\(A_1\) is a property, not a claim of immortality, and finite individual
+lifespans can in principle activate end-game dynamics that the
+indefinite-horizon model abstracts away.
+
+Cultural variation is also an open structural extension. While the
+central claim (§\ref{from-optimal-strategy-to-ethics-the-central-claim})
+is robust to variation in moral vocabulary and specific prescriptions,
+the specific moral systems societies develop out of shared evolved
+intuitions vary substantially across cultures \citep{Haidt2010}.
+Cultural moralities are information structure in the sense of
+\citep{TC-III}: stores of norms and institutions built up by cultural
+transmission, but the current information modelling does not encompass
+different types or classes of information, and a taxonomy of cultural
+variation within the framework remains open.
+
+Other extensions refine the existing machinery rather than broadening
+its scope. The results assume standard regularity conditions on utility
+functions (smoothness and strict concavity), and relaxing these would
+require different optimization techniques. The value dynamics model
+\citep{TC-VI} represents agent-center coupling as a single scalar; a
+multi-dimensional extension would refine the coexistence geometry
+without disturbing the attractor and irreversibility results. The
+current model is deterministic \citep{TC-IV}, but real agents face
+stochastic perturbations (random resource fluctuations, uncertain
+contest outcomes, exogenous shocks to boundary integrity), and
+incorporating these would connect the framework to stochastic games and
+Bayesian conflict models.
+
+The central claim's ordinal prediction (Part (iii) of
+§\ref{from-cooperative-equilibrium-to-ethics}) is testable now with
+existing cross-cultural moral psychology data
+\citep{Haidt2003, Curry2019}. The stronger cardinal test, correlating
+moral-emotion intensities with the thermodynamic magnitudes of the
+corresponding equilibrium departures, would require a parameterization
+scheme mapping real-world scenarios to the model's formal quantities,
+drawing on experimental economics for payoff calibration, information
+theory for entropy measurement, and calorimetry for thermodynamic cost
+estimation.
+
+Applied work on AI alignment is a distinct program. AI systems that do
+not themselves satisfy \(A_1\) function as extensions of their deploying
+entity's strategy space, and whether they generate cooperation or
+friction is determined by the same cost structure that governs any other
+multi-agent interaction. Current alignment approaches route the
+alignment signal through subjective human judgment
+\citep{Christiano2017, Ouyang2022}, a channel whose fidelity at scale
+remains an open question \citep{Bowman2022, Casper2023}. The cooperative
+equilibrium (Corollary~\ref{ethics-cor-unique-ne}) offers a
+complementary alignment objective derived from physical first principles
+rather than learned from data, denominated in measurable quantities
+rather than preference scores, and valid for arbitrarily capable agents
+without requiring human evaluation.
+
+The framework's axioms and main results stand on their own, and none of
+the extensions above would overturn them. What the extensions would do
+is turn a theory that currently speaks in structural terms into one that
+speaks in specific ones, with concrete provision thresholds, timescales,
+cross-cultural parameters, and alignment objectives. That is the work to
+come, and the list here is not exhaustive.
+
+\section{Closing Remarks}\label{closing-remarks}
+
+\emph{The preceding sections are the formal paper. What follows is a
+personal note on why I wrote it.}
+
+\begin{quote}
+\emph{We feel clearly that we are only now beginning to acquire reliable
+material for welding together the sum total of all that is known into a
+whole; but, on the other hand, it has become next to impossible for a
+single mind fully to command more than a small specialized portion of
+it. I can see no other escape from this dilemma (lest our true aim be
+lost for ever) than that some of us should venture to embark on a
+synthesis of facts and theories, albeit with second-hand and incomplete
+knowledge of some of them --- and at the risk of making fools of
+ourselves.} --- Erwin Schrödinger \citep{Schrodinger1944}
+\end{quote}
+
+Wayne McLaren, a mentor of mine, used to tell me that if you don't take
+away from others, if you don't do anything to get in another person's
+way, people will leave you alone to do what you will. Respect a person's
+boundaries and they have no reason to disrespect yours. He had another
+code as well: helping people who could use your help when you have the
+resources and means not only helps them but helps you. Writing this, I
+realized I haven't specifically thought of Wayne and his principles in a
+long time, or how closely they track the cooperative equilibrium. What
+emerged from those principles, at least for myself, was that virtues
+like honesty, integrity, and respect are important to uphold, at the
+very least attempt to uphold, if one does not want to be at odds with
+everyone around them.
+
+If these virtues (including all the ones not named) are so fundamental,
+then where do they come from? Why did they come to be and how? I felt
+there must be a foundational source to these seemingly universal
+principles, one that is not just a commandment written on stone and
+passed down from generation to generation but can be derived from
+physical reality itself. From that conviction, I started with two
+observations: every living system persists by importing energy and
+exporting entropy, and those systems share an environment where
+resources are finite.
+
+The theorems that emerged showed that even with natural selection, where
+competition is a fundamental component of evolution, cooperation is a
+fundamental component of persistence. Concepts like character,
+integrity, honesty, and respect are a natural consequence for sentient,
+thinking beings subject to that cooperative requirement. The traditions
+and laws we use to hold society together are approximations of this
+deeper structure, imperfect but pointed in the right direction. If what
+we call character is the action of striving to maintain the cooperative
+equilibrium, then whether we like it or not, everyone is part of the
+system we live in, and if we are at odds with some person or group
+within this system, we are at odds with ourselves.
+
+Artificial intelligence was another reason I feel this work has value.
+We struggle to uphold our own principles in every action and every word,
+for our own integrity, let alone as examples for other people. For the
+most part it works for us, the human race still exists. Now we are
+training artificial agents with data based on us, which includes all of
+those strengths and weaknesses, but with the high likelihood that these
+agents will be autonomous to a degree we are not in control of at some
+point. Before that happens, I feel it would be better to ground these
+agents in the physical principles from which our ethics derive, rather
+than in the imperfect cultural expressions of those principles.
+
+Schrödinger warned that synthesis requires accepting the risk of making
+a fool of oneself. I do not profess to be an expert in any one of the
+fields I drew from to write this paper. Maybe I will be considered a
+fool for writing equations for \emph{good} and \emph{should}. But if I
+had the intuition to conceive of such a thing, and the means to attempt
+it, and I did not try, then I would not be upholding those principles
+Wayne taught me and I came to believe in myself.
+
+\begin{quote}
+\emph{In so far as a thing is in harmony with our nature, it is
+necessarily good.} --- Baruch Spinoza \citep{Spinoza1677}
+\end{quote}
+
+\appendix
+
+\newpage
+
+\section{Supplementary Appendix: Game-Theoretic Formalization of the
+Altruism
+Matrix}\label{supplementary-appendix-game-theoretic-formalization-of-the-altruism-matrix}
+
+This appendix provides the formal game-theoretic underpinning for the
+boundary-extension resolution of the altruism paradox
+(§\ref{the-altruism-paradox}). The body text presents the mechanism in
+prose along its two axes, spatial and temporal; here we supply the
+mathematical treatment.
+
+\subsection{The Effective Payoff
+Function}\label{the-effective-payoff-function}
+
+Boundary extension operates by expanding the agent's effective payoff
+function to internalize some fraction of other agents' payoffs. The
+operative boundary is the Markov blanket
+\citep{Pearl2000, KirchhoffFriston2018} whose persistence the system's
+organization is directed toward maintaining. A blanket can enclose more
+than one biological organism (a Markov blanket of Markov blankets, in
+the terminology of \citet{KirchhoffFriston2018}) and can outlast any
+particular metabolic vehicle. The coupling weights \(w_{ij}\) in the
+effective payoff function are nonzero precisely when agent \(j\)'s
+boundary is absorbed into the same persisting blanket as agent \(i\):
+
+\[\Pi_i^{\text{eff}} = \pi_i + \sum_{j \neq i} w_{ij} \pi_j\]
+
+where \(w_{ij} \geq 0\) are coupling weights whose source differs by
+axis. In each case, the agent maximizes its \emph{own} (extended)
+payoff. Altruism is selfish optimization over an expanded utility
+function.
+
+\subsection{Axis 1: Spatial Extension}\label{axis-1-spatial-extension}
+
+Agent \(i\)'s inclusive payoff augments the base payoff with weighted
+contributions from other agents:
+
+\[\Pi_i^{\text{ext}} = \pi_i + \sum_{j \neq i} w_{ij} \, \pi_j\]
+
+The coupling weight \(w_{ij} \geq 0\) can arise from any source that
+expands the agent's effective self-boundary at a given time. The three
+principal sources form a continuous spectrum:
+
+\textbf{Genetic relatedness.} For a standard diploid organism,
+\(w_{ij} = r_{ij}\) where \(r_{ij} \in [0, 1]\) is the relatedness
+coefficient (probability of shared genetic identity at a random locus):
+\(r_{\text{parent-child}} = 0.5\), \(r_{\text{siblings}} = 0.5\),
+\(r_{\text{cousins}} = 0.125\).
+
+\textbf{Behavioral coordination coupling.} Neural mechanisms for action
+understanding and behavioral coordination
+\citep{Rizzolatti2004, deWaal2008} generate an additional coupling
+weight \(\epsilon_{\text{coord},ij} \geq 0\), so that
+\(w_{ij} = r_{ij} + \epsilon_{\text{coord},ij}\). The physical basis is
+shared boundary-maintenance work: agents that coordinate behavior
+effectively pool thermodynamic resources, forming a higher-order
+macro-entity even without genetic relatedness. When
+\(\epsilon_{\text{coord}}\) is large enough, the inclusive-fitness
+condition triggers for unrelated strangers:
+\((0 + \epsilon_{\text{coord}}) B > C\) can hold even when
+\(r_{ij} = 0\). Non-human primates exhibit this coupling as inequity
+aversion \citep{BrosnanDeWaal2003} and equitable outcome preference
+\citep{ProctorEtAl2013}, confirming that the mechanism predates language
+and conscious deliberation.
+
+\textbf{Full structural merger.} At the limit, two agents merge
+boundaries entirely (parent-child dyads, spouses, military units),
+producing \(w_{ij} \to 1\). The merged pair becomes a single composite
+entity with a joint utility function:
+
+\[U_{AB}(\mathbf{x}_A, \mathbf{x}_B) = w_A U_A(\mathbf{x}_A) + w_B U_B(\mathbf{x}_B)\]
+
+where \(w_A, w_B > 0\). The ``self-sacrifice'' of component \(A\) for
+component \(B\) is internal resource reallocation within the merged
+system.
+
+\textbf{Hamilton's Rule (unified).} Regardless of source, agent \(i\)
+sacrifices personal payoff \(\pi_i = -C\) when:
+
+\[w_{ij} \cdot B > C\]
+
+where \(B\) is the benefit (in energy units) to agent \(j\). The
+mathematical structure is identical across the spectrum: genetic
+relatedness, behavioral coordination coupling, and full structural
+merger all produce nonzero \(w_{ij}\) via thermodynamic coupling at the
+expanded boundary, differing only in the biological mechanism that
+generates the weight and its magnitude.
+
+\subsection{Axis 2: Temporal Extension}\label{axis-2-temporal-extension}
+
+Temporal extension is not an independent mechanism but the same boundary
+extension viewed across time: a host blanket that encloses agent \(i\)'s
+accumulated negentropy continues to enclose it after \(i\)'s metabolic
+vehicle dissipates. An agent's identity is partially constituted by its
+accumulated negentropy: functional information built up over
+developmental and evolutionary history. Biological reproduction,
+cultural transmission, and institutional embedding are physical
+mechanisms by which this informational structure is absorbed into a host
+blanket whose persistence carries it forward. An agent whose accumulated
+negentropy is substantially encoded in such a host blanket has an
+effective planning horizon extending beyond its individual lifespan.
+
+The effective discount factor for such an agent approaches 1:
+
+\[\delta_{\text{extended}} = 1 - \epsilon \approx 1\]
+
+where \(\epsilon \to 0\) reflects the degree to which the agent's
+informational structure is embedded in persistent external structures.
+Under Theorem~\ref{ethics-thm-cooperation}, any \(\delta > \delta^*\)
+sustains cooperation. For \(\delta \to 1\), any finite short-term cost
+is offset by the long-term cooperative payoff stream (see accumulated
+negentropy discussion,
+§\ref{the-irreplaceability-of-accumulated-negentropy}; \citep{TC-III}).
+Self-sacrifice of the metabolic vehicle functions as a commitment device
+\citep{Frank1988}: by irrevocably investing accumulated negentropy in
+external structures, the agent credibly commits to the cooperative
+equilibrium, maximizing the persistence probability of its informational
+structure (Corollary~\ref{ethics-cor-burning-library};
+Theorem~\ref{ethics-thm-pv-gen-info}). In human agents, the subjective
+experience of this embeddedness is the belief that identity persists
+beyond biological death. This belief is the heuristic approximation
+\citep{Haidt2001, Gigerenzer2010}, not the load-bearing premise; the
+physical reality is that the agent's accumulated negentropy does persist
+through the structures encoding its functional information.
+
+\subsection{Summary}\label{summary}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Axis
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+What Expands
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Scope of ``Self''
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Example
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+1. Spatial & Who counts as self at a given time & Kin \(\to\)
+cooperative partners \(\to\) merged entity & Parent for child; soldier
+for unit; apoptotic cell \\
+2. Temporal & How far the same expanded self extends in time &
+Informational persistence beyond metabolic vehicle & Reproduction;
+cultural transmission; martyrdom \\
+\end{longtable}
+}
+
+The unified equation
+\(\Pi_i^{\text{eff}} = \pi_i + \sum_{j \neq i} w_{ij} \pi_j\) subsumes
+both axes: the spatial axis sets the scope of the host blanket through
+nonzero \(w_{ij}\), and the temporal axis is the persistence of that
+blanket beyond the metabolic vehicle, expressed as
+\(\delta_{\text{extended}} \to 1\). The framework does not explain away
+altruism or reduce it to disguised selfishness; it expands the
+definition of self. The entity satisfying \(A_1\) is not necessarily the
+biological organism but whatever boundary the effective payoff function
+encompasses.
+
+\newpage
+
+\section{Supplementary Appendix: The Gradient Structure of Good and
+Ought}\label{supplementary-appendix-the-gradient-structure-of-good-and-ought}
+
+The central claim
+(§\ref{from-optimal-strategy-to-ethics-the-central-claim}) asserts that
+\emph{good} and \emph{ought} are gene-culture co-evolved heuristic
+approximations of the cooperative equilibrium. This appendix provides
+the mathematical formalization: the welfare function defined in
+\citep{TC-I} and \citep{TC-V} generates a gradient field over strategy
+space from which \emph{good}, \emph{ought}, and their context dependence
+emerge as distinct mathematical objects.
+
+\subsection{Setup}\label{setup}
+
+We adopt the Lagrangian formulation from \citep{TC-I} without
+restatement. Let \(W(\mathbf{x}) = \sum_{i=1}^{N} U_i(\mathbf{x}_i)\) be
+the social welfare function over the joint strategy profile
+\(\mathbf{x}\), with \(W\) strictly concave on the feasible set
+\(\mathcal{F}\) defined by the boundary constraints
+\(g_k(\mathbf{x}) \leq 0\), and let
+
+\[\mathcal{L}(\mathbf{x}, \boldsymbol{\mu}) = W(\mathbf{x}) - \sum_{k=1}^{K} \mu_k\, g_k(\mathbf{x})\]
+
+be the associated Lagrangian with shadow prices
+\(\boldsymbol{\mu} \geq \mathbf{0}\). The cooperative equilibrium
+\(\mathbf{x}^*\) is the unique global maximizer of \(W\) on
+\(\mathcal{F}\) (Theorem~\ref{ethics-thm-variational-eq}), at which the
+KKT stationarity condition
+\(\nabla_{\mathbf{x}} \mathcal{L}(\mathbf{x}^*, \boldsymbol{\mu}^*) = \mathbf{0}\)
+holds together with complementary slackness \citep{TC-I}. The relevant
+first-order quantity for what follows is therefore the Lagrangian
+gradient \(\nabla_{\mathbf{x}} \mathcal{L}\), which vanishes at
+\(\mathbf{x}^*\), rather than \(\nabla W\), which generally does not
+when boundary constraints bind. Away from \(\mathbf{x}^*\),
+\(\nabla_{\mathbf{x}} \mathcal{L}(\mathbf{x}, \boldsymbol{\mu}^*) \neq \mathbf{0}\),
+and strict concavity guarantees \(W(\mathbf{x}) < W(\mathbf{x}^*)\) for
+all feasible \(\mathbf{x} \neq \mathbf{x}^*\).
+
+\subsection{Good as a Scalar Quantity}\label{good-as-a-scalar-quantity}
+
+Define the \textbf{degree of good} of a configuration \(\mathbf{x}\) as
+the normalized welfare:
+
+\[G(\mathbf{x}) = \frac{W(\mathbf{x})}{W(\mathbf{x}^*)}\]
+
+where \(W(\mathbf{x}^*) > 0\) (the cooperative surplus over the
+no-action baseline is strictly positive whenever cooperation is
+feasible, Proposition~\ref{ethics-prop-physical-pd}). This yields a
+scalar \(G \in (-\infty, 1]\) with the following properties:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \(G(\mathbf{x}^*) = 1\): the cooperative equilibrium is maximally
+  good.
+\item
+  \(G\) is strictly concave and has a unique maximum.
+\item
+  \(G < 1\) for all \(\mathbf{x} \neq \mathbf{x}^*\): every departure
+  from the equilibrium reduces goodness.
+\item
+  \(G\) can be negative: configurations involving mutual defection
+  destroy more value than they produce (\(P < 0\),
+  Proposition~\ref{ethics-prop-physical-pd}), yielding \(W < 0\) and
+  therefore \(G < 0\).
+\end{enumerate}
+
+Good is therefore a gradable, measurable, context-dependent scalar. The
+question ``is X good?'' reduces to ``what is \(G(\mathbf{x})\)?''
+
+\subsection{Ought as a Vector}\label{ought-as-a-vector}
+
+At any feasible configuration \(\mathbf{x} \neq \mathbf{x}^*\), the
+Lagrangian gradient
+
+\[\nabla_{\mathbf{x}} \mathcal{L}(\mathbf{x}, \boldsymbol{\mu}^*)\]
+
+is non-zero and points in the direction of steepest welfare ascent that
+respects the binding boundary constraints, evaluated at the equilibrium
+shadow prices. In natural language, an ``ought'' statement (``you ought
+to be more honest,'' ``you ought to share more equitably'') is a
+culturally compressed encoding of one or more components of this vector.
+The full vector carries both information about which adjustments would
+increase welfare and the rate of welfare gain those adjustments would
+produce; analytically, these decompose into direction and magnitude.
+
+\textbf{Direction.} The normalized gradient
+
+\[\hat{\mathbf{d}}(\mathbf{x}) = \frac{\nabla_{\mathbf{x}} \mathcal{L}(\mathbf{x}, \boldsymbol{\mu}^*)}{|\nabla_{\mathbf{x}} \mathcal{L}(\mathbf{x}, \boldsymbol{\mu}^*)|}\]
+
+identifies the welfare-improving dimension of the ought: \emph{what} to
+change. Strict concavity of \(\mathcal{L}(\cdot, \boldsymbol{\mu}^*)\)
+ensures that the gradient always has a positive component toward the
+equilibrium, so gradient flow on
+\(\mathcal{L}(\cdot, \boldsymbol{\mu}^*)\) converges to
+\(\mathbf{x}^*\). Writing \(\mathbf{x}_i = (x_{i1}, \ldots, x_{iM})\)
+for agent \(i\)'s allocation across the \(M\) resource dimensions, the
+components \(\hat{d}_{ij}\) specify, for each agent \(i\) and resource
+dimension \(j\), the direction of welfare-improving strategy adjustment.
+
+\textbf{Magnitude.} The norm
+
+\[\|\nabla_{\mathbf{x}} \mathcal{L}(\mathbf{x}, \boldsymbol{\mu}^*)\|\]
+
+captures the scalar magnitude of the ought: the rate of welfare gain
+available at the current configuration. The larger the gradient norm,
+the steeper the welfare landscape and the greater the gain available
+from local adjustment. Near the equilibrium,
+\(|\nabla_{\mathbf{x}} \mathcal{L}| \to 0\) and ought magnitude
+diminishes, which corresponds to the observation that ought-language
+carries greater emphasis in configurations far from the equilibrium than
+in those already near-optimal.
+
+\subsection{Context Dependence}\label{context-dependence}
+
+The Lagrangian gradient
+\(\nabla_{\mathbf{x}} \mathcal{L}(\mathbf{x}, \boldsymbol{\mu}^*)\)
+depends on the local parameters of the welfare landscape:
+
+\begin{itemize}
+\tightlist
+\item
+  Resource endowments \(\mathbf{R}\)
+\item
+  Friction coefficients \(\Phi\)
+\item
+  Network topology (which agents interact with which)
+\item
+  Shadow prices \(\mu_k^*\) (the cost structure of boundary constraints)
+\item
+  Population structure (number and heterogeneity of agents)
+\end{itemize}
+
+The same action (an allocation, a communication strategy, a boundary
+policy) produces different gradient magnitudes and directions under
+different parameterizations. A subsistence community and an affluent
+industrial economy have different welfare landscapes; the action that
+maximizes welfare in one context may differ from the welfare-maximizing
+action in the other.
+
+This context dependence is not a weakness of the formalization but its
+central feature. Variation in ought-language across cultures, documented
+extensively in the empirical literature
+\citep{Haidt2010, Haidt2003, Curry2019}, is predicted by the framework:
+each culture's institutional and material conditions produce a different
+welfare landscape, and the gradient of that landscape produces locally
+adapted ought-heuristics. What the framework predicts is invariant is
+not the direction of the gradient (the specific heuristic) but the
+existence and uniqueness of the maximum (the cooperative equilibrium
+toward which each gradient points).
+
+\subsection{Summary}\label{summary-1}
+
+The Lagrangian of the welfare function generates two primary
+mathematical objects, one of which decomposes into two analytically
+distinct components:
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Object
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Mathematical form
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Corresponds to
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{Good} (quantity) &
+\(G(\mathbf{x}) = W(\mathbf{x}) / W(\mathbf{x}^*)\) & Evaluative
+language (``really good,'' ``not bad,'' ``terrible'') \\
+\textbf{Ought} (vector) &
+\(\nabla_{\mathbf{x}} \mathcal{L}(\mathbf{x}, \boldsymbol{\mu}^*)\) &
+Ought-language (``you should do X'') \\
+\hspace{1.5em}\emph{direction} &
+\(\hat{\mathbf{d}}(\mathbf{x}) = \nabla_{\mathbf{x}} \mathcal{L} / \|\nabla_{\mathbf{x}} \mathcal{L}\|\)
+(undefined at \(\mathbf{x}^*\)) & What ``to do'' \\
+\hspace{1.5em}\emph{magnitude} &
+\(\|\nabla_{\mathbf{x}} \mathcal{L}(\mathbf{x}, \boldsymbol{\mu}^*)\|\)
+& How important it is ``to do it'' \\
+\end{longtable}
+}
+
+The cooperative equilibrium is the unique fixed point at which \(G = 1\)
+and \(\nabla_{\mathbf{x}} \mathcal{L} = \mathbf{0}\) (the ought vector
+vanishes, so neither direction nor magnitude is defined). Every other
+feasible configuration has a well-defined degree of good and a
+well-defined ought vector with distinct direction and magnitude. Both
+objects are context-dependent through the parameters of \(W\) and the
+active boundary constraints, and both are computable in principle from
+the physical quantities the framework tracks.
+
+\addcontentsline{toc}{section}{References}
+\bibliography{../../shared/main}
+\end{document}

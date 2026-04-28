@@ -1,2 +1,20 @@
-output/*
-/ethics_theorem.egg-info
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+dist/
+build/
+
+# Built PDFs (reproducible from tex/ via latexmk)
+pdf/
+
+# Generated output (run verification locally to reproduce)
+output/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# IDE
+.vscode/

@@ -31,24 +31,30 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
 # Script discovery
 # ---------------------------------------------------------------------------
 
-# Ordered list of core verification scripts (relative to repo root).
-# Add new scripts here to include them in the suite.
-CORE_SCRIPTS = [
-    # Core mathematical derivation verification (6 scripts)
-    "scripts/simulations/verify_lagrangian_constraints.py",
-    "scripts/simulations/verify_thermodynamic_friction.py",
-    "scripts/simulations/verify_information_entropy.py",
-    "scripts/simulations/verify_game_theory.py",
-    "scripts/simulations/verify_value_dynamics.py",
-    "scripts/simulations/verify_accumulated_negentropy.py",
-    # Application verification scripts (6 scripts — also generate figure data)
-    "scripts/simulations/applications/verify_misalignment_friction.py",
-    "scripts/simulations/applications/verify_deception_entropy.py",
-    "scripts/simulations/applications/verify_cooperative_equilibrium.py",
-    "scripts/simulations/applications/verify_resource_constraints.py",
-    "scripts/simulations/applications/verify_biosphere_preservation.py",
-    "scripts/simulations/applications/verify_foundation_collapse.py",
+# Folders to scan for verify_*.py scripts, relative to repo root.
+# Scripts are discovered automatically — just drop a new file in the folder.
+SCRIPT_DIRS = [
+    "scripts/simulations/derivations",
+    "scripts/simulations/applied",
+    # "scripts/simulations/applied_extras",
 ]
+
+# Add script filenames here to exclude them from the suite.
+# Example:  SKIP = {"verify_experimental.py"}
+SKIP: set[str] = set()
+
+
+def discover_scripts(root: Path) -> list[str]:
+    """Scan SCRIPT_DIRS for verify_*.py and return sorted relative paths."""
+    found: list[str] = []
+    for d in SCRIPT_DIRS:
+        folder = root / d
+        if not folder.is_dir():
+            continue
+        for f in sorted(folder.glob("verify_*.py")):
+            if f.name not in SKIP:
+                found.append(str(f.relative_to(root)))
+    return found
 
 # Matches any of the summary formats the scripts use:
 #   SUMMARY: 90 passed, 0 failed
@@ -83,7 +89,7 @@ def parse_checks(output: str) -> list[dict]:
 def find_repo_root() -> Path:
     here = Path(__file__).resolve().parent
     root = here.parent
-    if (root / "paper").is_dir():
+    if (root / "modules").is_dir():
         return root
     return Path.cwd()
 
@@ -168,13 +174,18 @@ def main() -> int:
     args = parser.parse_args()
 
     root = find_repo_root()
-    scripts = [root / s for s in CORE_SCRIPTS]
+    script_paths = discover_scripts(root)
+    scripts = [root / s for s in script_paths]
+
+    if not scripts:
+        print("No verification scripts found.")
+        return 1
 
     # ── Dry run ─────────────────────────────────────────────────────────────
     if args.dry_run:
         print("Scripts that would run:")
         for s in scripts:
-            exists = "✓" if s.exists() else "✗ MISSING"
+            exists = "OK" if s.exists() else "X MISSING"
             print(f"  {exists}  {s.relative_to(root)}")
         return 0
 
@@ -266,7 +277,7 @@ def main() -> int:
     print(f"  {'-'*col_w}  {'------':>6}  {'------':>6}  {'------':>6}")
 
     for name, passed, failed, total, elapsed, ok in results:
-        status_icon = _green("✓") if ok else _red("✗")
+        status_icon = _green("OK") if ok else _red("X")
         failed_str  = _red(str(failed)) if failed else str(failed)
         print(f"  {status_icon} {name:<{col_w-2}}  {passed:>6}  {failed_str:>6}  {elapsed:>5.1f}s")
 
@@ -277,9 +288,9 @@ def main() -> int:
 
     print()
     if all_ok:
-        print(_bold(_green(f"  ✓ ALL {total_passed}/{total_checks} CHECKS PASSED")))
+        print(_bold(_green(f"  ALL {total_passed}/{total_checks} CHECKS PASSED")))
     else:
-        print(_bold(_red(f"  ✗ {total_failed} CHECK(S) FAILED  ({total_passed}/{total_checks} passed)")))
+        print(_bold(_red(f"  {total_failed} CHECK(S) FAILED  ({total_passed}/{total_checks} passed)")))
 
     print(_bold("=" * 72))
     print()

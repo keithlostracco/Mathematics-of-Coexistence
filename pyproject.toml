@@ -32,20 +32,3 @@ include = ["modules*"]
 requires = ["setuptools>=75.0"]
 build-backend = "setuptools.build_meta"
 
-# ---------------------------------------------------------------------------
-# Paper build notes (Step 7D)
-# ---------------------------------------------------------------------------
-# The paper is built via Pandoc + citeproc + LaTeX.  These are system-level
-# dependencies, not Python packages:
-#
-#   Pandoc  ≥ 3.0   — https://pandoc.org/installing.html
-#   LaTeX            — TeX Live, MiKTeX, or TinyTeX
-#
-# Build command:
-#   python scripts/build_paper.py
-#
-# This invokes:
-#   pandoc paper/00-abstract.md ... paper/09-conclusion.md \
-#       --citeproc --bibliography=paper/references.bib \
-#       --pdf-engine=xelatex \
-#       -o output/paper.pdf

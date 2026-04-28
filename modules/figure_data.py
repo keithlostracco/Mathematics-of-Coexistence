@@ -63,7 +63,7 @@ def save_figure_data(name: str, **arrays: Any) -> Path:
     with open(path, "w") as f:
         json.dump(payload, f, indent=1)
 
-    print(f"  [DATA] Saved figure data → {path.relative_to(_PROJECT_ROOT)}")
+    print(f"  [DATA] Saved figure data -> {path.relative_to(_PROJECT_ROOT)}")
     return path
 
 
