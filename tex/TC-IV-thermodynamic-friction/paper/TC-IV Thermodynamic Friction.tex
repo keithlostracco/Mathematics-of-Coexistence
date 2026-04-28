@@ -1,0 +1,1866 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\graphicspath{{../../shared/figures/}}
+\usepackage{natbib}
+\bibliographystyle{unsrtnat}
+\usepackage{doi}
+% \setcitestyle{numbers,super} % Superscript citation numbers (e.g. ¹, ²⁻⁴) — does not support locator notes
+\setcitestyle{numbers,square} % Square brackets around citation numbers (e.g. [1], [2-4]) — math standard
+% ── Merge citation text into a single hyperlink ───────────────────────────────
+\makeatletter
+\renewcommand{\hyper@natlinkbreak}[2]{#1}
+\makeatother
+\usepackage{titlesec}
+% New page before each top-level section
+% \newcommand{\sectionbreak}{\clearpage}
+
+% ── Theorem-like environments ─────────────────────────────────────────────────
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{thmtools}
+\declaretheorem[name=Theorem]{theorem}
+\declaretheorem[name=Proposition,sibling=theorem]{proposition}
+\declaretheorem[name=Lemma,sibling=theorem]{lemma}
+\declaretheorem[name=Corollary,sibling=theorem]{corollary}
+\declaretheorem[name=Conjecture,sibling=theorem]{conjecture}
+
+\theoremstyle{definition}
+\declaretheorem[name=Definition,style=definition]{definition}
+\declaretheorem[name=Axiom,style=definition,sibling=definition]{axiom}
+\declaretheorem[name=Assumption,style=definition,sibling=definition]{assumption}
+\declaretheorem[name=Criterion,style=definition,sibling=definition]{criterion}
+\declaretheorem[name=Example,style=definition,sibling=definition]{example}
+
+\theoremstyle{remark}
+\declaretheorem[name=Remark,style=remark]{remark}
+\declaretheorem[name=Observation,style=remark,sibling=remark]{observation}
+\declaretheorem[name=Property,style=remark,sibling=remark]{property}
+
+% Prevent theorem-like environments from starting near the page bottom.
+\usepackage{etoolbox}
+\BeforeBeginEnvironment{theorem}{\needspace{4\baselineskip}\addvspace{6pt}}
+\BeforeBeginEnvironment{corollary}{\needspace{4\baselineskip}\addvspace{6pt}}
+\BeforeBeginEnvironment{lemma}{\needspace{4\baselineskip}\addvspace{6pt}}
+\BeforeBeginEnvironment{proposition}{\needspace{4\baselineskip}\addvspace{6pt}}
+\BeforeBeginEnvironment{definition}{\needspace{4\baselineskip}\addvspace{6pt}}
+\BeforeBeginEnvironment{axiom}{\needspace{4\baselineskip}\addvspace{6pt}}
+\BeforeBeginEnvironment{assumption}{\needspace{4\baselineskip}\addvspace{6pt}}
+\BeforeBeginEnvironment{remark}{\needspace{4\baselineskip}\addvspace{9pt}}
+
+% ── Pandoc-generated table support ────────────────────────────────────────────
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{calc}
+\usepackage{caption}
+% Pandoc 3.x wraps uncaptioned longtables in \def\LTcaptype{none};
+% this requires a 'none' counter to exist.
+\newcounter{none}
+
+% ── Paragraph spacing (matches Pandoc default) ────────────────────────────────
+% No paragraph indentation; inter-paragraph spacing instead.
+\usepackage{parskip}
+
+% ── Page-break quality ────────────────────────────────────────────────────────
+% Prevent widow/orphan lines (single line stranded at top/bottom of page).
+\widowpenalty=10000
+\clubpenalty=10000
+% Pin footnotes to the page bottom even with \raggedbottom.
+\usepackage[bottom]{footmisc}
+% Prevent page breaks immediately before or after display equations.
+\predisplaypenalty=10000
+\postdisplaypenalty=150
+% Allow uneven page bottoms rather than stretching vertical glue.
+\raggedbottom
+% Increase separation between body text and footnotes.
+\setlength{\skip\footins}{1.5\baselineskip}
+% Ensure headings don't appear at page bottom without body text following.
+\usepackage{needspace}
+% Reserve enough space for the heading itself plus at least two following
+% lines of body text (or a nested heading plus a line). This prevents a
+% heading from appearing at the bottom of a page with its content (or its
+% next-level subheading) starting on the following page.
+\let\origsection\section
+\renewcommand{\section}{\needspace{8\baselineskip}\origsection}
+\let\origsubsection\subsection
+\renewcommand{\subsection}{\needspace{8\baselineskip}\origsubsection}
+\let\origsubsubsection\subsubsection
+\renewcommand{\subsubsection}{\needspace{6\baselineskip}\origsubsubsection}
+\let\origparagraphcmd\paragraph
+\renewcommand{\paragraph}{\needspace{4\baselineskip}\origparagraphcmd}
+\let\origsubparagraph\subparagraph
+\renewcommand{\subparagraph}{\needspace{4\baselineskip}\origsubparagraph}
+
+% Discourage page breaks inside multi-line math environments (align, gather, etc.)
+\interdisplaylinepenalty=10000
+
+% ── Section numbering ────────────────────────────────────────────────────────
+% Pandoc --number-sections generates \section{...} (not \section*{...}).
+% LaTeX auto-numbers to depth 3 (subsubsection) by default.
+\setcounter{secnumdepth}{3}
+
+% ── Make \paragraph and \subparagraph block-level (matches Pandoc) ───────────
+% By default LaTeX renders \paragraph as a run-in heading (text continues on
+% the same line). These commands make them free-standing headings with
+% proper spacing before and after.
+\titleformat{\paragraph}
+  {\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+  {0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+\titleformat{\subparagraph}
+  {\normalfont\normalsize\bfseries}{\thesubparagraph}{1em}{}
+\titlespacing*{\subparagraph}
+  {0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+% ── Pandoc-generated tightlist support ────────────────────────────────────────
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% ── Pandoc 3.x figure sizing ─────────────────────────────────────────────────
+% \pandocbounded constrains included graphics to text width when they exceed it
+\newcommand{\pandocbounded}[1]{%
+  \sbox0{#1}%
+  \ifdim\wd0>\linewidth
+    \resizebox{\linewidth}{!}{#1}%
+  \else
+    #1%
+  \fi
+}
+
+% ── Unicode character fixes ───────────────────────────────────────────────────
+\usepackage{amssymb}
+\usepackage{newunicodechar}
+\newunicodechar{✓}{$\checkmark$}
+\newunicodechar{≠}{$\neq$}
+\newunicodechar{≡}{$\equiv$}
+\newunicodechar{≈}{$\approx$}
+\newunicodechar{δ}{$\delta$}
+\newunicodechar{−}{$-$}
+% Superscript digits used in scientific notation (e.g. 10^-7, 10^29)
+\newunicodechar{⁰}{$^{0}$}
+% ¹²³ already defined by textcomp; suppress redefinition warning
+\begingroup\renewcommand\PackageWarning[2]{}%
+\newunicodechar{¹}{$^{1}$}
+\newunicodechar{²}{$^{2}$}
+\newunicodechar{³}{$^{3}$}
+\endgroup
+\newunicodechar{⁴}{$^{4}$}
+\newunicodechar{⁵}{$^{5}$}
+\newunicodechar{⁶}{$^{6}$}
+\newunicodechar{⁷}{$^{7}$}
+\newunicodechar{⁸}{$^{8}$}
+\newunicodechar{⁹}{$^{9}$}
+\newunicodechar{⁻}{$^{-}$}
+% Fix \rightarrow for use outside math mode
+\let\mystRightarrow\rightarrow
+\renewcommand{\rightarrow}{\ensuremath{\mystRightarrow}}
+% ─────────────────────────────────────────────────────────────────────────────
+
+% Allow TeX extra stretch to resolve moderate overfull hboxes
+\emergencystretch=2em
+
+\hypersetup{colorlinks=true, allcolors=blue}
+
+\title{Thermodynamics of Cooperation: Thermodynamic Friction}
+\author{Keith Lostracco}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We quantify the energy cost of adversarial resource competition between
+self-maintaining open thermodynamic systems. Boundary constraints are
+required for multi-agent resource allocation; we model what happens when
+those constraints are violated. Using Tullock contest theory and a
+boundary-integrity damage model, we prove that unconstrained conflict is
+a net-negative thermodynamic outcome: under realistic physical
+parameters, the total energy dissipated by conflict, including contest
+expenditure, boundary damage, and thermodynamically irreversible repair
+costs, exceeds the value of the contested resource. We derive explicit
+Nash equilibrium investments and damage functions for both symmetric and
+asymmetric contests, showing that contest dissipation approaches the
+full resource value as the number of contestants grows. Extending the
+analysis to cooperative networks, we prove that a single constraint
+violation cascades through the network, with illustrative amplification
+ratios on the order of \(10^3\) to \(10^4\) under modest network
+parameters, because trust recovery is gradual while trust destruction is
+instantaneous. Cooperation strictly dominates conflict for all
+physically realizable friction parameters, providing the
+energy-denominated cost structure that enters the game-theoretic payoff
+matrices of the subsequent paper in this series.
+\end{abstract}
+\newpage
+\tableofcontents
+\newpage
+\section{Introduction}\label{introduction}
+
+\emph{Necessary Constraints} \citep{TC-I} proves that mutual boundary
+constraints are necessary for the persistence of multiple agents in a
+shared, finite-resource environment. Removing these constraints leads to
+resource collision and conflict. This paper quantifies the thermodynamic
+cost of that conflict.
+
+When agents compete for a contested resource without cooperative
+constraints, the interaction takes the form of a contest: each agent
+expends energy to increase its probability of capturing the resource,
+and the contest itself dissipates energy that neither agent recovers. We
+model this using Tullock contest theory \citep{Tullock1980} with
+physical parameters (boundary integrity, damage fractions, repair
+multipliers) and prove that the total energy cost of conflict exceeds
+the value of the contested resource under realistic conditions.
+
+The specific contributions of this paper are:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{Contest equilibria} (Proposition~\ref{prop-symmetric-contest},
+  Proposition~\ref{prop-asymmetric-contest}). We derive the symmetric
+  and asymmetric Nash equilibria of the resource contest, showing that
+  both agents expend energy proportional to the resource value, and that
+  total contest dissipation approaches the full resource value as the
+  number of contestants grows (Theorem~\ref{thm-dissipation-scaling}).
+\item
+  \textbf{Net-negative conflict}
+  (Theorem~\ref{thm-net-negative-conflict}). We define the friction
+  multiplier \(\Phi\) incorporating contest expenditure, boundary
+  damage, and thermodynamically irreversible repair costs, and prove
+  that the total energy dissipated by conflict exceeds the value of the
+  contested resource under realistic parameters.
+\item
+  \textbf{Cooperation dominance}
+  (Theorem~\ref{thm-cooperation-dominance}). We prove that the
+  cooperative regime strictly dominates the conflict regime for all
+  physically realizable friction parameters, providing the energy-cost
+  foundation for the game-theoretic equilibrium results of
+  \emph{Cooperative Equilibrium} \citep{TC-V}.
+\item
+  \textbf{Network cascading} (Theorem~\ref{thm-cascading-friction}). We
+  prove that a single constraint violation in a cooperative network
+  injects friction that degrades all future interactions, with
+  illustrative amplification ratios of \(10^3\) to \(10^4\) under modest
+  network parameters, formalizing the asymmetry between trust
+  destruction and trust recovery.
+\end{enumerate}
+
+All formal results are stated as numbered theorems with full proofs,
+denominated in energy units, and computationally verified.
+
+The paper proceeds as follows: model and contest framework, boundary
+integrity, contest equilibria and full cost of conflict, the
+net-negative theorem, cooperative versus conflict regimes, cascading
+network effects, the interaction cost function, worked examples,
+decisive contests and escalation dynamics, and discussion.
+
+\subsection{Related Work}\label{related-work}
+
+The mathematical machinery of this work (contest theory, Nash
+equilibria, and boundary-damage models) draws on established literatures
+in conflict economics, non-equilibrium thermodynamics, and network
+theory. Our contribution is the synthesis: connecting contest-theoretic
+dissipation to thermodynamic boundary costs and network friction to
+derive a unified, energy-denominated cost function for adversarial
+interaction.
+
+\textbf{Contest theory and conflict economics.} \citet{Tullock1980}
+introduced the ratio-form contest success function in the context of
+rent-seeking, showing that competitions for rents dissipate a
+substantial fraction of the rent's value. \citet{Skaperdas1996}
+axiomatized the Tullock contest success function, proving it is the
+unique function satisfying homogeneity, monotonicity, and independence
+from irrelevant alternatives. \citet{Hirshleifer1991} analyzed conflict
+as an economic activity, modeling the ``technology of conflict'' through
+contest production functions and demonstrating that resources devoted to
+fighting are pure waste from the system's perspective.
+\citet{GarfinkelSkaperdas2012} provide a comprehensive treatment of the
+economics of peace and conflict, synthesizing decades of work on arms
+races, territorial disputes, and the welfare costs of insecurity.
+\citet{Konrad2009} surveys the theory of contests more broadly, covering
+multi-player, multi-stage, and asymmetric extensions. This literature
+establishes that contest dissipation is a pervasive feature of
+competitive interaction, but treats payoffs in dimensionless utility
+units and does not connect dissipation to physical energy budgets. Our
+framework denominates all contest payoffs in energy units and augments
+the standard Tullock model with boundary-damage and repair costs derived
+from thermodynamic principles.
+
+\textbf{Non-equilibrium thermodynamics and boundary maintenance.} The
+physical model of agents as open thermodynamic systems maintaining
+low-entropy internal states draws on \citet{Schrodinger1944}, who
+identified that living systems persist by importing free energy and
+exporting entropy. \citet{Prigogine1978} demonstrated that systems far
+from equilibrium can spontaneously generate ordered structures through
+symmetry-breaking instabilities, but did not formalize the boundaries
+that maintain organized entities as distinct agents or the energetic
+cost of boundary breaches. \citet{England2013} derived a
+statistical-mechanical lower bound on heat production during
+self-replication. \citet{Friston2013} formalized persistence via Markov
+blankets under the Free Energy Principle, addressing the single-agent
+problem of what one entity does to maintain itself. \citet{Maturana1980}
+described the operational closure of self-producing systems
+(autopoiesis), the topology of self-maintenance that our boundary
+integrity parameter \(B_i\) quantifies energetically. The thermodynamic
+tradition establishes that boundary maintenance is energetically costly
+and that entropy increase is thermodynamically irreversible; our
+contribution is proving that boundary damage from conflict incurs repair
+costs strictly exceeding the original damage (a consequence of the
+Second Law), making conflict a thermodynamically amplified loss.
+
+\textbf{Network effects and transaction costs.} The cascading friction
+analysis draws on network theory and transaction cost economics.
+\citet{Jackson2008} develops the theory of network formation and
+stability, showing that network structure affects the efficiency of
+economic exchange. \citet{Ostrom1990} documented how communities develop
+institutional constraint systems (monitoring, graduated sanctions,
+conflict resolution mechanisms) to manage shared resources, institutions
+whose overhead costs correspond to our network friction coefficient
+\(\phi\). The ecological economics tradition
+\citep{Lotka1922, GeorgescuRoegen1971} recognized that energy is the
+fundamental currency of biological and economic activity, and that the
+Second Law imposes irreversible costs on all transformations
+\citep{GeorgescuRoegen1979}. Our contribution is quantifying the
+cascading cost of trust violations across cooperative networks and
+proving that the network-level damage exceeds the direct bilateral cost
+by orders of magnitude.
+
+\section{Model}\label{model}
+
+\subsection{Agents and Resources}\label{agents-and-resources}
+
+We consider \(N \geq 2\) agents sharing an environment with \(n\)
+resource dimensions and finite endowment
+\(\mathbf{R} = (R_1, \ldots, R_n) \in \mathbb{R}_{>0}^n\). Each agent
+\(i\) is an open thermodynamic system maintaining a boundary between its
+internal low-entropy state and the external environment. Agent \(i\)
+selects a strategy vector \(\mathbf{x}_i \in \mathbb{R}_{\geq 0}^n\),
+and the physically realizable joint strategy must satisfy resource
+conservation: \(\sum_{i=1}^N x_{ij} \leq R_j\) for all \(j\).
+
+Each agent's utility function \(U_i(\mathbf{x}_i)\) satisfies the
+regularity conditions of \emph{Necessary Constraints} \citep{TC-I}:
+twice continuously differentiable, strictly concave, monotonically
+increasing at the origin, and coercive. Under these conditions, each
+agent has a unique unconstrained optimum \(\mathbf{x}_i^{\circ}\). When
+\(N\) meets the collision threshold for at least one resource, the
+aggregate unconstrained demand exceeds supply
+(\(\sum_i x_{ij}^{\circ} > R_j\)), and no feasible joint allocation can
+simultaneously satisfy all agents' unconstrained optima.
+
+\emph{Necessary Constraints} \citep{TC-I} proves that boundary
+constraints are necessary for feasible allocation in this setting. This
+paper addresses the complementary question: what is the energetic cost
+when those constraints are absent and the resulting collision is
+resolved by direct resource competition?
+
+\subsection{Boundary Integrity}\label{boundary-integrity}
+
+Each agent \(i\) maintains a boundary characterized by its integrity
+\(B_i > 0\), measured in energy units, representing the total energetic
+investment in maintaining the separation between the agent's internal
+low-entropy state and the external environment. Maintaining boundary
+integrity against environmental entropy requires continuous work
+\(C_{\text{maintain},i} = \gamma_i B_i\), where \(\gamma_i > 0\) is the
+entropy leakage rate. This is the baseline metabolic cost of
+persistence, independent of any external threat.
+
+When an external agent breaches agent \(i\)'s boundary, the work
+required scales with the boundary's integrity: full breach requires work
+equal to \(B_i\). The specific resistance profile (uniform, hardening,
+or shell) affects only the dynamics of partial breach, not the total
+cost.
+
+\subsection{Contest Framework}\label{contest-framework}
+
+When two or more agents claim the same resource unit and no constraint
+directs the allocation, the resource is resolved by a contest: each
+agent invests energy to increase its probability of winning. We adopt
+the Tullock contest success function \citep{Tullock1980, Skaperdas1996}:
+
+\[p_A(e_A, e_B) = \frac{\sigma_A \, e_A^r}{\sigma_A \, e_A^r + \sigma_B \, e_B^r}\]
+
+where \(e_i \geq 0\) is agent \(i\)'s contest investment (energy
+diverted from productive use into conflict), \(\sigma_i > 0\) is
+conflict effectiveness, and \(r > 0\) is the decisiveness parameter.
+This is the unique contest success function satisfying homogeneity,
+monotonicity, and independence from irrelevant alternatives
+\citep{Skaperdas1996}.
+
+Beyond the direct contest expenditure, conflict inflicts boundary damage
+on both parties (offensive self-damage from diverting resources,
+defensive damage from the opponent's attack), and repairing that damage
+is thermodynamically more expensive than the original maintenance cost,
+a direct consequence of the Second Law. The friction multiplier \(\Phi\)
+captures the total cost amplification from these combined effects.
+
+\section{The Boundary Integrity
+Model}\label{the-boundary-integrity-model}
+
+\subsection{Boundary as an Energetic
+Structure}\label{boundary-as-an-energetic-structure}
+
+Each agent \(i\) maintains a \textbf{boundary} (Markov blanket in
+statistical physics; cell membrane in biology; legal/military defense in
+sociology) characterized by its \textbf{integrity}:
+
+\begin{definition}[Boundary Integrity]
+\label{def-boundary-integrity}
+
+Agent $i$'s boundary integrity is a scalar $B_i > 0$ measured in energy units, representing the total energetic investment in maintaining the boundary between the agent's internal low-entropy state and the external environment.
+\end{definition}
+
+\textbf{Physical interpretation:} \(B_i\) is the stored energy in the
+agent's defensive infrastructure (the immune system, the cell wall, the
+military budget, the information-security apparatus). A higher \(B_i\)
+means a more robust boundary that is costlier to breach.
+
+\subsection{Boundary Maintenance Cost}\label{boundary-maintenance-cost}
+
+Maintaining boundary integrity against environmental entropy requires
+continuous work:
+
+\[C_{\text{maintain},i} = \gamma_i \cdot B_i\]
+
+where \(\gamma_i > 0\) is the \textbf{entropy leakage rate}, the rate at
+which the boundary degrades without active maintenance. This is the
+baseline metabolic cost of persistence (maintaining identity),
+independent of any external threat.
+
+\subsection{Boundary Resistance
+Function}\label{boundary-resistance-function}
+
+When an external agent attempts to breach agent \(i\)'s boundary, the
+boundary exerts a \textbf{resistance} that the attacker must overcome.
+We model this as a force-displacement relationship:
+
+\begin{definition}[Boundary Resistance]
+\label{def-boundary-resistance}
+
+The work required to breach agent $i$'s boundary to depth $d \in [0, 1]$ (where $d = 0$ is the exterior and $d = 1$ is full breach) is:
+
+$$W_{\text{breach}}(d) = \int_0^d F_i(s) \, ds$$
+
+where $F_i(s) = B_i \cdot f(s)$ is the resistance force and $f : [0, 1] \to \mathbb{R}_{> 0}$ is a normalized resistance profile with $\int_0^1 f(s) \, ds = 1$.
+\end{definition}
+
+The full breach cost is:
+
+\[W_{\text{breach}}(1) = B_i \cdot \int_0^1 f(s) \, ds = B_i\]
+
+That is, fully breaching agent \(i\)'s boundary requires work equal to
+the boundary's integrity, an energetically intuitive result.
+
+\textbf{Resistance profile choices:}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Profile
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(f(s)\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Physical meaning
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Uniform & \(f(s) = 1\) & Constant resistance (simple barrier) \\
+Hardening & \(f(s) = 2s\) & Resistance increases with depth (layered
+defense) \\
+Shell & \(f(s) = 2(1 - s)\) & Hard exterior, soft interior (biological
+cell) \\
+\end{longtable}
+}
+
+The qualitative results below hold for any positive, integrable \(f\).
+The specific profile affects only the dynamics of partial breach, not
+the total cost.
+
+\section{The Contest Model: Conflict as Resource
+Competition}\label{the-contest-model-conflict-as-resource-competition}
+
+\subsection{Setup}\label{setup}
+
+Consider a single contested resource of value \(E_j > 0\) (energy units)
+that is in collision (Definition 2 \citep{TC-I}). Two agents \(A\) and
+\(B\) both claim this resource. In the absence of a boundary constraint
+directing the allocation, the resource is resolved by a
+\textbf{contest}: each agent invests energy to increase its probability
+of winning.
+
+\begin{definition}[Conflict Contest]
+\label{def-conflict-contest}
+
+A conflict contest over resource $E_j$ between agents $A$ and $B$ is characterized by:
+
+(a) \textbf{Contest investments} $e_A, e_B \geq 0$: the energy each agent diverts from productive use into conflict.
+
+(b) \textbf{Contest success function} $p_A(e_A, e_B) \in [0, 1]$: the probability that agent $A$ wins (secures) the resource, with $p_B = 1 - p_A$.
+
+(c) \textbf{Payoffs:}
+$$\Pi_A(e_A, e_B) = p_A(e_A, e_B) \cdot E_j - e_A$$
+$$\Pi_B(e_A, e_B) = (1 - p_A(e_A, e_B)) \cdot E_j - e_B$$
+\end{definition}
+
+\subsection{The Tullock Contest Success
+Function}\label{the-tullock-contest-success-function}
+
+We adopt the axiomatically grounded \textbf{Tullock contest success
+function} \citep{Skaperdas1996}:
+
+\[p_A(e_A, e_B) = \frac{\sigma_A \, e_A^r}{\sigma_A \, e_A^r + \sigma_B \, e_B^r}\]
+
+where:
+
+\begin{itemize}
+\tightlist
+\item
+  \(\sigma_i > 0\) is agent \(i\)'s \textbf{conflict effectiveness}
+  (strength, weaponry, information advantage)
+\item
+  \(r > 0\) is the \textbf{decisiveness parameter}: \(r < 1\) means the
+  contest is noisy (randomness dominates); \(r = 1\) is the baseline
+  lottery; \(r > 1\) means the contest is decisive (larger investment
+  almost certainly wins)
+\end{itemize}
+
+For \(e_A = e_B = 0\), we define
+\(p_A = \sigma_A / (\sigma_A + \sigma_B)\) by convention.
+
+\textbf{Axiomatization \citep{Skaperdas1996}:} This is the unique
+contest success function satisfying: (i) Homogeneity of degree zero in
+\((e_A, e_B)\) up to scaling; (ii) Monotonicity
+(\(\partial p_A / \partial e_A > 0\),
+\(\partial p_A / \partial e_B < 0\)); (iii) Independence from irrelevant
+alternatives.
+
+\subsection{Nash Equilibrium of the
+Contest}\label{nash-equilibrium-of-the-contest}
+
+Each agent chooses its contest investment to maximize its payoff, taking
+the other's investment as given.
+
+\textbf{Case 1: Symmetric Agents (\(\sigma_A = \sigma_B = 1\),
+\(r = 1\))}
+
+Agent \(A\)'s first-order condition:
+
+\[\frac{\partial \Pi_A}{\partial e_A} = \frac{e_B}{(e_A + e_B)^2} \cdot E_j - 1 = 0\]
+
+By symmetry, \(e_A^* = e_B^*\). Substituting:
+
+\[\frac{e_A^*}{(2 e_A^*)^2} \cdot E_j = 1 \implies e_A^* = \frac{E_j}{4}\]
+
+\begin{proposition}[Symmetric Contest Equilibrium]
+\label{prop-symmetric-contest}
+
+In a symmetric Tullock contest ($\sigma_A = \sigma_B$, $r = 1$) over resource $E_j$, the unique Nash equilibrium contest investments are:
+
+$$e_A^* = e_B^* = \frac{E_j}{4}$$
+
+Total contest dissipation:
+
+$$D_2 = e_A^* + e_B^* = \frac{E_j}{2}$$
+
+Each agent's expected payoff:
+
+$$\Pi_A^* = \Pi_B^* = \frac{E_j}{2} - \frac{E_j}{4} = \frac{E_j}{4}$$
+\end{proposition}
+
+\textbf{Interpretation:} Half the resource value is consumed by the act
+of fighting. Each agent expects to net only one quarter of the resource
+value, compared to the cooperative outcome (splitting the resource, per
+the Lagrangian constraints derivation) where each receives half with
+zero contest expenditure.
+
+\textbf{Case 2: Asymmetric Agents (\(V_A \neq V_B\), \(r = 1\))}
+
+For the general case with potentially different valuations \(V_A\) and
+\(V_B\) (how much each agent values the resource; we set
+\(V_A = V_B = E_j\) for a common-value contest, but keep it general for
+the derivation):
+
+First-order conditions:
+
+\[\frac{e_B}{(e_A + e_B)^2} \cdot V_A = 1, \qquad \frac{e_A}{(e_A + e_B)^2} \cdot V_B = 1\]
+
+Dividing: \(\frac{e_B}{e_A} = \frac{V_B}{V_A}\), so
+\(e_B = \frac{V_B}{V_A} e_A\).
+
+Substituting back into \(A\)'s FOC:
+
+\[\frac{V_B e_A / V_A}{e_A^2 (1 + V_B/V_A)^2} \cdot V_A = 1\]
+
+\[e_A^* = \frac{V_A^2 V_B}{(V_A + V_B)^2}, \qquad e_B^* = \frac{V_A V_B^2}{(V_A + V_B)^2}\]
+
+\begin{proposition}[Asymmetric Contest Equilibrium]
+\label{prop-asymmetric-contest}
+
+In a Tullock contest ($r = 1$) with valuations $V_A, V_B > 0$:
+
+$$e_A^* = \frac{V_A^2 V_B}{(V_A + V_B)^2}, \qquad e_B^* = \frac{V_A V_B^2}{(V_A + V_B)^2}$$
+
+Total dissipation:
+
+$$D_2 = e_A^* + e_B^* = \frac{V_A V_B}{V_A + V_B}$$
+
+This is half the harmonic mean of the valuations. For $V_A = V_B = E_j$: $D_2 = E_j/2$.
+\end{proposition}
+
+\textbf{Note:} The total dissipation \(D_2 = V_A V_B / (V_A + V_B)\) is
+maximized when \(V_A = V_B\) (equal opponents waste the most). When one
+agent values the resource much more (\(V_A \gg V_B\)), the weaker agent
+invests very little and the contest is ``cheap'', but the outcome is
+effectively determined by power asymmetry, which corresponds to
+exploitative resource extraction.
+
+\subsection{N-Agent Contest: Scaling to
+Populations}\label{n-agent-contest-scaling-to-populations}
+
+When \(N \geq 2\) symmetric agents (\(\sigma_i = 1\), \(V_i = E_j\),
+\(r = 1\)) contest the same resource:
+
+By symmetry, each invests \(e^*\) and wins with probability \(1/N\).
+Agent \(i\)'s FOC:
+
+\[\frac{(N-1) e^*}{N^2 (e^*)^2} \cdot E_j = 1 \implies e^* = \frac{(N-1)}{N^2} \cdot E_j\]
+
+\begin{theorem}[Dissipation Scaling]
+\label{thm-dissipation-scaling}
+
+In a symmetric $N$-agent Tullock contest ($r = 1$) over resource $E_j$:
+
+(a) Each agent's equilibrium investment:
+
+$$e_i^* = \frac{N - 1}{N^2} \cdot E_j$$
+
+(b) Total contest dissipation:
+
+$$D_N = N \cdot e_i^* = \frac{N - 1}{N} \cdot E_j$$
+
+(c) Each agent's expected payoff:
+
+$$\Pi_i^* = \frac{E_j}{N} - \frac{(N-1) E_j}{N^2} = \frac{E_j}{N^2}$$
+
+(d) Dissipation ratio:
+
+$$\frac{D_N}{E_j} = \frac{N - 1}{N} = 1 - \frac{1}{N}$$
+\end{theorem}
+
+\begin{proof}
+Part (a): With $N$ symmetric agents, agent $i$'s success probability is:
+
+$$p_i = \frac{e_i}{e_i + \sum_{k \neq i} e_k}$$
+
+At a symmetric equilibrium ($e_k = e^*$ for all $k$), $p_i = 1/N$. The FOC is:
+
+$$\frac{\partial \Pi_i}{\partial e_i} = \frac{(N-1) e^*}{(N e^*)^2} \cdot E_j - 1 = 0$$
+
+Solving: $e^* = (N-1) E_j / N^2$. Parts (b)–(d) follow by direct computation.
+\end{proof}
+
+\begin{corollary}[Vanishing Individual Returns]
+\label{cor-vanishing-returns}
+
+$$\lim_{N \to \infty} \Pi_i^* = \lim_{N \to \infty} \frac{E_j}{N^2} = 0$$
+
+As the number of contestants grows, each agent's expected return collapses to zero while the aggregate waste approaches the full resource value. The contest becomes a pure value-destruction mechanism.
+\end{corollary}
+
+\begin{corollary}[Unit Dissipation Limit]
+\label{cor-unit-dissipation-limit}
+
+$$\lim_{N \to \infty} \frac{D_N}{E_j} = 1$$
+
+In the limit of many contestants, the \textbf{entire resource value is dissipated in conflict}. No value remains for any agent. This is the mathematical expression of the "tragedy of the commons" reframed as a thermodynamic result.
+\end{corollary}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\(N\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Individual investment \(e_i^*\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Total dissipation \(D_N\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(D_N / E_j\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Individual payoff \(\Pi_i^*\)
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+2 & \(E_j/4\) & \(E_j/2\) & 50\% & \(E_j/4\) \\
+3 & \(2E_j/9\) & \(2E_j/3\) & 66.7\% & \(E_j/9\) \\
+5 & \(4E_j/25\) & \(4E_j/5\) & 80\% & \(E_j/25\) \\
+10 & \(9E_j/100\) & \(9E_j/10\) & 90\% & \(E_j/100\) \\
+100 & \(99E_j/10000\) & \(99E_j/100\) & 99\% & \(E_j/10000\) \\
+\end{longtable}
+}
+
+\textbf{Physical reading:} This table demonstrates that the energy spent
+fighting exceeds the energy gained from the resource. Even with just 2
+agents, half the value is burned. With 10 agents, 90\% is burned. The
+resource does not get ``won''; it gets \textbf{lost}.
+
+\section{The Full Cost of Conflict: Boundary Damage and
+Repair}\label{the-full-cost-of-conflict-boundary-damage-and-repair}
+
+\subsection{Beyond Contest
+Expenditure}\label{beyond-contest-expenditure}
+
+The Tullock contest model captures the energy directly invested in
+fighting (the ``ammunition''), but conflict inflicts additional costs:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Offensive boundary damage:} the attacker's boundary degrades
+  from neglect (energy diverted to attack) and counter-damage.
+\item
+  \textbf{Defensive boundary damage:} the defender's boundary is
+  physically damaged by the attack.
+\item
+  \textbf{Repair costs:} both agents must subsequently invest energy to
+  restore boundary integrity.
+\end{enumerate}
+
+These costs are \textbf{on top of} the contest dissipation \(D_N\)
+computed above.
+
+\subsection{Boundary Damage Functions}\label{boundary-damage-functions}
+
+\begin{definition}[Offensive Damage]
+\label{def-offensive-damage}
+
+In a conflict where agent $i$ invests $e_i$ in the contest, the \textbf{offensive damage} to the attacker's own boundary is:
+
+$$\Delta B_i^{\text{off}} = \delta^{\text{off}} \cdot e_i$$
+
+where $\delta^{\text{off}} \in [0, 1]$ is the offensive damage coefficient, the fraction of contest investment that translates into self-boundary degradation (energy diverted from maintenance, physical exposure during attack, counter-strikes).
+\end{definition}
+
+\begin{definition}[Defensive Damage]
+\label{def-defensive-damage}
+
+In a conflict where agent $i$ invests $e_i$ in the contest, the \textbf{defensive damage} inflicted on the opponent's boundary is:
+
+$$\Delta B_j^{\text{def}} = \delta^{\text{def}} \cdot e_i$$
+
+where $\delta^{\text{def}} \in [0, 1]$ is the defensive damage coefficient, the fraction of agent $i$'s attack energy that penetrates and damages agent $j$'s boundary.
+\end{definition}
+
+\textbf{Interpretation:} In a two-agent conflict where both invest
+\(e^*\):
+
+\begin{itemize}
+\tightlist
+\item
+  Agent \(A\)'s total boundary damage:
+  \(\Delta B_A = \delta^{\text{off}} \cdot e_A^* + \delta^{\text{def}} \cdot e_B^*\)
+\item
+  Agent \(B\)'s total boundary damage:
+  \(\Delta B_B = \delta^{\text{off}} \cdot e_B^* + \delta^{\text{def}} \cdot e_A^*\)
+\end{itemize}
+
+For symmetric agents (\(e_A^* = e_B^* = e^*\)):
+
+\[\Delta B_A = \Delta B_B = (\delta^{\text{off}} + \delta^{\text{def}}) \cdot e^*\]
+
+\subsection{Repair Costs: The Thermodynamic
+Asymmetry}\label{repair-costs-the-thermodynamic-asymmetry}
+
+Repairing a damaged boundary is thermodynamically more expensive than
+maintaining an intact one. This is a direct consequence of the Second
+Law: destruction increases entropy; reconstruction requires importing
+negentropy (ordered energy) from the environment.
+
+\begin{definition}[Repair Multiplier]
+\label{def-repair-multiplier}
+
+The energy required to repair boundary damage $\Delta B_i$ is:
+
+$$W_{\text{repair},i} = \kappa \cdot \Delta B_i$$
+
+where $\kappa \geq 1$ is the \textbf{repair multiplier}. The strict inequality $\kappa > 1$ holds in any physical system because:
+
+(i) Repair requires first clearing the damage (entropy removal), then rebuilding (negentropy import), two thermodynamic steps vs. one for maintenance.
+
+(ii) The damaged state has higher entropy than the pre-damage state; returning to the original configuration requires at least $\Delta S \cdot T$ additional work (Clausius inequality / minimum work theorem, Second Law of Thermodynamics).
+\end{definition}
+
+\textbf{Empirical calibration:} In biological systems, post-injury
+energy expenditure scales as BMR \(\times\) stress factor \(\times\)
+activity factor, where clinical stress factors range from 1.2 (minor
+surgery) to 1.5 (infected wounds) and activity factors from 1.2 to 1.5,
+yielding combined multipliers of approximately 1.4 to 2.3 for minor to
+moderate injuries alone \citep{Demling2009}. Major trauma and severe
+burns carry higher stress factors still. We use \(\kappa = 2\) as a
+conservative baseline in worked examples.
+
+\subsection{Total Conflict Cost: The Complete
+Ledger}\label{total-conflict-cost-the-complete-ledger}
+
+Assembling all cost components for a two-agent symmetric contest
+(\(r = 1\), \(\sigma_A = \sigma_B\)):
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Cost component
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Per agent
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+System total
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Contest investment \(e_i^*\) & \(E_j / 4\) & \(E_j / 2\) \\
+Boundary damage \(\Delta B_i\) &
+\((\delta^{\text{off}} + \delta^{\text{def}}) \cdot E_j / 4\) &
+\((\delta^{\text{off}} + \delta^{\text{def}}) \cdot E_j / 2\) \\
+Repair cost \(W_{\text{repair},i}\) &
+\(\kappa (\delta^{\text{off}} + \delta^{\text{def}}) \cdot E_j / 4\) &
+\(\kappa (\delta^{\text{off}} + \delta^{\text{def}}) \cdot E_j / 2\) \\
+\textbf{Total cost per agent} &
+\([1 + (1 + \kappa)(\delta^{\text{off}} + \delta^{\text{def}})] \cdot E_j / 4\)
+& \\
+\textbf{Total system cost} & &
+\([1 + (1 + \kappa)(\delta^{\text{off}} + \delta^{\text{def}})] \cdot E_j/2\) \\
+\end{longtable}
+}
+
+Define the \textbf{total friction multiplier}:
+
+\[\Phi \triangleq 1 + (1 + \kappa)(\delta^{\text{off}} + \delta^{\text{def}})\]
+
+Then:
+
+\[L_{\text{system}}^{(2)} = \Phi \cdot \frac{E_j}{2}\]
+
+where \(L_{\text{system}}^{(2)}\) is the total system loss from a
+two-agent contest.
+
+\section{The Net-Negative Theorem}\label{the-net-negative-theorem}
+
+\subsection{Statement}\label{statement}
+
+\begin{theorem}[Net-Negative Conflict]
+\label{thm-net-negative-conflict}
+
+In a conflict contest over resource $E_j$ between $N \geq 2$ symmetric agents with friction multiplier $\Phi = 1 + (1 + \kappa)(\delta^{\text{off}} + \delta^{\text{def}})$:
+
+(a) The total system loss (energy dissipated by conflict) is:
+
+$$L_{\text{system}}^{(N)} = \Phi \cdot \frac{N - 1}{N} \cdot E_j$$
+
+(b) The net system value (resource obtained minus all costs) is:
+
+$$V_{\text{net}} = E_j - L_{\text{system}}^{(N)} = E_j \left(1 - \Phi \cdot \frac{N - 1}{N}\right)$$
+
+(c) The conflict is \textbf{net-negative} ($V_{\text{net}} < 0$) if and only if:
+
+$$\Phi > \frac{N}{N - 1}$$
+
+For $N = 2$: $\Phi > 2$. For $N \geq 3$: $\Phi > 3/2$. For $N \to \infty$: $\Phi > 1$.
+\end{theorem}
+
+\begin{proof}
+The contest dissipation for $N$ symmetric agents is $D_N = \frac{N-1}{N} E_j$ (Theorem~\ref{thm-dissipation-scaling}). Total boundary damage across all agents is $N \cdot (\delta^{\text{off}} + \delta^{\text{def}}) \cdot e_i^* = (\delta^{\text{off}} + \delta^{\text{def}}) \cdot \frac{N-1}{N} E_j$ (each agent's damage is $(\delta^{\text{off}} + \delta^{\text{def}}) e_i^*$, summed over $N$ agents, using $N e_i^* = D_N$). Similarly, total repair cost is $\kappa (\delta^{\text{off}} + \delta^{\text{def}}) \cdot \frac{N-1}{N} E_j$. Summing:
+
+$$L_{\text{system}}^{(N)} = \left[1 + (1 + \kappa)(\delta^{\text{off}} + \delta^{\text{def}})\right] \cdot \frac{N-1}{N} E_j = \Phi \cdot \frac{N-1}{N} E_j$$
+
+The net value is $V_{\text{net}} = E_j - L_{\text{system}}^{(N)}$. Setting $V_{\text{net}} < 0$:
+
+$$E_j < \Phi \cdot \frac{N-1}{N} E_j \iff 1 < \Phi \cdot \frac{N-1}{N} \iff \Phi > \frac{N}{N-1}$$
+
+All damage terms are aggregate: $L_{\text{system}}^{(N)}$ sums contest dissipation and boundary damage across all $N$ agents, not per-pair. For asymmetric agents, the per-pair damage components $(\delta_i^{\text{off}} + \delta_i^{\text{def}}) e_i^*$ are summed over all $i$.
+\end{proof}
+
+\subsection{Physical
+Interpretation}\label{physical-interpretation-net-negative}
+
+\begin{corollary}[Inevitability of Net-Negative Conflict]
+\label{cor-inevitability-net-negative}
+
+For any physical system where boundary damage is non-negligible ($\delta^{\text{off}} + \delta^{\text{def}} > 0$) and repair is thermodynamically irreversible ($\kappa > 1$), the conflict is net-negative for sufficiently many contestants.
+\end{corollary}
+
+\begin{proof}
+As $N \to \infty$, the threshold $N/(N-1) \to 1$. Since $\Phi = 1 + (1 + \kappa)(\delta^{\text{off}} + \delta^{\text{def}}) > 1$ whenever $\delta^{\text{off}} + \delta^{\text{def}} > 0$, there exists a finite $N^*$ such that $\Phi > N^*/(N^* - 1)$, beyond which the conflict is net-negative. Specifically:
+
+$$N^* = \left\lfloor \frac{\Phi}{\Phi - 1} \right\rfloor + 1$$
+\end{proof}
+
+\begin{corollary}[The Two-Agent Threshold]
+\label{cor-two-agent-threshold}
+
+For two agents ($N = 2$), the conflict is net-negative when $\Phi > 2$, i.e., when:
+
+$$(1 + \kappa)(\delta^{\text{off}} + \delta^{\text{def}}) > 1$$
+
+With $\kappa = 2$ (conservative repair multiplier) and $\delta^{\text{off}} = \delta^{\text{def}} = 0.2$ (modest damage coefficients): $\Phi = 1 + 3 \cdot 0.4 = 2.2 > 2$. The conflict is net-negative even between just two agents.
+\end{corollary}
+
+\subsection{Numerical Illustration: The Friction Multiplier
+Landscape}\label{numerical-illustration-the-friction-multiplier-landscape}
+
+The following table shows the total system loss
+\(L_{\text{system}}^{(N)} / E_j\) for various parameter combinations:
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1429}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1429}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1429}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1429}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1429}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1429}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1429}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\(\delta^{\text{off}} + \delta^{\text{def}}\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(\kappa\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(\Phi\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(N = 2\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(N = 5\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(N = 10\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(N = 100\)
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+0 (pure contest) & n/a & 1.0 & 50\% & 80\% & 90\% & 99\% \\
+0.2 & 1.5 & 1.5 & 75\% & 120\% & 135\% & 148.5\% \\
+0.4 & 2.0 & 2.2 & 110\% & 176\% & 198\% & 217.8\% \\
+0.6 & 2.0 & 2.8 & 140\% & 224\% & 252\% & 277.2\% \\
+0.8 & 3.0 & 4.2 & 210\% & 336\% & 378\% & 415.8\% \\
+\end{longtable}
+}
+
+Values exceeding 100\% represent \textbf{net-negative outcomes}, where
+the system dissipates more energy than the contested resource contains.
+With even modest boundary damage parameters (\(\delta = 0.2\),
+\(\kappa = 1.5\)), two-agent contests are net-neutral and five-agent
+contests are already deeply net-negative.
+
+\section{Comparison: Conflict vs.~Cooperative
+Regimes}\label{comparison-conflict-vs.-cooperative-regimes}
+
+\subsection{The Cooperative Baseline}\label{the-cooperative-baseline}
+
+Under the boundary-constraint-based cooperative regime (Theorem 7
+\citep{TC-I}), agents achieve the variational equilibrium allocation
+with:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Zero contest expenditure:} No agent invests energy in
+  fighting.
+\item
+  \textbf{Zero boundary damage:} No boundaries are breached.
+\item
+  \textbf{Zero repair costs:} No damage to repair.
+\item
+  \textbf{Shadow price costs only:} Each agent's cost is bounded by the
+  Lagrange multipliers \(\mu_{Bk}^*\), the opportunity cost of
+  respecting others' boundary constraints.
+\end{itemize}
+
+The total system welfare under cooperation (Theorem 7 \citep{TC-I}) is:
+
+\[SW_{\text{coop}} = \sum_{i=1}^N U_i(\mathbf{x}_i^*)\]
+
+\subsection{The Conflict Regime}\label{the-conflict-regime}
+
+Under conflict (no boundary constraints), the total system welfare is:
+
+\[SW_{\text{conflict}} = \sum_{i=1}^N \left[ p_i \cdot E_j - e_i^* - W_{\text{repair},i} \right] = E_j - D_N - W_{\text{repair, total}}\]
+
+\[= E_j - \Phi \cdot \frac{N-1}{N} E_j = E_j \left(1 - \Phi \cdot \frac{N-1}{N}\right)\]
+
+\subsection{The Cooperation Premium}\label{the-cooperation-premium}
+
+\begin{theorem}[Cooperation Dominance]
+\label{thm-cooperation-dominance}
+
+The cooperative regime strictly dominates the conflict regime whenever resource collision occurs. Specifically:
+
+$$SW_{\text{coop}} - SW_{\text{conflict}} \geq \Phi \cdot \frac{N-1}{N} \cdot E_j > 0$$
+
+The cooperation premium is:
+\begin{itemize}
+\item Increasing in $N$ (more agents → more waste in conflict)
+\item Increasing in $\Phi$ (more boundary damage → more destructive conflict)
+\item Increasing in $E_j$ (higher-value resources → higher absolute waste)
+\end{itemize}
+
+\end{theorem}
+
+\begin{proof}
+Under cooperation, the full resource value $E_j$ is available for productive allocation (minus only the shadow-price opportunity costs, which are transfers between agents, not system losses). Under conflict, the system loses $L_{\text{system}}^{(N)} = \Phi \cdot \frac{N-1}{N} E_j$ in pure waste. Since waste does not produce utility:
+
+$$SW_{\text{coop}} - SW_{\text{conflict}} \geq L_{\text{system}}^{(N)} = \Phi \cdot \frac{N-1}{N} \cdot E_j > 0$$
+
+The inequality is strict because $\Phi \geq 1$, $N \geq 2$, and $E_j > 0$.
+\end{proof}
+
+\textbf{Physical interpretation:} This is the formal proof of our
+central claim: \emph{``The only way to globally minimize
+\(E_{\text{conflict}}\) across the system is to establish mutual
+constraints.''} The cooperative premium quantifies exactly how much
+energy the system saves by adopting boundary constraints.
+
+\subsection{Worked Example: Cooperation vs.~Conflict Under
+Scarcity}\label{worked-example-cooperation-vs.-conflict-under-scarcity}
+
+Consider two symmetric agents with utility parameters \(\alpha = 10\),
+\(\beta = 1\) (matching the worked example of \emph{Necessary
+Constraints} \citep{TC-I}), shared resource \(R = 12\), and friction
+multiplier \(\Phi = 2.2\)
+(\(\delta^{\text{off}} = \delta^{\text{def}} = 0.2\), \(\kappa = 2\)):
+
+\textbf{Cooperative regime (VE):} - Allocation: \(x_A^* = x_B^* = 6\) -
+Utilities: \(U_A = U_B = 42\) - System welfare:
+\(SW_{\text{coop}} = 84\)
+
+\textbf{Conflict regime:}
+
+The contested portion is the collision overlap. Each agent wants 10 but
+only 12 is available. The contested amount is
+\(\sum x_i^{\circ} - R = 20 - 12 = 8\) units.
+
+Contest over the excess demand (\(E_{\text{contested}} = 8\) in resource
+units, with energy value depending on the utility function):
+
+\begin{itemize}
+\tightlist
+\item
+  Contest dissipation: \(D_2 = E_{\text{contested}}/2 = 4\) (energy
+  units lost to fighting)
+\item
+  Boundary damage + repair:
+  \((1 + \kappa)(\delta^{\text{off}} + \delta^{\text{def}}) \cdot D_2 = 3 \cdot 0.4 \cdot 4 = 4.8\)
+\item
+  Total system loss: \(D_2 + 4.8 = 8.8\) energy units
+\end{itemize}
+
+Even a simplified conflict model shows the cooperation premium: the
+system saves at least 8.8 energy units by establishing mutual
+constraints, more than the entire contested portion of the resource.
+
+\section{Cascading Network Effects: Trust and Ambient
+Friction}\label{cascading-network-effects-trust-and-ambient-friction}
+
+\subsection{Motivation}\label{motivation}
+
+The preceding analysis treats each conflict as isolated. In reality,
+conflict events propagate through the network: when agent \(A\) violates
+agent \(B\)'s boundary, every other agent in the network must
+\textbf{update its threat model}. This section formalizes the cascading
+cost.
+
+\subsection{The Network Friction
+Coefficient}\label{the-network-friction-coefficient}
+
+\begin{definition}[Network Friction]
+\label{def-network-friction}
+
+Consider a network of $N$ agents engaged in cooperative resource exchange. The \textbf{network friction coefficient} $\phi \geq 0$ parameterizes the per-transaction overhead cost due to monitoring, verification, and precautionary defense:
+
+$$C_{\text{overhead}}(\phi) = \phi \cdot E_{\text{transaction}}$$
+
+where $E_{\text{transaction}}$ is the energy value of a cooperative transaction. At $\phi = 0$, transactions are frictionless (perfect trust). At $\phi > 0$, each interaction bears an overhead tax.
+\end{definition}
+
+\textbf{Examples of friction overhead:} - \textbf{Biological:} Immune
+surveillance costs (metabolic energy spent monitoring for pathogens,
+even when healthy). - \textbf{Economic:} Transaction costs (legal fees,
+contract enforcement, insurance, escrow). - \textbf{Societal:} Policing,
+auditing, intelligence gathering, defensive military posture.
+
+\subsection{Trust as a State Variable}\label{trust-as-a-state-variable}
+
+Define the \textbf{network trust level} \(T \in [0, 1]\) as the
+complement of normalized friction:
+
+\[T = \frac{1}{1 + \phi}\]
+
+\begin{itemize}
+\tightlist
+\item
+  \(T = 1\): perfect trust (\(\phi = 0\)), frictionless cooperation.
+\item
+  \(T \to 0\): zero trust (\(\phi \to \infty\)), cooperative
+  transactions become prohibitively expensive.
+\end{itemize}
+
+Equivalently: \(\phi = \frac{1 - T}{T}\).
+
+\subsection{Violation-Induced Friction
+Increase}\label{violation-induced-friction-increase}
+
+Each boundary violation increases the network friction coefficient:
+
+\begin{definition}[Friction Injection]
+\label{def-friction-injection}
+
+When a boundary violation of severity $v > 0$ (measured in energy units of damage) occurs at time $t$, the network friction coefficient updates as:
+
+$$\phi_{t+1} = \phi_t + \eta \cdot v$$
+
+where $\eta > 0$ is the \textbf{friction sensitivity}, which controls how strongly the network responds to violations. The sensitivity $\eta$ depends on:
+\begin{itemize}
+\item \textbf{Visibility:} Public violations have higher $\eta$ (all agents update simultaneously).
+\item \textbf{Precedent:} First violations in a low-friction network have higher $\eta$ (trust is fragile).
+\item \textbf{Network density:} Denser networks (more inter-agent connections) have higher $\eta$ (information propagates faster).
+\end{itemize}
+
+\end{definition}
+
+\subsection{The Cost of Ambient
+Friction}\label{the-cost-of-ambient-friction}
+
+If the network has \(M\) cooperative transactions per period, each of
+average value \(\bar{E}\), the \textbf{total friction tax} per period
+is:
+
+\begin{definition}[Friction Tax]
+\label{def-friction-tax}
+
+The per-period \textbf{friction tax} on a cooperative network with $M$ transactions of average value $\bar{E}$ and network friction coefficient $\phi$ is:
+
+$$C_{\text{friction}} = \phi \cdot M \cdot \bar{E}$$
+
+This is the aggregate overhead energy that the network dissipates on monitoring, verification, and defense, energy that could otherwise go to productive boundary maintenance.
+\end{definition}
+
+\subsection{Friction Recovery (Trust
+Rebuilding)}\label{friction-recovery-trust-rebuilding}
+
+Trust rebuilds slowly through consistent cooperative behavior:
+
+\begin{definition}[Friction Decay]
+\label{def-friction-decay}
+
+In the absence of new violations, the friction coefficient decays toward zero at rate $\epsilon \in (0, 1)$ per period:
+
+$$\phi_{t+1} = (1 - \epsilon) \cdot \phi_t$$
+
+This exponential decay means friction halves every $t_{1/2} = \ln 2 / \ln(1/(1 - \epsilon))$ periods.
+\end{definition}
+
+\subsection{Combined Law of Motion}\label{combined-law-of-motion}
+
+Combining Definition~\ref{def-friction-injection} and
+Definition~\ref{def-friction-decay} into a single dynamic equation:
+
+\begin{remark}[Friction Law of Motion]
+\label{rmk-friction-law-of-motion}
+
+The network friction coefficient $\phi_t$ evolves according to a first-order stochastic difference equation:
+
+$$\phi_{t+1} = (1 - \epsilon)\,\phi_t + \eta\,v_t \cdot \mathbb{1}_{\{\text{violation at } t\}}$$
+
+where $\epsilon \in (0,1)$ is the trust recovery rate (Definition~\ref{def-friction-decay}), $\eta > 0$ is the friction sensitivity, $v_t > 0$ is the violation severity, and $\mathbb{1}_{\{\text{violation at } t\}}$ is the indicator of a boundary violation at time $t$. In the absence of violations, friction decays geometrically toward zero. Each violation injects an additive shock $\eta v_t$ that raises the friction floor for all subsequent periods. This asymmetry (instantaneous injection, gradual recovery) is thermodynamically natural: increasing entropy is easy; decreasing it requires sustained work.
+\end{remark}
+
+\textbf{Key asymmetry:} Friction injection
+(Definition~\ref{def-friction-injection}) is \textbf{instantaneous and
+additive} (a single violation immediately increases \(\phi\)). Friction
+recovery is \textbf{gradual and multiplicative} (rebuilding trust
+requires persistent cooperative behavior over many periods). This
+asymmetry is thermodynamically natural: increasing entropy (breaking
+trust) is easy; decreasing entropy (rebuilding trust) requires sustained
+work.
+
+\subsection{The Cascading Cost
+Theorem}\label{the-cascading-cost-theorem}
+
+\begin{theorem}[Cascading Friction]
+\label{thm-cascading-friction}
+
+A single boundary violation of severity $v$ in a network with $M$ transactions of average value $\bar{E}$ and friction sensitivity $\eta$ produces a \textbf{total cascading cost} of:
+
+$$C_{\text{cascade}} = \frac{\eta \cdot v \cdot M \cdot \bar{E}}{\epsilon}$$
+
+over the full recovery period $[t_{\text{violation}}, \infty)$. The ratio of cascading cost to direct conflict cost $v$ is:
+
+$$\frac{C_{\text{cascade}}}{v} = \frac{\eta \cdot M \cdot \bar{E}}{\epsilon}$$
+
+This ratio scales linearly with network size ($M$) and inversely with recovery rate ($\epsilon$).
+\end{theorem}
+
+\begin{proof}
+The violation at time $t_0$ injects $\Delta\phi = \eta v$ into the friction coefficient. Without further violations, the excess friction at time $t_0 + k$ is:
+
+$$\Delta\phi_k = \eta v \cdot (1 - \epsilon)^k$$
+
+The excess friction cost at period $k$ is $\Delta\phi_k \cdot M \cdot \bar{E}$. The total cascading cost is the sum over all future periods:
+
+$$C_{\text{cascade}} = \sum_{k=0}^{\infty} \eta v \cdot (1 - \epsilon)^k \cdot M \cdot \bar{E} = \eta v \cdot M \cdot \bar{E} \cdot \frac{1}{\epsilon}$$
+
+using the geometric series formula $\sum_{k=0}^{\infty} q^k = 1/(1-q)$ for $q = 1 - \epsilon \in (0, 1)$.
+\end{proof}
+
+\subsection{Numerical Illustration: The Amplification
+Factor}\label{numerical-illustration-the-amplification-factor}
+
+Consider a modest-sized economic network:
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Parameter
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Symbol
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Value
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Interpretation
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Network transactions / period & \(M\) & 1,000 & A small community \\
+Average transaction value & \(\bar{E}\) & 10 & Energy units per
+transaction \\
+Friction sensitivity & \(\eta\) & 0.01 & 1\% of violation severity
+becomes friction \\
+Recovery rate & \(\epsilon\) & 0.05 & \textasciitilde14 periods to halve
+friction \\
+Violation severity & \(v\) & 50 & A significant boundary breach \\
+\end{longtable}
+}
+
+\textbf{Direct cost of the violation:} \(v = 50\) energy units.
+
+\textbf{Cascading cost:}
+
+\[C_{\text{cascade}} = \frac{0.01 \times 50 \times 1000 \times 10}{0.05} = \frac{5000}{0.05} = 100{,}000 \text{ energy units}\]
+
+\textbf{Amplification factor:}
+\(C_{\text{cascade}} / v = 100{,}000 / 50 = 2{,}000\times\).
+
+Scaling the same parameters to a larger ecosystem (\(M = 10{,}000\)
+transactions per period, holding \(\bar{E}\), \(\eta\), \(\epsilon\),
+and \(v\) fixed) yields:
+
+\[C_{\text{cascade}} = \frac{0.01 \times 50 \times 10{,}000 \times 10}{0.05} = 1{,}000{,}000 \text{ energy units},\]
+
+with amplification factor \(20{,}000\times\). The amplification factor
+scales linearly in \(M\) and inversely in \(\epsilon\), so modest
+network parameters span the range \(10^3\) to \(10^4\) across small
+communities and larger ecosystems.
+
+The network-level damage from a single violation is therefore three to
+four orders of magnitude greater than the direct damage. This formalizes
+the intuition that small lies or broken promises do not destroy the
+network immediately, but they increase the ambient ``heat'' (distrust).
+
+\subsection{Multiple Violations: The Friction
+Ratchet}\label{multiple-violations-the-friction-ratchet}
+
+When violations are recurring (rate \(\nu\) violations per period, each
+of severity \(v\)), the steady-state friction coefficient is:
+
+\[\phi_{\infty} = \frac{\nu \cdot \eta \cdot v}{\epsilon}\]
+
+and the steady-state friction tax is:
+
+\[C_{\text{friction}}^{\infty} = \phi_{\infty} \cdot M \cdot \bar{E} = \frac{\nu \cdot \eta \cdot v \cdot M \cdot \bar{E}}{\epsilon}\]
+
+\begin{corollary}[Friction Ratchet]
+\label{cor-friction-ratchet}
+
+If the violation rate $\nu$ exceeds the critical threshold:
+
+$$\nu^* = \frac{\epsilon}{\eta \cdot v} \cdot \frac{E_{\text{coop net}}}{M \cdot \bar{E}}$$
+
+where $E_{\text{coop net}}$ is the total cooperative surplus of the network, then the friction tax exceeds the cooperative surplus and the network collapses: cooperation becomes energetically unprofitable.
+\end{corollary}
+
+This is the mathematical formalization of societal collapse: when
+violations are too frequent and trust recovery is too slow, the overhead
+cost of maintaining any cooperative structure exceeds its benefit, and
+agents are better off in isolation or smaller, higher-trust
+sub-networks.
+
+\section{The Interaction Cost Function: Formal
+Definition}\label{the-interaction-cost-function-formal-definition}
+
+Synthesizing the results above into a single mathematical object:
+
+\begin{definition}[Interaction Cost Function]
+\label{def-interaction-cost-function}
+
+The \textbf{interaction cost function} $\mathcal{C} : \mathbb{R}_{\geq 0}^N \times [0, \infty) \to \mathbb{R}_{\geq 0}$ maps a strategy profile and network friction state to the total energy dissipated by non-cooperative interactions:
+
+$$\mathcal{C}(\mathbf{e}, \phi) = \underbrace{\sum_{i=1}^{N} e_i}_{\text{contest dissipation}} + \underbrace{(1 + \kappa) \sum_{i=1}^{N} (\delta^{\text{off}} + \delta^{\text{def}}) \, e_i}_{\text{boundary damage + repair}} + \underbrace{\phi \cdot M \cdot \bar{E}}_{\text{ambient friction tax}}$$
+
+where $\mathbf{e} = (e_1, \ldots, e_N)$ is the vector of contest investments.
+
+At the contest Nash equilibrium:
+
+$$\mathcal{C}^* = \Phi \cdot \frac{N-1}{N} \cdot E_j + \phi \cdot M \cdot \bar{E}$$
+\end{definition}
+
+This defines thermodynamic friction as a precise mathematical object:
+the total energy dissipated by non-cooperative interactions in a
+multi-agent system, decomposed into contest dissipation, boundary damage
+and repair, and ambient friction tax.
+
+\section{Worked Examples}\label{worked-examples}
+
+\subsection{Example 1: Two-Agent Resource Contest
+(Baseline)}\label{example-1-two-agent-resource-contest-baseline}
+
+\textbf{Setup:} Two symmetric agents (\(\sigma_A = \sigma_B = 1\)), one
+resource worth \(E_j = 100\) energy units. Boundary parameters:
+\(\delta^{\text{off}} = 0.15\), \(\delta^{\text{def}} = 0.25\),
+\(\kappa = 2\).
+
+\textbf{Friction multiplier:}
+
+\[\Phi = 1 + (1 + 2)(0.15 + 0.25) = 1 + 3 \times 0.4 = 2.2\]
+
+\textbf{Contest equilibrium:}
+
+\[e_A^* = e_B^* = \frac{100}{4} = 25\]
+
+\textbf{Total dissipation:} \(D_2 = 50\)
+
+\textbf{Boundary damage per agent:}
+\((\delta^{\text{off}} + \delta^{\text{def}}) \times 25 = 0.4 \times 25 = 10\)
+
+\textbf{Repair cost per agent:} \(\kappa \times 10 = 20\)
+
+\textbf{Total system loss:} \(50 + 2(10 + 20) = 50 + 60 = 110\) (i.e.,
+\(\Phi \times 50 = 2.2 \times 50 = 110\))
+
+\textbf{Net system value:} \(100 - 110 = -10\) energy units.
+
+\textbf{Verdict: Net-negative.} The conflict dissipated 10\% more energy
+than the resource contained. Both agents would have been better off
+splitting the resource (each getting 50 energy units with zero conflict
+cost).
+
+\subsection{Example 2: Five-Agent
+Scramble}\label{example-2-five-agent-scramble}
+
+Same parameters as above, but \(N = 5\).
+
+\[e_i^* = \frac{4 \times 100}{25} = 16, \qquad D_5 = 5 \times 16 = 80\]
+
+\textbf{Total system loss:} \(\Phi \times 80 = 2.2 \times 80 = 176\)
+
+\textbf{Net system value:} \(100 - 176 = -76\) energy units.
+
+\textbf{Verdict: Catastrophically net-negative.} The system dissipates
+76\% more energy than the resource is worth. Each agent's expected
+payoff: \(100/25 = 4\) from winning, minus \(16\) investment, minus
+boundary+repair costs.
+
+\subsection{Example 3: The ``Profitable Bully'' (When Unilateral
+Defection Pays
+Temporarily)}\label{example-3-the-profitable-bully-when-unilateral-defection-pays-temporarily}
+
+Not all defection is immediately net-negative for the defector. Consider
+agents with valuations \(V_A = V_B = 100\) but asymmetric effectiveness
+(\(\sigma_A = 3\), \(\sigma_B = 1\)) in the standard Tullock model:
+
+Using the symmetric-valuation Tullock NE with effectiveness weights, the
+investments are:
+
+\[e_A^* = e_B^* = \frac{\sigma_A \sigma_B}{(\sigma_A + \sigma_B)^2} E_j = \frac{3}{16} \times 100 = 18.75\]
+
+Winning probabilities:
+\(p_A = \frac{\sigma_A}{\sigma_A + \sigma_B} = \frac{3}{4}\),
+\(p_B = \frac{1}{4}\).
+
+Agent \(A\)'s expected payoff (before boundary costs):
+\(0.75 \times 100 - 18.75 = 56.25\).
+
+Agent \(B\)'s expected payoff: \(0.25 \times 100 - 18.75 = 6.25\).
+
+Total contest dissipation: \(2 \times 18.75 = 37.5\).
+
+With boundary costs (\(\Phi = 2.2\)): total system loss =
+\(2.2 \times 37.5 = 82.5\).
+
+\textbf{System net:} \(100 - 82.5 = 17.5\), barely positive.
+
+\textbf{But the bully profits at the victim's expense.} The private
+incentive to bully exists even when the systemic outcome is nearly
+net-negative. \textbf{This is precisely why boundary constraints are
+necessary} (Theorem 5 \citep{TC-I}): the bully's profit is private and
+short-term; the system's loss is public, and cascading friction
+(Theorem~\ref{thm-cascading-friction}) means the network-level damage
+vastly exceeds the direct cost.
+
+\section{\texorpdfstring{Decisive Contests (\(r > 1\)): Escalation
+Dynamics}{Decisive Contests (r \textgreater{} 1): Escalation Dynamics}}\label{decisive-contests-escalation-dynamics}
+
+\subsection{The Impact of
+Decisiveness}\label{the-impact-of-decisiveness}
+
+When \(r > 1\), the contest becomes increasingly ``all-or-nothing'': a
+marginal increase in investment translates into a larger increase in
+winning probability, and agents invest more aggressively as a result.
+
+For symmetric agents in the moderate-decisiveness regime
+\(r \in (0, N/(N-1)]\), the interior first-order condition yields the
+unique symmetric pure-strategy Nash equilibrium
+
+\[e_i^* = \frac{r(N-1)}{N^2} \cdot E_j, \qquad D_N = \frac{r(N-1)}{N} \cdot E_j.\]
+
+At the upper boundary \(r = N/(N-1)\), dissipation reaches the full
+resource value (\(D_N = E_j\)) and per-agent expected payoff falls to
+zero. For \(r > N/(N-1)\), the interior critical point is no longer a
+maximum of agent \(i\)'s payoff: the symmetric pure-strategy Nash
+equilibrium of the unconstrained Tullock contest ceases to exist
+\citep{BayeKovenock-deVries1994}, and the equilibrium of the unbounded
+game shifts into mixed strategies in which expected total dissipation
+equals \(E_j\) (full rent dissipation).
+
+\subsection{Physical Budget
+Constraints}\label{physical-budget-constraints}
+
+The unbounded contest is a useful theoretical limit, but it does not
+describe the systems this paper considers. In our framework every agent
+is an open thermodynamic system with finite metabolic supply: contest
+investment \(e_i\) is real energy diverted from boundary maintenance and
+productive use, and is bounded above by an agent-specific physical
+budget \(\bar e_i > 0\) (a function of metabolic capacity, stored
+reserves, and boundary integrity \(B_i\)). The contest action space is
+therefore the compact interval \([0, \bar e_i]\) rather than
+\([0, \infty)\).
+
+In the moderate regime \(r \leq N/(N-1)\), the interior NE
+\(e_i^* = r(N-1) E_j/N^2\) remains the equilibrium whenever it lies
+inside the budget set (\(e_i^* \leq \bar e_i\)); otherwise the
+equilibrium is at the cap, examined below.
+
+In the decisive regime \(r > N/(N-1)\), the interior FOC has no maximum
+on the unbounded action space, but the budget constraint compactifies
+the strategy space and restores existence of a pure-strategy
+equilibrium, located at the budget cap.
+
+\begin{proposition}[Budget-Constrained Decisive Contest]
+\label{prop-budget-constrained-decisive}
+
+Consider $N \geq 2$ symmetric agents ($\sigma_i = 1$) with common physical budget $\bar e \in (0, E_j/N]$ contesting a resource of value $E_j$ under decisiveness $r > N/(N-1)$. The symmetric profile $e_i = \bar e$ for all $i$ is a pure-strategy Nash equilibrium of the budget-constrained contest. Total contest dissipation is
+
+$$D_N = N \bar e \leq E_j,$$
+
+with equality when $\bar e = E_j/N$. Each agent's expected payoff is $\Pi_i^* = E_j/N - \bar e \geq 0$.
+\end{proposition}
+
+\begin{proof}
+At the symmetric profile $e_i = \bar e$, agent $i$'s success probability is $1/N$ and expected payoff is $E_j/N - \bar e \geq 0$. Two classes of unilateral deviation must be checked.
+
+\emph{Upward deviations} are infeasible: the budget cap $\bar e$ binds.
+
+\emph{Downward deviations} to $e_i' \in [0, \bar e)$. The marginal payoff at $e_i = \bar e$ when others play $\bar e$ is $E_j r(N-1)/(N^2 \bar e) - 1$. Because $\bar e \leq E_j/N$ and $r > N/(N-1)$,
+
+$$\frac{E_j \, r(N-1)}{N^2 \, \bar e} \;\geq\; \frac{r(N-1)}{N} \;>\; 1,$$
+
+so the marginal payoff is strictly positive and the payoff is locally increasing as $e_i \to \bar e^-$; small downward deviations strictly reduce payoff. For the discrete deviation to $e_i' = 0$, payoff is $-0 = 0$, while equilibrium payoff is $E_j/N - \bar e \geq 0$, so dropping out is weakly dominated. Intermediate deviations are dominated because the payoff function on $[0, \bar e]$ is unimodal at the cap when $\bar e \leq E_j/N$ and $r > N/(N-1)$ (verified numerically across the parameter range). Hence $e_i = \bar e$ for all $i$ is a pure-strategy Nash equilibrium.
+\end{proof}
+
+The interior NE of the moderate regime and the corner NE of the decisive
+regime meet continuously at \(r = N/(N-1)\) when \(\bar e = E_j/N\): the
+interior formula gives
+\(e_i^* = (N-1) E_j/N^2 \cdot N/(N-1) = E_j/N = \bar e\).
+
+\subsection{Net-Negativity Under Budget
+Constraints}\label{net-negativity-under-budget-constraints}
+
+The friction multiplier \(\Phi\) applies identically in either regime,
+so the system loss is
+
+\[L_{\text{system}}^{(N)} = \Phi \cdot D_N,\]
+
+with \(D_N = r(N-1) E_j/N\) in the moderate regime and
+\(D_N = N \bar e\) in the budget-bound decisive regime.
+
+\begin{corollary}[Escalation under Physical Budgets]
+\label{cor-escalation-instability}
+
+For $N \geq 2$ symmetric agents with budget cap $\bar e$:
+
+(a) \emph{Moderate regime} ($r \leq N/(N-1)$, interior NE feasible): conflict is net-negative whenever $\Phi r (N-1)/N > 1$. In particular, $r = 1$ recovers Theorem~\ref{thm-net-negative-conflict}.
+
+(b) \emph{Decisive regime} ($r > N/(N-1)$, equilibrium at cap): conflict is net-negative whenever $\Phi N \bar e > E_j$, i.e., whenever the cap exceeds $E_j/(\Phi N)$. With $\Phi = 2.2$ and $N = 2$, this requires $\bar e > E_j/4.4$, a budget level that is small relative to the resource value but routinely exceeded by adversaries committing significant fractions of their reserves to the contest.
+
+In both regimes, sufficiently decisive contests with non-negligible boundary damage produce dissipation exceeding the contested resource value before the contest is even resolved.
+\end{corollary}
+
+\textbf{Physical interpretation.} Arms races and high-stakes
+confrontations are decisive contests with \(r > 1\) and budget
+commitments approaching \(\bar e\). The decisive-regime result captures
+what unbounded Tullock cannot: agents do not bid to mathematical
+infinity, they exhaust their physical reserves. The cap is set by
+metabolism, treasury, or boundary integrity, not by strategic
+moderation. Once \(\Phi\) multiplies the cap-bound dissipation, the
+total energetic cost of the contest exceeds the value of the contested
+resource, recovering the arms-race conclusion that history confirms.
+
+\section{Discussion}\label{discussion}
+
+\subsection{Physical Interpretation}\label{physical-interpretation}
+
+The results establish a complete energetic cost structure for
+adversarial resource competition. The logical chain proceeds as follows:
+resource collision (established by \emph{Necessary Constraints}
+\citep{TC-I}) forces a contest; the contest dissipates energy
+proportional to the resource value
+(Theorem~\ref{thm-dissipation-scaling}); boundary damage and
+thermodynamically irreversible repair amplify the cost through the
+friction multiplier (Theorem~\ref{thm-net-negative-conflict}); and
+network cascading propagates a single violation across all future
+cooperative transactions (Theorem~\ref{thm-cascading-friction}).
+
+The net-negative theorem (Theorem~\ref{thm-net-negative-conflict}) is
+the central result: under realistic physical parameters (\(\Phi > 2\)),
+the total energy dissipated by conflict (contest effort, boundary
+damage, and repair costs) exceeds the value of the contested resource.
+Conflict is not merely suboptimal; it is thermodynamically wasteful at a
+system level. The system would be better off if the resource simply did
+not exist, because the act of fighting over it destroys more value than
+the resource contains.
+
+The network cascading result (Theorem~\ref{thm-cascading-friction})
+extends this from bilateral to multilateral settings. A single violation
+does not merely cost the immediate parties; it injects friction into the
+cooperative network that degrades all subsequent interactions, with
+illustrative amplification ratios of \(10^3\) to \(10^4\) under modest
+network parameters. This makes the true cost of defection far larger
+than the immediate bilateral loss. The asymmetry between friction
+injection (instantaneous, additive) and friction recovery (gradual,
+multiplicative) is thermodynamically natural: increasing entropy is
+easy; decreasing it requires sustained work.
+
+Together, these results provide the physical foundation for the
+energy-denominated payoff matrix used in \emph{Cooperative Equilibrium}
+\citep{TC-V}. The structurally negative mutual defection payoff
+(\(P < 0\)) in that payoff matrix is not assumed; it is a consequence of
+the friction analysis proved here.
+
+The theoretical amplification ratios obtained in the worked illustration
+(\(10^3\) to \(10^4\)) exceed those reported in empirical studies of
+specific conflict events (e.g., the approximately 4:1 supply chain
+amplification measured in the 2017 NotPetya cyberattack
+\citep{Crosignani2023}). This discrepancy is expected and systematic,
+for three reasons. First, the model computes costs for contests played
+to equilibrium; empirical conflicts typically terminate early (through
+settlement, withdrawal, or capitulation) once the accumulating costs
+become apparent, so empirical data captures the cost of partially played
+contests. Second, the model is denominated in energy, not money;
+monetary estimates omit energy flows that have no market price
+(metabolic costs of stress and displacement, thermodynamic cost of
+rebuilding to lower specification) and undercount flows that are
+nominally priced but practically unattributable due to the
+interdependency of causal factors (reduced productivity under elevated
+uncertainty, opportunity costs of diverted capital, sustained cognitive
+load across affected populations). Third, empirical observation windows
+are finite, while the cascading friction integral extends over the full
+recovery period, including the long tail of elevated ambient friction
+that no finite-horizon study captures. Each of these biases operates in
+the same direction: empirical dollar-denominated estimates are
+systematic lower bounds on the total energy-denominated cost that the
+theoretical model computes.
+
+Moreover, even the friction model itself is conservative. The cost
+structure derived here (contest expenditure, boundary damage, repair,
+and network cascading) accounts for the energy dissipated by the
+conflict process, but does not account for the \emph{informational}
+value of what conflict destroys. \emph{Accumulated Negentropy}
+\citep{TC-III} proves that complex dissipative structures accumulate
+organizational information over time
+(\(\mathcal{N}(T) = \int_0^T \dot{W}_{\text{order}}(t)\,dt\)) that
+cannot be reconstituted by re-spending the original energy investment.
+When conflict destroys such structures, the true loss includes not only
+the repair cost \(\kappa\) captured by the friction multiplier but also
+the accumulated negentropy that no repair process recovers. The friction
+analysis proved here is therefore a lower bound on the total
+thermodynamic cost of conflict; incorporating accumulated negentropy
+would increase the effective cost by additional orders of magnitude.
+
+\subsection{Testable Predictions}\label{testable-predictions}
+
+The model generates falsifiable predictions with explicit failure
+conditions:
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Prediction
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Source
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Falsified If\ldots{}
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Contest dissipation approaches the resource value as contestant number
+grows: \(D_N/E_j = (N-1)/N \to 1\) &
+Theorem~\ref{thm-dissipation-scaling} & Empirical resource contests with
+\(N \geq 10\) (e.g., multi-bidder rent-seeking competitions)
+consistently dissipate less than \(80\%\) of the contested value, where
+the model predicts at least \(90\%\) \\
+Conflict is net-negative (\(\Phi > 2\)) under realistic boundary-damage
+parameters (\(\delta^{\text{off}} + \delta^{\text{def}} \geq 0.2\),
+\(\kappa \geq 1.5\)) & Theorem~\ref{thm-net-negative-conflict} &
+Empirical data on conflict costs in resource competition (military
+expenditure vs.~resource value, litigation costs vs.~settlement values)
+consistently show total costs below 100\% of the contested resource
+value when boundary damage is non-negligible \\
+Network amplification of violation costs at ratios of \(10^3\) to
+\(10^4\) & Theorem~\ref{thm-cascading-friction} & Supply chain
+disruption data, financial contagion events, or ecological cascade
+measurements show amplification ratios consistently below \(10^2\) in
+densely connected cooperative networks \\
+Cooperation strictly dominates conflict for all \(\Phi > 2\) &
+Theorem~\ref{thm-cooperation-dominance} & Experimental resource-sharing
+games with calibrated friction parameters consistently find conflict
+outcomes that Pareto-dominate cooperative outcomes \\
+Decisive contests (\(r > N/(N-1)\)) under finite physical budgets
+dissipate the full budget commitment \(N\bar e\), exceeding \(E_j\) once
+amplified by \(\Phi > 1\) & Corollary~\ref{cor-escalation-instability} &
+Arms-race expenditure data shows total military spending below the
+strategic value of the contested territory or resource \\
+\end{longtable}
+}
+
+The strongest falsification of the model would be a class of physically
+realistic conflict scenarios, with non-negligible boundary damage and
+thermodynamically irreversible repair, in which total conflict costs are
+consistently below the contested resource value. The model's
+architecture makes this structurally difficult (\(\Phi > 1\) whenever
+boundary damage is positive), but a counterexample would require
+revision of the damage model.
+
+\subsection{Limitations}\label{limitations}
+
+The contest model uses the Tullock success function, which assumes
+agents compete by expending effort that enters a ratio-form contest
+success function. Real conflicts may involve threshold effects, arms
+races with discontinuous outcomes, or asymmetric information about
+opponent capabilities. The boundary damage model assumes linear damage
+fractions (\(\delta^{\text{off}}, \delta^{\text{def}}\) are constants);
+nonlinear or state-dependent damage functions would refine the friction
+multiplier estimates but would not eliminate the fundamental result that
+repair costs exceed damage costs (which follows from the Second Law, not
+from linearity).
+
+The network cascading analysis assumes a homogeneous network topology
+with uniform friction transmission. Heterogeneous networks with variable
+connectivity would yield a distribution of amplification ratios rather
+than a single estimate. The friction sensitivity parameter \(\eta\) and
+recovery rate \(\epsilon\) are treated as constants; in practice, both
+may depend on the history of violations, network structure, and agent
+characteristics.
+
+The repair multiplier \(\kappa\) is bounded below by 1 (thermodynamic
+irreversibility) but its precise value is application-specific. The
+worked examples use \(\kappa = 2\) as a conservative baseline motivated
+by biological wound-healing costs, where tissue repair typically
+requires several multiples of the energy cost of equivalent tissue
+maintenance; other domains (institutional trust, financial system
+repair) may have substantially higher values.
+
+\textbf{Scope.} The model applies to any system of agents that maintain
+boundaries and compete for finite resources, with no restriction on
+species, substrate, or scale. The results address the energy cost of
+conflict, not the mechanism by which cooperation is established or
+enforced. Subsequent papers in this series address enforcement through
+game-theoretic equilibrium selection (\emph{Cooperative Equilibrium}
+\citep{TC-V}) and the dynamics of cooperative stability (\emph{Value
+Dynamics} \citep{TC-VI}).
+
+\subsection{Applications}\label{applications}
+
+The model applies wherever self-maintaining systems engage in
+adversarial resource competition:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{Military conflict and territorial disputes.} The friction
+  multiplier \(\Phi\) provides a computable estimate of total conflict
+  cost relative to the contested resource value. The net-negative
+  theorem predicts that wars over territory or resources dissipate more
+  energy (economic output, infrastructure, human capital) than the
+  contested resources are worth, a prediction consistent with empirical
+  analyses of conflict costs \citep{GarfinkelSkaperdas2012}.
+  \citet{StiglitzBilmes2008} estimate the total economic cost of the
+  Iraq War at approximately \$3 trillion (including long-term veteran
+  care, debt service, and macroeconomic disruption); against annual
+  Iraqi oil revenues of approximately \$96 billion \citep{IMF2024Iraq},
+  this yields a cost-to-annual-resource-value ratio exceeding 30:1. The
+  escalation result (Corollary~\ref{cor-escalation-instability})
+  predicts that decisive contests under finite physical budgets exhaust
+  the budgeted energy at a rate that, once amplified by \(\Phi\),
+  exceeds the strategic value of the contested resource.
+\item
+  \textbf{Litigation and dispute resolution.} Legal contests are Tullock
+  contests with \(r\) determined by the quality of evidence and legal
+  representation. The model predicts that total litigation costs
+  (attorney fees, court costs, productivity loss, relationship damage)
+  should exceed settlement values under adversarial proceedings with
+  non-negligible boundary damage. \citet{HannafordAgor2013} report that
+  median litigation costs range from \$43,000 to \$122,000, while
+  \citet{HannafordAgor2015} found that 75\% of civil judgments are below
+  \$5,200, yielding cost-to-value ratios exceeding 8:1 for the majority
+  of cases. These findings are consistent with the net-negative
+  prediction: the contest expenditure alone consumes the resource value,
+  before accounting for the additional friction of relationship damage
+  and productivity loss.
+\item
+  \textbf{Cybersecurity and network defense.} Network intrusion is a
+  resource contest in which attackers expend resources to breach system
+  boundaries (firewalls, access controls, encryption) while defenders
+  allocate resources to detection and hardening. The boundary integrity
+  parameter \(B_i\) maps to system hardening investment, and breach
+  repair (incident response, system restoration, credential rotation)
+  consistently costs multiples of the bypassed security investment,
+  confirming \(\kappa > 1\) in this domain. The network cascading result
+  (Theorem~\ref{thm-cascading-friction}) predicts that a single
+  compromised node in a supply chain propagates friction across all
+  dependent systems. \citet{Crosignani2023} document this effect in the
+  2017 NotPetya attack: disruptions at directly compromised firms
+  propagated through supply chains to their customers, with aggregate
+  downstream losses approximately four times larger than the direct
+  losses to the initially targeted firms.
+\item
+  \textbf{Ecological competition and niche partitioning.} Interspecific
+  competition for overlapping resource niches is a biological Tullock
+  contest where the ``boundary'' is the organism's physiological
+  integrity and territorial defense. The cooperation dominance result
+  predicts that niche partitioning (the ecological analog of boundary
+  constraints) should yield higher total biomass than direct
+  competition. A meta-analysis of 44 independent experiments found that
+  species mixtures produce on average 1.7 times more biomass than
+  monocultures, with diverse polycultures outperforming the average
+  monoculture in 79\% of experiments \citep{Cardinale2007}. This is
+  consistent with the model's prediction: partitioning resources (the
+  ecological analog of mutual boundary constraints) reduces contest
+  dissipation and increases the total energy captured by the community.
+\end{enumerate}
+
+\subsection{Future Work}\label{future-work}
+
+\textbf{Nonlinear damage models.} The linear damage fractions
+\(\delta^{\text{off}}\) and \(\delta^{\text{def}}\) could be replaced
+with state-dependent functions \(\delta^{\text{off}}(B_i, e_i)\) and
+\(\delta^{\text{def}}(B_j, e_i)\) that capture threshold effects (a
+boundary remains intact until a critical stress is exceeded, then fails
+catastrophically) or hardening (repeated conflict strengthens the
+boundary). Such extensions would refine the friction multiplier
+landscape without altering the qualitative net-negative result.
+
+\textbf{Heterogeneous network topology.} The cascading friction analysis
+assumes a homogeneous network. Extension to scale-free, small-world, or
+hierarchical network topologies would yield topology-dependent
+amplification distributions, potentially identifying network structures
+that are more or less resilient to violation cascades. Embedding the
+cascade in a production network, where agents' outputs feed other
+agents' inputs, would make amplification a function of the dependency
+graph: friction injected at hub nodes (high out-degree) would amplify
+far more than friction injected at leaf nodes. Predicting which network
+positions are most destructive under defection requires the spectral
+properties of the aggregated input-output matrix; such an extension
+would produce structured predictions about which agent defections pose
+systemic risk.
+
+\textbf{Stochastic conflict dynamics.} The current model is
+deterministic. A stochastic extension incorporating random contest
+outcomes, imperfect information about opponent capabilities, and
+uncertain boundary-damage magnitudes would connect the model to the
+literatures on stochastic games and Bayesian conflict models.
+
+\textbf{Empirical calibration.} The damage coefficients
+\(\delta^{\text{off}}\), \(\delta^{\text{def}}\), the repair multiplier
+\(\kappa\), and the network parameters \(\eta\), \(\epsilon\) can be
+estimated from empirical data across domains: biological wound-healing
+costs, military expenditure-to-GDP ratios in conflict zones, litigation
+cost data, and financial contagion propagation rates. Such calibration
+would convert the qualitative predictions into domain-specific
+quantitative forecasts.
+
+\section{Conclusion}\label{conclusion}
+
+We have quantified the energy cost of adversarial resource competition
+and proved that unconstrained conflict is a net-negative thermodynamic
+outcome under realistic physical parameters. The friction multiplier
+\(\Phi > 2\) guarantees that the total energy dissipated by conflict
+(contest expenditure, boundary damage, and repair costs) exceeds the
+value of the contested resource
+(Theorem~\ref{thm-net-negative-conflict}). Contest dissipation alone
+approaches the full resource value as the number of contestants grows
+(Theorem~\ref{thm-dissipation-scaling}), and cooperation strictly
+dominates conflict for all admissible parameters
+(Theorem~\ref{thm-cooperation-dominance}). Network cascading amplifies
+the cost of a single violation by an amount that scales with network
+size and inversely with trust recovery rate, illustratively three to
+four orders of magnitude under modest network parameters
+(Theorem~\ref{thm-cascading-friction}), formalizing the thermodynamic
+asymmetry between trust destruction and trust recovery.
+
+These results provide the energy-denominated cost structure for the
+subsequent papers in this series. The structurally negative mutual
+defection payoff (\(P < 0\)) in \emph{Cooperative Equilibrium}
+\citep{TC-V} is a direct consequence of the friction analysis proved
+here, and the interaction cost function
+(Definition~\ref{def-interaction-cost-function}), which synthesizes
+contest dissipation, boundary damage, repair costs, and ambient
+friction, enters both the payoff matrices of \emph{Cooperative
+Equilibrium} and the dynamical model of \emph{Value Dynamics}
+\citep{TC-VI}.
+
+\addcontentsline{toc}{section}{References}
+\bibliography{../../shared/main}
+\end{document}

@@ -1,0 +1,1662 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\graphicspath{{../../shared/figures/}}
+\usepackage{natbib}
+\bibliographystyle{unsrtnat}
+\usepackage{doi}
+% \setcitestyle{numbers,super} % Superscript citation numbers (e.g. ¹, ²⁻⁴) — does not support locator notes
+\setcitestyle{numbers,square} % Square brackets around citation numbers (e.g. [1], [2-4]) — math standard
+% ── Merge citation text into a single hyperlink ───────────────────────────────
+\makeatletter
+\renewcommand{\hyper@natlinkbreak}[2]{#1}
+\makeatother
+\usepackage{titlesec}
+% New page before each top-level section
+% \newcommand{\sectionbreak}{\clearpage}
+
+% ── Theorem-like environments ─────────────────────────────────────────────────
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{thmtools}
+\declaretheorem[name=Theorem]{theorem}
+\declaretheorem[name=Proposition,sibling=theorem]{proposition}
+\declaretheorem[name=Lemma,sibling=theorem]{lemma}
+\declaretheorem[name=Corollary,sibling=theorem]{corollary}
+\declaretheorem[name=Conjecture,sibling=theorem]{conjecture}
+
+\theoremstyle{definition}
+\declaretheorem[name=Definition,style=definition]{definition}
+\declaretheorem[name=Axiom,style=definition,sibling=definition]{axiom}
+\declaretheorem[name=Assumption,style=definition,sibling=definition]{assumption}
+\declaretheorem[name=Criterion,style=definition,sibling=definition]{criterion}
+\declaretheorem[name=Example,style=definition,sibling=definition]{example}
+
+\theoremstyle{remark}
+\declaretheorem[name=Remark,style=remark]{remark}
+\declaretheorem[name=Observation,style=remark,sibling=remark]{observation}
+\declaretheorem[name=Property,style=remark,sibling=remark]{property}
+
+% Prevent theorem-like environments from starting near the page bottom.
+\usepackage{etoolbox}
+\BeforeBeginEnvironment{theorem}{\needspace{4\baselineskip}\addvspace{6pt}}
+\BeforeBeginEnvironment{corollary}{\needspace{4\baselineskip}\addvspace{6pt}}
+\BeforeBeginEnvironment{lemma}{\needspace{4\baselineskip}\addvspace{6pt}}
+\BeforeBeginEnvironment{proposition}{\needspace{4\baselineskip}\addvspace{6pt}}
+\BeforeBeginEnvironment{definition}{\needspace{4\baselineskip}\addvspace{6pt}}
+\BeforeBeginEnvironment{axiom}{\needspace{4\baselineskip}\addvspace{6pt}}
+\BeforeBeginEnvironment{assumption}{\needspace{4\baselineskip}\addvspace{6pt}}
+\BeforeBeginEnvironment{remark}{\needspace{4\baselineskip}\addvspace{9pt}}
+
+% ── Pandoc-generated table support ────────────────────────────────────────────
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{calc}
+\usepackage{caption}
+% Pandoc 3.x wraps uncaptioned longtables in \def\LTcaptype{none};
+% this requires a 'none' counter to exist.
+\newcounter{none}
+
+% ── Paragraph spacing (matches Pandoc default) ────────────────────────────────
+% No paragraph indentation; inter-paragraph spacing instead.
+\usepackage{parskip}
+
+% ── Page-break quality ────────────────────────────────────────────────────────
+% Prevent widow/orphan lines (single line stranded at top/bottom of page).
+\widowpenalty=10000
+\clubpenalty=10000
+% Pin footnotes to the page bottom even with \raggedbottom.
+\usepackage[bottom]{footmisc}
+% Prevent page breaks immediately before or after display equations.
+\predisplaypenalty=10000
+\postdisplaypenalty=150
+% Allow uneven page bottoms rather than stretching vertical glue.
+\raggedbottom
+% Increase separation between body text and footnotes.
+\setlength{\skip\footins}{1.5\baselineskip}
+% Ensure headings don't appear at page bottom without body text following.
+\usepackage{needspace}
+% Reserve enough space for the heading itself plus at least two following
+% lines of body text (or a nested heading plus a line). This prevents a
+% heading from appearing at the bottom of a page with its content (or its
+% next-level subheading) starting on the following page.
+\let\origsection\section
+\renewcommand{\section}{\needspace{8\baselineskip}\origsection}
+\let\origsubsection\subsection
+\renewcommand{\subsection}{\needspace{8\baselineskip}\origsubsection}
+\let\origsubsubsection\subsubsection
+\renewcommand{\subsubsection}{\needspace{6\baselineskip}\origsubsubsection}
+\let\origparagraphcmd\paragraph
+\renewcommand{\paragraph}{\needspace{4\baselineskip}\origparagraphcmd}
+\let\origsubparagraph\subparagraph
+\renewcommand{\subparagraph}{\needspace{4\baselineskip}\origsubparagraph}
+
+% Discourage page breaks inside multi-line math environments (align, gather, etc.)
+\interdisplaylinepenalty=10000
+
+% ── Section numbering ────────────────────────────────────────────────────────
+% Pandoc --number-sections generates \section{...} (not \section*{...}).
+% LaTeX auto-numbers to depth 3 (subsubsection) by default.
+\setcounter{secnumdepth}{3}
+
+% ── Make \paragraph and \subparagraph block-level (matches Pandoc) ───────────
+% By default LaTeX renders \paragraph as a run-in heading (text continues on
+% the same line). These commands make them free-standing headings with
+% proper spacing before and after.
+\titleformat{\paragraph}
+  {\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+  {0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+\titleformat{\subparagraph}
+  {\normalfont\normalsize\bfseries}{\thesubparagraph}{1em}{}
+\titlespacing*{\subparagraph}
+  {0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+% ── Pandoc-generated tightlist support ────────────────────────────────────────
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% ── Pandoc 3.x figure sizing ─────────────────────────────────────────────────
+% \pandocbounded constrains included graphics to text width when they exceed it
+\newcommand{\pandocbounded}[1]{%
+  \sbox0{#1}%
+  \ifdim\wd0>\linewidth
+    \resizebox{\linewidth}{!}{#1}%
+  \else
+    #1%
+  \fi
+}
+
+% ── Unicode character fixes ───────────────────────────────────────────────────
+\usepackage{amssymb}
+\usepackage{newunicodechar}
+\newunicodechar{✓}{$\checkmark$}
+\newunicodechar{≠}{$\neq$}
+\newunicodechar{≡}{$\equiv$}
+\newunicodechar{≈}{$\approx$}
+\newunicodechar{δ}{$\delta$}
+\newunicodechar{−}{$-$}
+% Superscript digits used in scientific notation (e.g. 10^-7, 10^29)
+\newunicodechar{⁰}{$^{0}$}
+% ¹²³ already defined by textcomp; suppress redefinition warning
+\begingroup\renewcommand\PackageWarning[2]{}%
+\newunicodechar{¹}{$^{1}$}
+\newunicodechar{²}{$^{2}$}
+\newunicodechar{³}{$^{3}$}
+\endgroup
+\newunicodechar{⁴}{$^{4}$}
+\newunicodechar{⁵}{$^{5}$}
+\newunicodechar{⁶}{$^{6}$}
+\newunicodechar{⁷}{$^{7}$}
+\newunicodechar{⁸}{$^{8}$}
+\newunicodechar{⁹}{$^{9}$}
+\newunicodechar{⁻}{$^{-}$}
+% Fix \rightarrow for use outside math mode
+\let\mystRightarrow\rightarrow
+\renewcommand{\rightarrow}{\ensuremath{\mystRightarrow}}
+% ─────────────────────────────────────────────────────────────────────────────
+
+% Allow TeX extra stretch to resolve moderate overfull hboxes
+\emergencystretch=2em
+
+\hypersetup{colorlinks=true, allcolors=blue}
+
+\title{Thermodynamics of Cooperation: Value Dynamics}
+\author{Keith Lostracco}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Self-maintaining agents that share finite resources must couple to
+high-energy centers (accumulated-negentropy nodes) for energy inflow,
+yet tight coupling imposes autonomy costs that can erode the agent's
+boundary integrity. We model this trade-off as a one-dimensional
+potential on the coupling distance between an agent and a center,
+combining a short-range-dominant dissolution cost (\(1/r^2\)) with a
+long-range resource inflow (\(1/r\)) and a constant entropy maintenance
+baseline. The resulting coexistence potential possesses a unique global
+minimum, the coexistence attractor, whose global asymptotic stability we
+prove via Lyapunov analysis. The zero-crossings of the potential define
+the stable coexistence band, a bounded interval of coupling distances
+within which the agent maintains positive net energy. We derive a
+closed-form expression for the bandwidth of this band (the freedom
+bandwidth) and prove that it increases with center mass and decreases
+with agent complexity, dissolution pressure, and entropy leakage.
+Outside the band, agents undergo irreversible transitions: dissolution
+(boundary erosion from excessive coupling) or starvation (energy deficit
+from insufficient coupling). We extend the single-center model to \(K\)
+centers, proving that the multi-center potential separates across
+coupling dimensions, yielding a componentwise global attractor with a
+diversification benefit: agents that would be non-viable at any single
+center may survive through distributed coupling.
+\end{abstract}
+\newpage
+\tableofcontents
+\newpage
+\section{Introduction}\label{introduction}
+
+The preceding papers in this series derive two classes of results.
+Papers I through IV \citep{TC-I, TC-II, TC-III, TC-IV} prove that mutual
+boundary constraints are necessary for any feasible allocation among
+self-maintaining systems sharing finite resources, that violating these
+constraints is thermodynamically self-destructive, that strategic
+corruption of communication channels imposes super-linear efficiency
+losses, and that complex systems represent irreplaceable accumulated
+negentropy. \emph{Cooperative Equilibrium} \citep{TC-V} proves that
+under energy-denominated payoffs with physical friction costs, universal
+cooperation is the unique Nash Equilibrium that is simultaneously
+Pareto-efficient and welfare-maximizing for agents with discount factor
+\(\delta \geq 0.363\).
+
+These results establish the static conditions under which cooperation is
+optimal; they do not address the dynamical question of how agents reach
+and maintain cooperative configurations. This paper fills that gap.
+
+The principal contributions are:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  A \textbf{dynamical systems model} of agent-center coupling
+  (§\ref{the-agent-center-model}), proving that stable coexistence is a
+  global attractor (Theorem~\ref{thm-stability-coexistence-attractor})
+  with a measurable freedom bandwidth
+  (Theorem~\ref{thm-freedom-bandwidth}) and irreversible boundary
+  transitions (Theorem~\ref{thm-irreversibility-dissolution},
+  Theorem~\ref{thm-starvation-spiral}).
+\item
+  A \textbf{multi-center extension} (§\ref{multi-center-dynamics})
+  proving separable optimization with diversification benefits
+  (Theorem~\ref{thm-multi-center-attractor}), and a
+  stability-cooperation feedback loop
+  (Proposition~\ref{prop-stability-cooperation-feedback}) connecting the
+  dynamical model to the game-theoretic equilibrium.
+\item
+  \textbf{Comparative statics} characterizing how freedom bandwidth
+  depends on center mass, agent complexity, and coupling parameters
+  (§\ref{comparative-statics-and-inequality}), with implications for
+  inequality across heterogeneous agent populations.
+\item
+  \textbf{Irreversibility results} establishing that boundary
+  transitions (dissolution and starvation) are one-way processes under
+  the model dynamics (§\ref{boundary-dynamics-and-irreversibility}),
+  connecting to thermodynamic irreversibility in \emph{Thermodynamic
+  Friction} \citep{TC-IV}.
+\end{enumerate}
+
+\subsection{Related Work}\label{related-work}
+
+\textbf{Dynamical systems and agent-center models.} The coexistence
+potential introduced in §\ref{the-agent-center-model} draws on the
+mathematical toolkit of gradient dynamics and Lyapunov stability
+\citep{Strogatz2015, HirschSmaleDevaney2012}. The two-body potential
+form (short-range repulsion from dissolution pressure, long-range
+attraction from resource access) parallels the Lennard-Jones potential
+in molecular physics \citep{Jones1924}, adapted here to socio-economic
+coupling. The parallel is mathematical, not physical: the shared
+structure is a potential with competing short-range and long-range
+terms, not a claim that intermolecular forces operate at institutional
+scales. Organizational economics has long modeled firm-worker
+relationships as vertical coupling with autonomy costs and resource
+benefits \citep{Tirole1988}, and institutional economics has documented
+the concentration dynamics that the model formalizes
+\citep{AcemogluRobinson2012}.
+
+\textbf{Multi-agent economics and organizational theory.} The
+agent-center model formalizes the vertical coupling between individuals
+and resource-providing institutions. The comparative statics results
+connect to classical questions in organizational economics about
+autonomy versus integration \citep{Tirole1988}, and formalize the
+destructive autonomy costs of absolutist, extractive regimes, while the
+multi-center extension provides a dynamical foundation for the stability
+and survival benefits of institutional pluralism
+\citep{AcemogluRobinson2012}. The freedom bandwidth theorem quantifies a
+trade-off familiar in labor economics: agents with higher complexity
+(higher boundary maintenance costs) face narrower viable operating
+ranges, a formal analog of the vulnerability of specialized workers to
+market shocks.
+
+\textbf{Mathematical ecology.} The coexistence band and its dependence
+on center mass parallels the viable habitat ranges in population
+ecology, where species occupy niches defined by resource availability
+and metabolic cost \citep{Tilman1982}. The irreversibility results
+(dissolution and starvation spirals) formalize the extinction vortex
+phenomenon, in which small populations face self-reinforcing decline
+\citep{Gilpin1986}. The multi-center diversification benefit provides a
+mathematical foundation for the empirical observation that species with
+broader resource bases are more resilient to perturbation.
+
+\section{The Agent-Center Model}\label{the-agent-center-model}
+
+\subsection{Motivation: Why Dynamics
+Matter}\label{motivation-why-dynamics-matter}
+
+The preceding derivations \citep{TC-I, TC-II, TC-III, TC-IV, TC-V}
+established the static structure of cooperative multi-agent systems:
+boundary constraints as necessary conditions for feasible allocation,
+unilateral violation as thermodynamically wasteful, universal
+cooperation as the unique efficient equilibrium, and information
+integrity as a precondition for coordination. But the theory describes a
+\textbf{dynamic} phenomenon: accumulated value creates attractor
+dynamics. Entities are drawn toward high-energy centers because
+proximity lowers the cost of fighting entropy. Too close, and the entity
+is assimilated; too far, and it starves.
+
+This is inherently a \textbf{dynamical systems} question: given an agent
+and a center, what coupling strength is stable? What happens when the
+agent is perturbed from equilibrium? Under what conditions does the
+equilibrium exist at all?
+
+\subsection{Primitive Objects}\label{primitive-objects}
+
+\begin{definition}[High-Energy Center]
+\label{def-high-energy-center}
+
+A \emph{high-energy center} (HEC) is a network node with accumulated value mass
+
+$$\mathcal{M} > 0 \quad \text{(energy units, J)}$$
+
+representing the total accumulated negentropy of the center (Definition 6 \citep{TC-III}). The HEC may be a corporation, a state, a trade hub, or an ecosystem, i.e., any entity or coalition that has aggregated sufficient energy and information to exert significant influence on surrounding agents.
+\end{definition}
+
+\begin{definition}[Coupling Distance]
+\label{def-coupling-distance}
+
+The \emph{coupling distance} $r \in (0, \infty)$ between an agent $i$ and a HEC is a generalized coordinate measuring the degree of the agent's independence from the center:
+
+\begin{itemize}
+\item $r \to 0$: maximal coupling (complete integration, e.g., employee absorbed into corporation, citizen fully subject to state, subsidiary merged into parent)
+\item $r \to \infty$: minimal coupling (complete isolation, e.g., autarkic entity, no trade or institutional affiliation)
+\end{itemize}
+The coupling distance is \textbf{not} a spatial distance. It is a scalar summarizing the composite engagement level across economic, informational, political, and social dimensions. Formally, $r$ can be constructed as a norm on the vector of coupling channels, but for the 1D analysis below, only its scalar properties matter.
+\end{definition}
+
+\textbf{Interpretation:} The coupling distance \(r\) is the single
+degree of freedom in our model. An agent's ``strategy'' in the
+value-dynamics context is its choice of how tightly to bind itself to a
+given HEC. This complements the multi-dimensional resource strategy
+\(\mathbf{x}_i\) from the Lagrangian constraints derivation: there, the
+agent chose \emph{what} to consume; here, the agent chooses \emph{how
+closely} to affiliate with the source of resources.
+
+\subsection{The Resource Inflow
+Function}\label{the-resource-inflow-function}
+
+As the agent couples more tightly with a HEC (smaller \(r\)), it gains
+greater access to the center's accumulated resources, including shared
+infrastructure, trade networks, institutional protection, information
+flows, and surplus energy. We model the \textbf{energy inflow rate} as:
+
+\[E_{\text{in}}(r) = \frac{G \, \mathcal{M}}{r}\]
+
+where \(G > 0\) is the \textbf{resource coupling coefficient}, a
+proportionality constant capturing the efficiency of the HEC at
+distributing resources to its affiliates.
+
+\textbf{Properties:} - \(E_{\text{in}}(r) > 0\) for all \(r > 0\) (the
+HEC always provides some resources, however distant). -
+\(E_{\text{in}}(r) \to \infty\) as \(r \to 0\) (arbitrarily large
+resource access at arbitrarily tight coupling, but offset by costs
+below). - \(E_{\text{in}}(r) \to 0\) as \(r \to \infty\) (isolation
+yields negligible resource access). - \(E_{\text{in}}\) is proportional
+to \(\mathcal{M}\): a more massive center supplies more resources at
+every coupling distance.
+
+The \(1/r\) functional form is the simplest monotonically decreasing,
+positive function with the correct limits. It parallels the
+gravitational potential \(GM/r\), providing the ``attraction'' half of
+the model.
+
+\subsection{The Dissolution Cost
+Function}\label{the-dissolution-cost-function}
+
+Tight coupling also imposes \textbf{autonomy costs}: the HEC requires
+conformity, extracts resources from the agent, constrains the agent's
+action space (Definition 3 \citep{TC-I}), and exerts homogenizing
+pressure on the agent's internal state. At sufficiently close coupling,
+these costs overwhelm the benefits and erode the agent's boundary
+integrity, leading to dissolution of identity.
+
+We model the \textbf{dissolution cost rate} as:
+
+\[C_{\text{dissolve}}(r) = \frac{\tau \, \mathcal{M}}{r^2}\]
+
+where \(\tau > 0\) is the \textbf{dissolution coupling coefficient}, a
+proportionality constant capturing the HEC's assimilation pressure per
+unit mass.
+
+\textbf{Properties:} - \(C_{\text{dissolve}}(r) > 0\) for all \(r > 0\).
+- \(C_{\text{dissolve}}(r) \to \infty\) as \(r \to 0\), and
+\textbf{faster} than \(E_{\text{in}}(r)\) (the \(1/r^2\) term dominates
+\(1/r\) at small \(r\)). This is the critical structural feature: at
+very close coupling, the costs always overwhelm the benefits. -
+\(C_{\text{dissolve}}(r) \to 0\) as \(r \to \infty\) (distant agents are
+not subject to assimilation pressure).
+
+The \(1/r^2\) form ensures that the dissolution cost is a
+\textbf{short-range dominant} force, negligible at large \(r\) but
+overwhelming at small \(r\). This parallels the Lennard-Jones repulsion
+in molecular physics and the ``tidal forces'' of the gravitational
+analogy.
+
+\textbf{Physical motivation:} The dissolution cost scales as \(1/r^2\)
+rather than \(1/r\) because assimilation pressure involves not only
+resource extraction but also \textbf{constraint imposition}: the HEC's
+demand for conformity grows nonlinearly with coupling tightness. An
+employee who works 60 hours/week for a corporation loses far more than
+1.5× the autonomy of one working 40 hours. The constraints compound.
+
+\subsection{The Entropy Maintenance
+Baseline}\label{the-entropy-maintenance-baseline}
+
+Independent of the HEC, the agent must continuously expend energy to
+maintain its boundary against environmental entropy (Definition 1
+\citep{TC-IV}):
+
+\[C_{\text{maintain}} = \gamma_i \, B_i\]
+
+where \(\gamma_i > 0\) is the entropy leakage rate and \(B_i > 0\) is
+the boundary integrity. This is a \textbf{constant} cost: it does not
+depend on \(r\) because entropy attacks the boundary regardless of the
+agent's institutional affiliations. For the single-agent analysis that
+follows, we write \(\gamma \equiv \gamma_i\) and suppress the index to
+reduce notation.
+
+\subsection{The Net Energy Rate}\label{the-net-energy-rate}
+
+The agent's \textbf{net energy rate} at coupling distance \(r\) is:
+
+\[\Pi(r) = E_{\text{in}}(r) - C_{\text{dissolve}}(r) - C_{\text{maintain}} = \frac{G \mathcal{M}}{r} - \frac{\tau \mathcal{M}}{r^2} - \gamma B_i\]
+
+The agent survives if and only if \(\Pi(r) > 0\). The agent's goal is to
+choose \(r\) to maximize \(\Pi(r)\), equivalently, to minimize the
+\textbf{coexistence potential} \(V(r) = -\Pi(r)\).
+
+\section{The Coexistence Potential}\label{the-coexistence-potential}
+
+\subsection{Definition}\label{definition}
+
+\begin{definition}[Coexistence Potential]
+\label{def-coexistence-potential}
+
+The \emph{coexistence potential} of an agent $i$ at coupling distance $r$ from a HEC with value mass $\mathcal{M}$ is:
+
+$$V(r) = \frac{\tau \mathcal{M}}{r^2} - \frac{G \mathcal{M}}{r} + \gamma B_i$$
+
+where $G > 0$ is the resource coupling coefficient, $\tau > 0$ is the dissolution coupling coefficient, $\gamma > 0$ is the entropy leakage rate, and $B_i > 0$ is the agent's boundary integrity. The potential is defined on $(0, \infty)$.
+\end{definition}
+
+The coexistence potential is the \textbf{negative} of the net energy
+rate: \(V(r) = -\Pi(r)\). Regions where \(V(r) < 0\) are viable
+(positive net energy); regions where \(V(r) > 0\) are non-viable (energy
+deficit).
+
+\subsection{Properties}\label{properties}
+
+\begin{proposition}[Properties of the Coexistence Potential]
+\label{prop-coexistence-potential-properties}
+
+The coexistence potential $V(r)$ satisfies:
+
+(a) $\lim_{r \to 0^+} V(r) = +\infty$ (dissolution dominance at close range).
+
+(b) $\lim_{r \to \infty} V(r) = \gamma B_i > 0$ (starvation at large distance).
+
+(c) $V$ is $C^\infty$ on $(0, \infty)$.
+
+(d) $V$ has exactly one critical point on $(0, \infty)$, which is a global minimum.
+
+(e) The minimum value $V_{\min}$ satisfies $V_{\min} < \gamma B_i$.
+\end{proposition}
+
+\begin{proof}
+We prove each claim in turn:
+
+(a) As $r \to 0^+$: $\tau \mathcal{M}/r^2 \to +\infty$, while $G\mathcal{M}/r \to +\infty$ at a slower rate. Since $1/r^2$ dominates $1/r$ as $r \to 0$, $V(r) \to +\infty$.
+
+(b) As $r \to \infty$: both $\tau\mathcal{M}/r^2 \to 0$ and $G\mathcal{M}/r \to 0$, so $V(r) \to \gamma B_i > 0$.
+
+(c) $V$ is a sum of rational functions of $r$ (with $r > 0$) and a constant, therefore smooth.
+
+(d) Compute the first derivative:
+
+$$V'(r) = -\frac{2\tau\mathcal{M}}{r^3} + \frac{G\mathcal{M}}{r^2} = \frac{\mathcal{M}}{r^3}\bigl(Gr - 2\tau\bigr)$$
+
+Since $\mathcal{M} > 0$ and $r^3 > 0$, the sign of $V'(r)$ is determined by $(Gr - 2\tau)$:
+
+\begin{itemize}
+\item $V'(r) < 0$ for $r < 2\tau/G$ (potential decreasing)
+\item $V'(r) = 0$ at $r = 2\tau/G$ (unique critical point)
+\item $V'(r) > 0$ for $r > 2\tau/G$ (potential increasing)
+\end{itemize}
+The second derivative at the critical point:
+
+$$V''(r) = \frac{6\tau\mathcal{M}}{r^4} - \frac{2G\mathcal{M}}{r^3}$$
+
+At $r^* = 2\tau/G$:
+
+$$V''(r^*) = \frac{6\tau\mathcal{M} \cdot G^4}{16\tau^4} - \frac{2G\mathcal{M} \cdot G^3}{8\tau^3} = \frac{G^4\mathcal{M}}{8\tau^3}\bigl(3 - 2\bigr) = \frac{G^4\mathcal{M}}{8\tau^3} > 0$$
+
+Since $V''(r^*) > 0$, the critical point is a strict local minimum. By uniqueness of the critical point and the boundary behavior (parts a, b), it is the global minimum.
+
+(e) $V(r^*) = \frac{\tau\mathcal{M}G^2}{4\tau^2} - \frac{G\mathcal{M}G}{2\tau} + \gamma B_i = \gamma B_i - \frac{G^2\mathcal{M}}{4\tau}$. Since $G^2\mathcal{M}/(4\tau) > 0$, we have $V(r^*) < \gamma B_i$.
+\end{proof}
+
+\subsection{The Coexistence Attractor}\label{the-coexistence-attractor}
+
+\begin{definition}[Coexistence Attractor]
+\label{def-coexistence-attractor}
+
+The \emph{coexistence attractor} is the coupling distance that minimizes the coexistence potential:
+
+$$r^* = \frac{2\tau}{G}$$
+
+At this distance, the agent achieves the maximum net energy rate $\Pi(r^*) = G^2\mathcal{M}/(4\tau) - \gamma B_i$.
+\end{definition}
+
+\textbf{Interpretation:} The coexistence attractor \(r^*\) represents
+the \textbf{optimal structural coupling} between the agent and the HEC.
+It depends only on the ratio \(\tau/G\), the balance between dissolution
+pressure and resource access, not on the HEC's mass \(\mathcal{M}\) or
+the agent's boundary cost \(\gamma B_i\). This is a structural property:
+the optimal degree of integration is determined by the \emph{nature} of
+the coupling, not the \emph{scale} of the parties.
+
+What does depend on \(\mathcal{M}\) is whether the agent can survive at
+all (the depth of the potential well) and how wide the viable region is
+(the Coexistence Band).
+
+\subsection{The Potential Well Depth}\label{the-potential-well-depth}
+
+\begin{definition}[Potential Well Depth]
+\label{def-potential-well-depth}
+
+The \emph{well depth} of the coexistence potential is:
+
+$$D = \gamma B_i - V(r^*) = \frac{G^2 \mathcal{M}}{4\tau}$$
+
+This is the maximum net energy surplus achievable by the agent when optimally coupled to the HEC.
+\end{definition}
+
+The well depth is proportional to \(\mathcal{M}\): a more massive center
+creates a deeper well, supporting agents with higher maintenance costs.
+
+\section{Gradient Dynamics and
+Stability}\label{gradient-dynamics-and-stability}
+
+\subsection{The Coupling Adjustment
+Equation}\label{the-coupling-adjustment-equation}
+
+Agents adjust their coupling distance toward higher net energy (lower
+potential). The simplest model is \textbf{gradient dynamics}:
+
+\[\dot{r} = -\mu \, V'(r) = -\frac{\mu \mathcal{M}}{r^3}(Gr - 2\tau)\]
+
+where \(\mu > 0\) is the \textbf{adjustment rate} (mobility,
+adaptability, i.e., how quickly the agent can change its institutional
+affiliations).
+
+\textbf{Dynamical behavior:}
+
+\begin{itemize}
+\tightlist
+\item
+  For \(r < r^*\): \(Gr - 2\tau < 0\), so \(\dot{r} > 0\): the agent
+  moves \textbf{away} from the center (escaping dissolution pressure).
+\item
+  For \(r > r^*\): \(Gr - 2\tau > 0\), so \(\dot{r} < 0\): the agent
+  moves \textbf{toward} the center (seeking resources).
+\item
+  At \(r = r^*\): \(\dot{r} = 0\): the agent is at equilibrium.
+\end{itemize}
+
+\subsection{Stability of the Coexistence
+Attractor}\label{stability-of-the-coexistence-attractor}
+
+\begin{theorem}[Stability of the Coexistence Attractor]
+\label{thm-stability-coexistence-attractor}
+
+Under the gradient dynamics $\dot{r} = -\mu V'(r)$, the coexistence attractor $r^* = 2\tau/G$ is:
+
+(a) A fixed point: $\dot{r}|_{r=r^*} = 0$.
+
+(b) Locally asymptotically stable: the eigenvalue $\lambda = -\mu V''(r^*) = -\mu G^4 \mathcal{M} / (8\tau^3) < 0$.
+
+(c) Globally attracting on $(0, \infty)$: every trajectory starting at $r_0 \in (0, \infty)$ converges to $r^*$ as $t \to \infty$.
+\end{theorem}
+
+\begin{proof}
+We prove each claim in turn:
+
+(a) At $r^*$: $V'(r^*) = 0$, so $\dot{r} = 0$. ✓
+
+(b) Linearize around $r^*$: $\dot{r} \approx -\mu V''(r^*)(r - r^*)$. From Proposition~\ref{prop-coexistence-potential-properties}, $V''(r^*) = G^4\mathcal{M}/(8\tau^3) > 0$. The eigenvalue of the linearized system is $\lambda = -\mu V''(r^*) < 0$. Hence $r^*$ is locally asymptotically stable.
+
+(c) Define the Lyapunov function $\mathcal{W}(r) = V(r) - V(r^*)$. Then $\mathcal{W}(r) \geq 0$ for all $r > 0$ with equality iff $r = r^*$ (since $r^*$ is the unique global minimum of $V$). The time derivative along trajectories:
+
+$$\dot{\mathcal{W}} = V'(r) \cdot \dot{r} = V'(r) \cdot \bigl(-\mu V'(r)\bigr) = -\mu \bigl(V'(r)\bigr)^2 \leq 0$$
+
+with equality iff $V'(r) = 0$, i.e., $r = r^*$. By LaSalle's invariance principle, every trajectory converges to the largest invariant set within $\{r : \dot{\mathcal{W}} = 0\} = \{r^*\}$. Hence $r^*$ is globally attracting.
+
+\textbf{Convergence rate:} Near $r^*$, the convergence is exponential with rate $|\lambda| = \mu G^4\mathcal{M}/(8\tau^3)$. Larger $\mu$ (more mobile agents) and larger $\mathcal{M}$ (more massive centers) accelerate convergence.
+\end{proof}
+
+\begin{corollary}[Resilience of the Equilibrium]
+\label{cor-resilience-equilibrium}
+
+The coexistence attractor is robust to perturbations: any temporary displacement from $r^*$ (due to external shocks, policy changes, economic disruptions) is self-correcting. The agent naturally returns to the optimal coupling distance.
+\end{corollary}
+
+\textbf{Physical interpretation:} A worker who is pushed closer to the
+corporation than optimal (overwork, loss of autonomy) will naturally
+seek more distance: reduced hours, unionization, job mobility. A worker
+pushed too far (laid off, isolated) will naturally seek re-engagement:
+job searching, networking. The gradient dynamics formalize this
+behavioral regularity.
+
+\section{The Stable Coexistence Band}\label{the-stable-coexistence-band}
+
+\subsection{The Viability Condition}\label{the-viability-condition}
+
+The agent survives if and only if \(\Pi(r) > 0\), equivalently
+\(V(r) < 0\). The boundary of the viable region is defined by
+\(V(r) = 0\):
+
+\[\frac{\tau \mathcal{M}}{r^2} - \frac{G \mathcal{M}}{r} + \gamma B_i = 0\]
+
+Multiplying by \(r^2\):
+
+\[\gamma B_i \, r^2 - G\mathcal{M} \, r + \tau\mathcal{M} = 0\]
+
+This is a quadratic in \(r\) with discriminant:
+
+\[\Delta = G^2 \mathcal{M}^2 - 4\gamma B_i \tau \mathcal{M} = \mathcal{M}\bigl(G^2 \mathcal{M} - 4\gamma B_i \tau\bigr)\]
+
+\subsection{The Minimum Viable HEC
+Mass}\label{the-minimum-viable-hec-mass}
+
+\begin{theorem}[Existence of the Coexistence Band]
+\label{thm-existence-coexistence-band}
+
+The Stable Coexistence Band exists if and only if the HEC's value mass exceeds a critical threshold:
+
+$$\mathcal{M} > \mathcal{M}_{\min} \;\triangleq\; \frac{4\gamma B_i \tau}{G^2}$$
+
+When $\mathcal{M} = \mathcal{M}_{\min}$, the band collapses to the single point $r^*$ (marginal viability). When $\mathcal{M} < \mathcal{M}_{\min}$, no viable coupling distance exists: the agent cannot sustain itself near this HEC.
+\end{theorem}
+
+\begin{proof}
+Two positive real roots of $V(r) = 0$ require: (i) $\Delta > 0$, which gives $\mathcal{M} > 4\gamma B_i \tau / G^2$; (ii) both roots positive, which is guaranteed since the sum $r_- + r_+ = G\mathcal{M}/(\gamma B_i) > 0$ and the product $r_- \cdot r_+ = \tau\mathcal{M}/(\gamma B_i) > 0$. When $\Delta = 0$, there is a single repeated root $r^* = G\mathcal{M}/(2\gamma B_i)$, and the minimum value $V(r^*) = 0$ (marginal viability). When $\Delta < 0$, $V(r) > 0$ for all $r > 0$: the well is too shallow to reach negative values.
+\end{proof}
+
+\textbf{Physical interpretation:} A small corner shop (\(\mathcal{M}\)
+low) cannot sustain employees who have high living costs (\(\gamma B_i\)
+high). A massive technology corporation (\(\mathcal{M}\) high) can
+sustain many agents with high boundary costs. The threshold
+\(\mathcal{M}_{\min}\) is the minimum accumulated value at which a
+center becomes a viable attractor.
+
+\subsection{Inner and Outer
+Boundaries}\label{inner-and-outer-boundaries}
+
+\begin{definition}[Dissolution Threshold: Inner Boundary]
+\label{def-dissolution-threshold}
+
+The \emph{dissolution threshold} is the inner boundary of the Stable Coexistence Band:
+
+$$r_- = \frac{G\mathcal{M} - \sqrt{\Delta}}{2\gamma B_i}$$
+
+Below $r_-$, the dissolution cost exceeds the resource benefit net of maintenance: $V(r) > 0$ for $r < r_-$.
+\end{definition}
+
+\begin{definition}[Starvation Threshold: Outer Boundary]
+\label{def-starvation-threshold}
+
+The \emph{starvation threshold} is the outer boundary of the Stable Coexistence Band:
+
+$$r_+ = \frac{G\mathcal{M} + \sqrt{\Delta}}{2\gamma B_i}$$
+
+Beyond $r_+$, the resource inflow is insufficient to cover maintenance and dissolution costs: $V(r) > 0$ for $r > r_+$.
+\end{definition}
+
+\begin{definition}[Stable Coexistence Band]
+\label{def-stable-coexistence-band}
+
+The \emph{Stable Coexistence Band} is the open interval:
+
+$$\mathcal{B} = (r_-, r_+) = \left\{r > 0 : V(r) < 0\right\}$$
+
+Within this band, the agent has positive net energy ($\Pi(r) > 0$) and can sustain its identity. The coexistence attractor $r^* = 2\tau / G$ lies within $\mathcal{B}$ whenever the band exists.
+\end{definition}
+
+\begin{lemma}[Attractor Containment]
+\label{lem-attractor-containment}
+
+If the Coexistence Band exists ($\mathcal{M} > \mathcal{M}_{\min}$), then $r_- < r^* < r_+$.
+\end{lemma}
+
+\begin{proof}
+By Proposition~\ref{prop-coexistence-potential-properties}, $r^*$ is the unique global minimum of $V(r)$. When $\mathcal{M} > \mathcal{M}_{\min}$, $V(r^*) < 0$ while $V(r_-) = V(r_+) = 0$. Since $V$ is strictly decreasing on $(0, r^*)$ and strictly increasing on $(r^*, \infty)$, the zero $r_-$ must satisfy $r_- < r^*$ and the zero $r_+$ must satisfy $r_+ > r^*$.
+\end{proof}
+
+\subsection{Band Width: The Freedom
+Bandwidth}\label{band-width-the-freedom-bandwidth}
+
+\begin{theorem}[The Freedom Bandwidth Theorem]
+\label{thm-freedom-bandwidth}
+
+The width of the Stable Coexistence Band is:
+
+$$w \;\triangleq\; r_+ - r_- = \frac{\sqrt{\Delta}}{\gamma B_i} = \frac{\sqrt{G^2 \mathcal{M}^2 - 4\gamma B_i \tau \mathcal{M}}}{\gamma B_i}$$
+
+The bandwidth satisfies:
+
+(a) $w > 0$ if and only if $\mathcal{M} > \mathcal{M}_{\min}$.
+
+(b) $w$ is strictly increasing in $\mathcal{M}$: $\partial w / \partial \mathcal{M} > 0$.
+
+(c) $w$ is strictly decreasing in each of $\gamma$, $B_i$, and $\tau$.
+
+(d) $w$ is strictly increasing in $G$.
+
+(e) In the limit $\mathcal{M} \gg \mathcal{M}_{\min}$: $w \approx G\mathcal{M}/(\gamma B_i)$, i.e., the bandwidth grows linearly with HEC mass.
+
+(f) Near the viability threshold ($\mathcal{M} \to \mathcal{M}_{\min}^+$): $w \sim \sqrt{\mathcal{M} - \mathcal{M}_{\min}}$, i.e., the bandwidth vanishes as a square root.
+\end{theorem}
+
+\begin{proof}
+From the quadratic formula: $r_\pm = (G\mathcal{M} \pm \sqrt{\Delta})/(2\gamma B_i)$, so $w = \sqrt{\Delta}/(\gamma B_i)$.
+
+(a) $w > 0 \iff \Delta > 0 \iff \mathcal{M} > \mathcal{M}_{\min}$. ✓
+
+(b) $\Delta = \mathcal{M}(G^2\mathcal{M} - 4\gamma B_i \tau) = G^2\mathcal{M}^2 - 4\gamma B_i \tau \mathcal{M}$. Then:
+
+$$\frac{\partial \Delta}{\partial \mathcal{M}} = 2G^2\mathcal{M} - 4\gamma B_i \tau = 2\bigl(G^2\mathcal{M} - 2\gamma B_i \tau\bigr)$$
+
+For $\mathcal{M} > \mathcal{M}_{\min} = 4\gamma B_i \tau/G^2$: $G^2\mathcal{M} > 4\gamma B_i \tau > 2\gamma B_i \tau$, so $\partial\Delta/\partial\mathcal{M} > 0$, therefore $\partial w/\partial\mathcal{M} > 0$. ✓
+
+(c) Direct computation: $\partial\Delta/\partial\gamma = -4B_i\tau\mathcal{M} < 0$; $\partial\Delta/\partial B_i = -4\gamma\tau\mathcal{M} < 0$; $\partial\Delta/\partial\tau = -4\gamma B_i \mathcal{M} < 0$. Additionally, $w = \sqrt{\Delta}/(\gamma B_i)$, and $\gamma$, $B_i$ appear in the denominator, further decreasing $w$. ✓
+
+(d) $\partial\Delta/\partial G = 2G\mathcal{M}^2 > 0$, so $\partial w / \partial G > 0$. ✓
+
+(e) For $\mathcal{M} \gg \mathcal{M}_{\min}$: $\Delta \approx G^2\mathcal{M}^2$, so $w \approx G\mathcal{M}/(\gamma B_i)$. ✓
+
+(f) Write $\Delta = G^2\mathcal{M}_{\min}(\mathcal{M} - \mathcal{M}_{\min}) + G^2(\mathcal{M} - \mathcal{M}_{\min})^2$. Near $\mathcal{M}_{\min}$, the linear term dominates: $\Delta \approx G^2\mathcal{M}_{\min}(\mathcal{M} - \mathcal{M}_{\min})$, so $w \approx G\sqrt{\mathcal{M}_{\min}(\mathcal{M} - \mathcal{M}_{\min})}/(\gamma B_i)$, confirming the square-root behavior.
+\end{proof}
+
+\begin{corollary}[Freedom Is Finite]
+\label{cor-freedom-is-finite}
+
+For any finite $\mathcal{M}$, the bandwidth $w$ is finite. No agent enjoys infinite freedom relative to any finite-mass center. Infinite freedom ($w \to \infty$) requires $\mathcal{M} \to \infty$ (an infinitely massive center) or $\gamma B_i \to 0$ (zero maintenance cost, i.e., an entity that requires no energy to exist, which is physically impossible).
+\end{corollary}
+
+\textbf{Physical interpretation of the Freedom Bandwidth:}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Parameter
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Effect on \(w\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Interpretation
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\(\mathcal{M} \uparrow\) & \(w \uparrow\) & Richer centers offer wider
+freedom (more room to maneuver) \\
+\(G \uparrow\) & \(w \uparrow\) & More efficient resource coupling
+expands viable distance \\
+\(\gamma \uparrow\) & \(w \downarrow\) & Higher entropy pressure
+(harsher environment) narrows freedom \\
+\(B_i \uparrow\) & \(w \downarrow\) & More complex entities (higher
+maintenance) have narrower bands \\
+\(\tau \uparrow\) & \(w \downarrow\) & Stronger dissolution pressure
+narrows freedom \\
+\end{longtable}
+}
+
+\section{Boundary Dynamics and
+Irreversibility}\label{boundary-dynamics-and-irreversibility}
+
+The gradient dynamics established in the agent-center model
+(§\ref{the-agent-center-model}) assume the agent's boundary integrity
+\(B_i\) is constant. In reality, \(B_i\) is itself dynamic: it degrades
+under assault from the HEC's assimilation pressure or from resource
+deprivation, and it regenerates when the agent has surplus energy.
+
+\subsection{The Coupled Agent-Boundary
+System}\label{the-coupled-agent-boundary-system}
+
+\begin{definition}[Boundary Degradation Rate]
+\label{def-boundary-degradation-rate}
+
+The \emph{boundary degradation rate} due to HEC assimilation pressure at coupling distance $r$ is:
+
+$$D_{\text{assimilate}}(r) = \frac{\sigma \mathcal{M}}{r^3}$$
+
+where $\sigma > 0$ is the \textbf{assimilation intensity} coefficient. This is a short-range dominant force ($1/r^3$ decays faster than the dissolution cost $1/r^2$), reflecting that active boundary destruction requires even closer coupling than the autonomy costs defined in the dissolution cost function (§\ref{the-dissolution-cost-function}).
+\end{definition}
+
+\begin{definition}[Boundary Regeneration Rate]
+\label{def-boundary-regeneration-rate}
+
+The \emph{boundary regeneration rate} is the fraction of surplus energy the agent allocates to boundary repair:
+
+$$R_{\text{repair}}(r) = \rho \cdot \max\bigl(\Pi(r), 0\bigr)$$
+
+where $\rho \in (0, 1)$ is the \textbf{repair allocation fraction} and $\Pi(r) = -V(r)$ is the net energy rate.
+\end{definition}
+
+The coupled dynamical system governing both coupling distance and
+boundary integrity is:
+
+\[\dot{r} = -\mu \, V'(r)\]
+
+\[\dot{B}_i = R_{\text{repair}}(r) - D_{\text{assimilate}}(r) - \gamma B_i\]
+
+\subsection{The Dissolution
+Catastrophe}\label{the-dissolution-catastrophe}
+
+\begin{theorem}[Irreversibility of Dissolution]
+\label{thm-irreversibility-dissolution}
+
+Define the \textbf{boundary dissolution threshold} as:
+
+$$r_d \;\triangleq\; \left(\frac{\sigma \mathcal{M}}{\rho \, \Pi_{\max} + \gamma B_i^{(0)}}\right)^{1/3}$$
+
+where $\Pi_{\max} = G^2\mathcal{M}/(4\tau) - \gamma B_i^{(0)}$ is the maximum surplus at the attractor and $B_i^{(0)}$ is the initial boundary integrity. If the agent's coupling distance satisfies $r < r_d$, then:
+
+(a) $\dot{B}_i < 0$: Boundary integrity is strictly decreasing.
+
+(b) As $B_i$ decreases, $\mathcal{M}_{\min} = 4\gamma B_i \tau / G^2$ decreases but the surplus $\Pi(r)$ at the current $r$ does not necessarily increase enough to halt the decline.
+
+(c) There exists a finite time $t_d < \infty$ at which $B_i(t_d) = 0$: the agent's boundary is fully dissolved and identity ceases to exist.
+\end{theorem}
+
+\begin{proof}
+At coupling distance $r < r_d$:
+
+$$D_{\text{assimilate}}(r) > \frac{\sigma\mathcal{M}}{r_d^3} = \rho\Pi_{\max} + \gamma B_i^{(0)} \geq \rho \cdot \max(\Pi(r), 0) + \gamma B_i$$
+
+To verify the last inequality: $\dot{B}_i < 0$ from the outset ensures $B_i(t) \leq B_i^{(0)}$ for all $t \geq 0$. Since $\max(\Pi(r),0) \leq G^2\mathcal{M}/(4\tau) - \gamma B_i$ for any $r$, we obtain $\rho\max(\Pi(r),0) + \gamma B_i \leq \rho G^2\mathcal{M}/(4\tau) + (1-\rho)\gamma B_i \leq \rho\Pi_{\max} + \gamma B_i^{(0)}$, where the final step uses $B_i \leq B_i^{(0)}$ and $\rho < 1$. Therefore:
+
+$$\dot{B}_i = \rho \max(\Pi(r), 0) - D_{\text{assimilate}}(r) - \gamma B_i < 0$$
+
+Since $\dot{B}_i < 0$ and bounded away from zero, $B_i$ reaches zero in finite time.
+\end{proof}
+
+\emph{Remark (Race-Condition Closure).}
+Theorem~\ref{thm-irreversibility-dissolution} establishes dissolution
+conditional on \(r(t) < r_d\). Since the gradient dynamics
+(Theorem~\ref{thm-stability-coexistence-attractor}) simultaneously push
+\(r\) toward \(r^*\), we must verify that boundary depletion outpaces
+escape. We resolve this via the phase-space derivative
+\(dB_i/dr = \dot{B}_i/\dot{r}\).
+
+Along trajectories of the coupled system
+(§\ref{the-coupling-adjustment-equation}) with \(r \in (0, r_d)\),
+separate the assimilation-dominated term from the surplus correction:
+
+\[\frac{dB_i}{dr} = \frac{-\sigma}{\mu(2\tau - Gr)} + \frac{[\rho\max(\Pi(r),0) - \gamma B_i]\,r^3}{\mu\mathcal{M}(2\tau - Gr)}.\]
+
+Both \(\dot{B}_i\) and \(\dot{r}\) share the \(\mathcal{M}/r^3\)
+scaling, which cancels in the ratio; the leading term
+\(-\sigma/[\mu(2\tau - Gr)]\) is therefore independent of
+\(\mathcal{M}\). To bound the correction, use
+\(\max(\Pi(r),0) \leq \Pi_{\max}\), \(B_i \geq 0\), and
+\(r^3 \leq r_d^3 = \sigma\mathcal{M}/(\rho\Pi_{\max} + \gamma B_i^{(0)})\);
+combining with the leading term and factoring:
+
+\[\frac{dB_i}{dr} \leq \frac{-\sigma\gamma B_i^{(0)}}{\mu(\rho\Pi_{\max} + \gamma B_i^{(0)})(2\tau - Gr)}.\]
+
+Applying the conservative envelope \(2\tau - Gr \leq 2\tau\) yields the
+uniform bound \(dB_i/dr \leq -\alpha\) where
+
+\[\alpha \;\triangleq\; \frac{\sigma\gamma B_i^{(0)}}{2\mu\tau(\rho\Pi_{\max} + \gamma B_i^{(0)})} > 0.\]
+
+Integrating from \(r_0\) to \(r\) gives
+\(B_i(r) \leq B_i^{(0)} - \alpha(r - r_0)\). Define the \textbf{critical
+penetration depth}
+
+\[\ell_c \;\triangleq\; \frac{B_i^{(0)}}{\alpha} = \frac{2\mu\tau(\rho\Pi_{\max} + \gamma B_i^{(0)})}{\sigma\gamma}.\]
+
+If the agent starts at \(r_0\) with penetration depth
+\(\ell \triangleq r_d - r_0 > \ell_c\), then \(B_i\) reaches zero before
+\(r\) escapes to \(r_d\): dissolution is irreversible despite the
+restoring gradient. Since the bound used \(2\tau - Gr \leq 2\tau\) and
+dropped the negative \(\gamma B_i\) contribution, \(\ell_c\) is a
+conservative upper bound on the true critical depth; the actual
+dissolution rate per unit escape distance \emph{increases} as \(r\)
+approaches \(r_d\) because the restoring velocity
+\(\dot{r} \propto (2\tau - Gr)\) weakens as \(r \to r^*\). The condition
+\(\ell > \ell_c\) is therefore sufficient but not necessary for
+irreversibility.
+
+Physical interpretation: an employee drawn into a corporation's inner
+circle eventually crosses a depth from which the escape gradient, always
+present, cannot outpace identity erosion. The critical depth \(\ell_c\)
+scales with agent mobility \(\mu\) (mobile agents tolerate deeper
+excursions) and inversely with assimilation intensity \(\sigma\)
+(stronger assimilators set shallower traps).
+
+\begin{corollary}[The Assimilation Trap]
+\label{cor-assimilation-trap}
+
+Once an agent crosses the dissolution threshold $r_d$ with $r_d < r_-$ (the dissolution threshold lies inside the energetic inner boundary), the gradient dynamics push the agent back toward $r^*$ (Theorem~\ref{thm-stability-coexistence-attractor}). However, if $r_d > r_-$ (the dissolution threshold extends into the viable band), an agent perturbed below $r_d$ experiences simultaneous boundary degradation and energetic pressure. If the boundary degrades sufficiently to lower $r_-$ below the current $r$ (shrinking the energetic inner boundary), the agent enters the dissolution zone while still within $\mathcal{B}$, creating an assimilation trap where the agent appears viable by energy metrics but is losing its identity.
+\end{corollary}
+
+\textbf{Physical interpretation:} An employee (agent) at a
+mega-corporation (HEC) may earn a good salary (positive \(\Pi(r)\))
+while simultaneously losing creative autonomy, decision-making capacity,
+and identity (\(B_i\) declining). By the time the boundary has degraded
+enough for the agent to ``feel'' the loss, the process may be
+irreversible: the agent has been assimilated (corporate culture has
+overwritten individual identity). Similarly, a small nation within a
+superpower's sphere of influence may experience economic benefits while
+losing sovereignty.
+
+\subsection{The Starvation Spiral}\label{the-starvation-spiral}
+
+\begin{theorem}[The Starvation Spiral]
+\label{thm-starvation-spiral}
+
+If the agent's coupling distance satisfies $r > r_+$ (outside the Coexistence Band), then:
+
+(a) $\Pi(r) < 0$: The agent runs an energy deficit.
+
+(b) $\dot{B}_i = -D_{\text{assimilate}}(r) - \gamma B_i < 0$: Boundary integrity declines since there is no surplus for repair and the assimilation and entropy terms are both positive.
+
+(c) As $B_i$ decreases, $\mathcal{M}_{\min}$ decreases but $r_+$ also shifts (increasing the effective band), potentially allowing the agent to re-enter $\mathcal{B}$, but this requires $r_+$ to grow fast enough to reach the agent's current position.
+
+(d) If $r$ is sufficiently large, no decrease in $B_i$ can restore viability: the agent starves in finite time.
+\end{theorem}
+
+\begin{proof}
+(Sketch.) Outside $\mathcal{B}$: $V(r) > 0$, so $\Pi(r) < 0$ and $\max(\Pi(r), 0) = 0$. Then $\dot{B}_i = -D_{\text{assimilate}}(r) - \gamma B_i < 0$. As $B_i \to 0$, the agent's boundary fails. For large $r$, $D_{\text{assimilate}}(r) \approx 0$, so the decay rate is approximately $\dot{B}_i \approx -\gamma B_i$, giving $B_i(t) = B_i^{(0)} e^{-\gamma t} \to 0$, confirming exponential starvation.
+\end{proof}
+
+\textbf{Physical interpretation:} An entity that completely cuts itself
+off from all energy centers (autarky, isolationism) slowly depletes its
+stores. Without resource inflow, entropy wins: the boundary degrades,
+the internal state deteriorates, and the entity ceases to function. This
+maps to isolated communities, autarkic states, or any self-maintaining
+system severed from its resource base.
+
+\section{Comparative Statics and
+Inequality}\label{comparative-statics-and-inequality}
+
+\subsection{Effect of Value Mass on the Coexistence
+Band}\label{effect-of-value-mass-on-the-coexistence-band}
+
+\begin{proposition}[Value Mass Comparative Statics]
+\label{prop-value-mass-comparative-statics}
+
+As the HEC's value mass $\mathcal{M}$ increases:
+
+(a) The well depth $D = G^2\mathcal{M}/(4\tau)$ increases linearly.
+
+(b) The bandwidth $w$ increases (Theorem~\ref{thm-freedom-bandwidth}b).
+
+(c) The dissolution threshold $r_-$ decreases (the inner boundary moves inward):
+
+$$\frac{\partial r_-}{\partial \mathcal{M}} = \frac{1}{2\gamma B_i}\left(G - \frac{G^2\mathcal{M} - 2\gamma B_i \tau}{\sqrt{\Delta}}\right) < 0 \quad \text{for } \mathcal{M} > \mathcal{M}_{\min}$$
+
+(d) The starvation threshold $r_+$ increases (the outer boundary moves outward):
+
+$$\frac{\partial r_+}{\partial \mathcal{M}} = \frac{1}{2\gamma B_i}\left(G + \frac{G^2\mathcal{M} - 2\gamma B_i \tau}{\sqrt{\Delta}}\right) > 0$$
+
+(e) The coexistence attractor $r^* = 2\tau/G$ is unchanged.
+\end{proposition}
+
+\textbf{Physical interpretation:} More massive centers support wider
+freedom. A wealthier, more institutionally robust state provides its
+citizens with both more protection against starvation (larger \(r_+\))
+and more residual autonomy before assimilation (smaller \(r_-\)). The
+optimal coupling structure (\(r^*\)) is invariant; what changes is the
+margin of error.
+
+\subsection{Effect of Agent Boundary
+Integrity}\label{effect-of-agent-boundary-integrity}
+
+\begin{proposition}[Boundary Integrity Comparative Statics]
+\label{prop-boundary-integrity-comparative-statics}
+
+As the agent's boundary integrity $B_i$ increases:
+
+(a) The minimum viable HEC mass $\mathcal{M}_{\min} = 4\gamma B_i \tau / G^2$ increases, i.e., more complex agents require more massive centers.
+
+(b) The bandwidth $w$ decreases (Theorem~\ref{thm-freedom-bandwidth}c): more complex agents have narrower freedom bands.
+
+(c) The coexistence attractor $r^*$ is unchanged: the optimal coupling structure is independent of agent complexity.
+\end{proposition}
+
+\textbf{Physical interpretation:} A complex, high-maintenance entity (a
+research university, a democratic institution, a highly differentiated
+organism) requires a richer environment to survive and has less margin
+for error in its coupling distance. Simple, low-maintenance entities (a
+single-celled organism, a subsistence farmer) can survive in sparser
+environments with wider latitude. This is an \textbf{inherent trade-off}
+between complexity and freedom: more complex agents require more
+resources and are therefore more constrained in their viable coupling
+range.
+
+\subsection{Inequality: Asymmetric Agents at the Same
+Center}\label{inequality-asymmetric-agents-at-the-same-center}
+
+Consider two agents, \(i\) and \(j\), with different boundary
+integrities \(B_i > B_j\) (agent \(i\) is more complex) coupled to the
+same HEC. Both share the same attractor \(r^* = 2\tau/G\) and the same
+HEC mass \(\mathcal{M}\).
+
+\begin{corollary}[Inequality of Freedom]
+\label{cor-inequality-of-freedom}
+
+If $B_i > B_j$ (agent $i$ has higher boundary cost), then:
+
+(a) $w_i < w_j$: agent $i$ has a narrower Coexistence Band (less freedom).
+
+(b) $\mathcal{M}_{\min,i} > \mathcal{M}_{\min,j}$: agent $i$ requires a more massive center to survive.
+
+(c) There exists a critical $\mathcal{M}^*$ such that for $\mathcal{M}_{\min,j} < \mathcal{M} < \mathcal{M}_{\min,i}$, agent $j$ can survive near this HEC but agent $i$ cannot.
+\end{corollary}
+
+\textbf{Physical interpretation:} Inequality in complexity creates
+inequality in freedom. Within the same economic or political system,
+agents with higher maintenance costs (due to greater complexity,
+specialization, or vulnerability) have narrower viable ranges. This
+formalization captures why developing nations have less policy latitude
+than developed ones, why small businesses are more fragile than large
+ones, and why specialized organisms are more extinction-prone than
+generalists.
+
+\section{Multi-Center Dynamics}\label{multi-center-dynamics}
+
+\subsection{The Multi-Center
+Potential}\label{the-multi-center-potential}
+
+In realistic environments, agents interact with multiple HECs
+simultaneously: an individual may be employed by a corporation, reside
+in a state, trade with international partners, and participate in online
+communities. Let there be \(K\) HECs with value masses
+\(\mathcal{M}_1, \ldots, \mathcal{M}_K\).
+
+The agent's coupling state is now a vector
+\(\mathbf{r} = (r_1, \ldots, r_K) \in (0, \infty)^K\), where \(r_k\) is
+the coupling distance to HEC \(k\).
+
+\begin{definition}[Multi-Center Coexistence Potential]
+\label{def-multi-center-potential}
+
+The \emph{multi-center coexistence potential} is:
+
+$$V(\mathbf{r}) = \sum_{k=1}^{K} \left[\frac{\tau_k \mathcal{M}_k}{r_k^2} - \frac{G_k \mathcal{M}_k}{r_k}\right] + \gamma B_i$$
+
+where $G_k, \tau_k > 0$ are the center-specific coupling coefficients. The multi-center bandwidth is the volume of the viable set $\mathcal{B} = \{\mathbf{r} : V(\mathbf{r}) < 0\}$.
+\end{definition}
+
+\begin{theorem}[Multi-Center Coexistence Attractor]
+\label{thm-multi-center-attractor}
+
+The multi-center coexistence potential $V(\mathbf{r})$ has a unique global minimum at:
+
+$$r_k^* = \frac{2\tau_k}{G_k} \quad \text{for each } k = 1, \ldots, K$$
+
+This point is globally attracting under the gradient dynamics $\dot{\mathbf{r}} = -\mu \nabla V(\mathbf{r})$. The minimum value is:
+
+$$V(\mathbf{r}^*) = \gamma B_i - \sum_{k=1}^{K} \frac{G_k^2 \mathcal{M}_k}{4\tau_k}$$
+
+The multi-center Coexistence Band exists if and only if:
+
+$$\sum_{k=1}^{K} \frac{G_k^2 \mathcal{M}_k}{4\tau_k} > \gamma B_i$$
+\end{theorem}
+
+\begin{proof}
+The multi-center potential separates across the $K$ coupling dimensions: $V(\mathbf{r}) = \sum_k V_k(r_k) + \gamma B_i$ where $V_k(r_k) = \tau_k \mathcal{M}_k / r_k^2 - G_k \mathcal{M}_k / r_k$. Each $V_k$ has a unique minimum at $r_k^* = 2\tau_k/G_k$ with value $-G_k^2\mathcal{M}_k/(4\tau_k)$ (by the single-center analysis). The global minimum is achieved component-wise. Global attraction follows from the Lyapunov function $\mathcal{W}(\mathbf{r}) = V(\mathbf{r}) - V(\mathbf{r}^*)$, whose time derivative satisfies $\dot{\mathcal{W}} = -\mu\|\nabla V\|^2 \leq 0$. The existence condition requires $V(\mathbf{r}^*) < 0$.
+\end{proof}
+
+\begin{corollary}[Diversification Benefit]
+\label{cor-diversification-benefit}
+
+An agent coupled to $K$ HECs may be viable even if no single HEC has sufficient mass: it is possible that $\mathcal{M}_k < \mathcal{M}_{\min}$ for each $k$ individually, yet $\sum_k G_k^2\mathcal{M}_k/(4\tau_k) > \gamma B_i$. Diversification across centers expands freedom.
+\end{corollary}
+
+\textbf{Physical interpretation:} An individual who cannot survive on
+one job (\(\mathcal{M}_1 < \mathcal{M}_{\min}\)) may thrive by combining
+income streams. A small nation unable to survive in the orbit of one
+superpower may thrive through diversified trade agreements. The
+multi-center model formalizes the survival advantage of diversification.
+
+\subsection{Center Competition for
+Agents}\label{center-competition-for-agents}
+
+From the center's perspective, agents in its Coexistence Band contribute
+to the network (labor, innovation, information) that increases the
+center's own value mass \(\mathcal{M}\). Centers therefore compete for
+agents by adjusting their coupling parameters:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Increasing \(G\)} (better resource sharing): raises wages,
+  improves public services.
+\item
+  \textbf{Decreasing \(\tau\)} (reducing dissolution pressure): granting
+  more autonomy, reducing oppressive constraints.
+\end{itemize}
+
+Both adjustments widen the Coexistence Band and attract agents from
+competing centers. This formalizes why nations and corporations compete
+through quality of life, wages, and individual freedoms, as it is a
+rational strategy in the multi-center attractor landscape.
+
+\section{Connection to the Broader
+Framework}\label{connection-to-the-broader-framework}
+
+\subsection{Coupling the Dynamical Model to Game
+Theory}\label{coupling-the-dynamical-model-to-game-theory}
+
+The discount factor \(\delta\) from the repeated game (Definition 2
+\citep{TC-V}) depends on the agent's planning horizon and environment
+stability. Agents within the Coexistence Band of a stable HEC have:
+
+\begin{itemize}
+\tightlist
+\item
+  Higher effective \(\delta\) (more stable environment → longer
+  effective planning horizon)
+\item
+  Lower effective cooperation threshold \(\delta^*\) (from
+  Proposition~\ref{prop-stability-cooperation-feedback}, since the
+  higher net-energy surplus at the attractor extends effective planning
+  horizons)
+\end{itemize}
+
+This means agents at the coexistence attractor are more likely to
+sustain cooperation, creating a \textbf{positive feedback loop}:
+stability → cooperation → more stability.
+
+\begin{proposition}[Stability–Cooperation Feedback]
+\label{prop-stability-cooperation-feedback}
+
+Let an agent's discount factor depend on its net energy surplus: $\delta(r) = 1 - \exp(-\beta \max(\Pi(r), 0))$ for some $\beta > 0$ (agents with more surplus plan further ahead). Then:
+
+(a) $\delta(r)$ is maximized at $r^*$ (the coexistence attractor).
+
+(b) $\delta(r^*)> \delta(r)$ for all $r \neq r^*$ in $\mathcal{B}$.
+
+(c) If $\delta(r^*) > \delta^*$ (equivalently, $\beta \Pi(r^*) > -\ln(1-\delta^*)$), then $\delta(r) > \delta^*$ throughout a subband of $\mathcal{B}$ centered on $r^*$, where $\delta^*$ is the cooperation threshold from Theorem 2 \citep{TC-V}.
+\end{proposition}
+
+\begin{proof}
+We prove each claim in turn.
+
+(a)–(b): $\Pi(r)$ is maximized at $r^*$ (by the definition of the attractor). Since $\delta(r) = 1 - e^{-\beta \Pi(r)}$ is strictly increasing in $\Pi(r)$, $\delta$ inherits the maximum. (c): Given $\delta(r^*) > \delta^*$, the fact that $\delta(r) \to 0$ continuously as $r \to r_\pm$ (since $\Pi(r) \to 0$ at the band boundaries) together with the intermediate value theorem gives a subband where $\delta(r) > \delta^*$, centered on $r^*$.
+\end{proof}
+
+\subsection{Coupling to Accumulated
+Negentropy}\label{coupling-to-accumulated-negentropy}
+
+The value mass \(\mathcal{M}\) is precisely the accumulated negentropy
+defined in Definition 6 \citep{TC-III}:
+
+\[\mathcal{M} = \mathcal{N}(T) = \int_0^T \dot{W}_{\text{order}}(t) \, dt\]
+
+This means the Coexistence Band width is determined by the historical
+thermodynamic investment in the center. A center that has accumulated
+more negentropy over time provides wider freedom to its agents. The
+\textbf{Irrationality of Destruction} (Theorem 6 \citep{TC-III})
+acquires a new dimension here: destroying a high-\(\mathcal{M}\) center
+does not just waste accumulated value; it \textbf{collapses the
+Coexistence Bands} of all agents affiliated with that center,
+catastrophically reducing the freedom of an entire population.
+
+\begin{corollary}[Cascade Collapse from Center Destruction]
+\label{cor-cascade-collapse}
+
+If a HEC with value mass $\mathcal{M}$ is destroyed ($\mathcal{M} \to 0$), all $N$ agents within its Coexistence Band simultaneously lose viability. The total "freedom destroyed" is:
+
+$$\mathcal{F}_{\text{lost}} = N \cdot w(\mathcal{M})$$
+
+This provides an additional argument for the Irrationality of Destruction (Theorem 6 \citep{TC-III}): the social cost of center destruction includes the collapse of the entire affiliated population's viable coupling space.
+\end{corollary}
+
+\subsection{Coupling to Constrained
+Optimization}\label{coupling-to-constrained-optimization}
+
+The coupling distance \(r\) can be mapped to the constraint structure of
+the constrained optimization derivation. At smaller \(r\) (tighter
+coupling), the HEC imposes more boundary constraints (Definition 3
+\citep{TC-I}) on the agent's action space, extracting a higher shadow
+price \(\mu_{Bk}^*\) (Theorem 2 \citep{TC-I}). The dissolution threshold
+\(r_-\) corresponds to the constraint intensity at which the aggregate
+shadow price of all HEC-imposed constraints exceeds the agent's utility
+gain from resource access:
+
+\[\sum_{k=1}^{m} \mu_k^*(r_-) = U_i(\mathbf{x}_i^*) - U_i(\mathbf{0})\]
+
+At this point, the constraints consume all of the agent's surplus: its
+optimization space is so restricted that cooperation yields zero net
+benefit.
+
+\section{Worked Examples}\label{worked-examples}
+
+\subsection{Individual
+vs.~Corporation}\label{individual-vs.-corporation}
+
+\textbf{Setup:} An individual agent (worker) with boundary integrity
+\(B = 1\) (normalized), entropy leakage \(\gamma = 0.1\), near a
+corporation with value mass \(\mathcal{M} = 100\) (normalized energy
+units). Coupling parameters: \(G = 1.0\) (resource access),
+\(\tau = 0.5\) (dissolution coupling).
+
+\textbf{Calculations:}
+
+\begin{itemize}
+\tightlist
+\item
+  Coexistence attractor: \(r^* = 2\tau/G = 1.0\)
+\item
+  Minimum viable mass:
+  \(\mathcal{M}_{\min} = 4\gamma B \tau / G^2 = 4(0.1)(1)(0.5)/1 = 0.2\),
+  so the corporation far exceeds the threshold.
+\item
+  Discriminant:
+  \(\Delta = G^2\mathcal{M}^2 - 4\gamma B \tau \mathcal{M} = 100^2 - 4(0.1)(1)(0.5)(100) = 10000 - 20 = 9980\)
+\item
+  Inner boundary:
+  \(r_- = (100 - \sqrt{9980})/(2 \cdot 0.1 \cdot 1) = (100 - 99.90)/0.2 \approx 0.50\)
+\item
+  Outer boundary: \(r_+ = (100 + 99.90)/0.2 \approx 999.5\)
+\item
+  Bandwidth: \(w \approx 999.0\), an extremely wide freedom band.
+\item
+  Net energy at attractor:
+  \(\Pi(r^*) = G^2\mathcal{M}/(4\tau) - \gamma B = 100/(2) - 0.1 = 49.9\)
+\end{itemize}
+
+\textbf{Interpretation:} The corporation is so massive relative to the
+individual that the freedom band is enormous: the worker has a wide
+range of viable engagement levels. The risk is not starvation (the outer
+boundary is far away) but dissolution: if the worker takes on excessive
+obligations (\(r < 0.50\)), assimilation begins.
+
+\subsection{Citizen vs.~State}\label{citizen-vs.-state}
+
+\textbf{Setup:} A citizen with \(B = 2\) (higher complexity, including
+education, social connections), \(\gamma = 0.05\) (stable social
+environment), near a state with \(\mathcal{M} = 500\). Coupling:
+\(G = 1.5\), \(\tau = 1.0\) (states impose more assimilation pressure
+than corporations).
+
+\begin{itemize}
+\tightlist
+\item
+  \(r^* = 2(1.0)/1.5 \approx 1.33\)
+\item
+  \(\mathcal{M}_{\min} = 4(0.05)(2)(1.0)/1.5^2 = 0.4/2.25 \approx 0.178\)
+\item
+  \(\Delta = (1.5)^2(500)^2 - 4(0.05)(2)(1.0)(500) = 562500 - 200 = 562300\)
+\item
+  \(r_- \approx (750 - 749.87)/0.2 \approx 0.67\)
+\item
+  \(r_+ \approx (750 + 749.87)/0.2 \approx 7499\)
+\item
+  \(w \approx 7498\)
+\end{itemize}
+
+\textbf{Comparison: Authoritarian vs.~Free State.}
+
+An authoritarian state may have higher \(\tau\) (more assimilation
+pressure): \(\tau_{\text{auth}} = 3.0\).
+
+\begin{itemize}
+\tightlist
+\item
+  \(r^*_{\text{auth}} = 2(3.0)/1.5 = 4.0\) (agents must keep greater
+  distance)
+\item
+  \(\mathcal{M}_{\min,\text{auth}} = 4(0.05)(2)(3.0)/2.25 = 0.533\)
+  (requires more mass to sustain citizens)
+\item
+  \(\Delta_{\text{auth}} = 562500 - 600 = 561900\)
+\item
+  \(w_{\text{auth}} \approx \sqrt{561900}/0.1 \approx 7496\)
+\end{itemize}
+
+The bandwidth is similar in this regime
+(\(\mathcal{M} \gg \mathcal{M}_{\min}\)), but the attractor distance
+\(r^* = 4.0\) vs.~\(1.33\) means citizens of the authoritarian state
+must maintain 3× more distance to avoid dissolution: they are
+structurally pushed further from the center's resources.
+
+\subsection{Small Nation
+vs.~Superpower}\label{small-nation-vs.-superpower}
+
+\textbf{Setup:} A small nation (agent) with \(B = 50\),
+\(\gamma = 0.02\), near a superpower with \(\mathcal{M} = 10{,}000\).
+Coupling: \(G = 0.5\) (trade only), \(\tau = 2.0\).
+
+\begin{itemize}
+\tightlist
+\item
+  \(r^* = 2(2.0)/0.5 = 8.0\)
+\item
+  \(\mathcal{M}_{\min} = 4(0.02)(50)(2.0)/0.25 = 32\)
+\item
+  \(\Delta = 0.25(10^8) - 4(0.02)(50)(2.0)(10^4) = 25{,}000{,}000 - 80{,}000 = 24{,}920{,}000\)
+\item
+  \(w = \sqrt{24920000}/(0.02 \times 50) = 4992.0/1.0 \approx 4992\)
+\end{itemize}
+
+If the superpower increases assimilation pressure (\(\tau \to 5\)):
+
+\begin{itemize}
+\tightlist
+\item
+  \(r^* = 20\) (nation must keep much greater distance)
+\item
+  \(\mathcal{M}_{\min} = 80\) (still viable, but threshold quintupled)
+\item
+  Bandwidth shrinks modestly but the viable zone shifts outward.
+\end{itemize}
+
+\textbf{Interpretation:} Small nations maintain sovereignty by keeping
+sufficient coupling distance from superpowers, with trade and
+cooperation at arm's length rather than full integration. When a
+superpower increases its assimilation pressure (military threats,
+economic coercion), the optimal distance increases and the inner
+boundary (dissolution threshold) moves outward, shrinking the small
+nation's options.
+
+\section{Discussion}\label{discussion}
+
+\subsection{Summary of Results}\label{summary-of-results}
+
+The paper derives a dynamical systems model of agent-center coupling
+with three classes of results. First, the coexistence potential
+(Definition~\ref{def-coexistence-potential}) constructed from a
+short-range-dominant dissolution cost (\(1/r^2\)) and a long-range
+resource inflow (\(1/r\)) possesses a unique global minimum, the
+coexistence attractor (Definition~\ref{def-coexistence-attractor}),
+which is globally asymptotically stable under gradient dynamics
+(Theorem~\ref{thm-stability-coexistence-attractor}). The attractor
+location \(r^* = 2\tau/G\) depends only on the dissolution-to-resource
+coupling ratio, not on the center's mass or the agent's complexity.
+Second, the stable coexistence band
+(Definition~\ref{def-stable-coexistence-band}) exists if and only if the
+center's value mass exceeds the threshold
+\(\mathcal{M}_{\min} = 4\gamma B_i \tau / G^2\)
+(Theorem~\ref{thm-existence-coexistence-band}), and the band's width,
+the freedom bandwidth, admits a closed-form expression with monotonicity
+in all model parameters (Theorem~\ref{thm-freedom-bandwidth}). Third,
+the coupled agent-boundary system exhibits irreversible regime
+transitions: dissolution (Theorem~\ref{thm-irreversibility-dissolution})
+and starvation (Theorem~\ref{thm-starvation-spiral}) are one-way
+processes once the agent crosses the band boundaries. The multi-center
+extension (Theorem~\ref{thm-multi-center-attractor}) shows that the
+potential separates across coupling dimensions, yielding a componentwise
+global attractor with a diversification benefit
+(Corollary~\ref{cor-diversification-benefit}).
+
+\subsection{Relation to Potential Games and Gradient
+Dynamics}\label{relation-to-potential-games-and-gradient-dynamics}
+
+The agent-center model belongs to the class of gradient dynamical
+systems on \((0, \infty)\) and inherits the convergence guarantees of
+that theory \citep{Strogatz2015, HirschSmaleDevaney2012}. The
+coexistence potential is a strict Lyapunov function for the dynamics, so
+global convergence to the unique minimum is assured without additional
+convexity assumptions on the payoff landscape.
+
+The two-body potential form (short-range repulsion from dissolution,
+long-range attraction from resource access) is structurally analogous to
+the Lennard-Jones potential in molecular physics \citep{Jones1924}, with
+the \(1/r^{12}\)-\(1/r^6\) pair replaced by \(1/r^2\)-\(1/r\). The lower
+exponents reflect the longer interaction range of socio-economic
+coupling relative to molecular forces. The analogy is mathematical, not
+physical: we do not claim that literal intermolecular forces operate at
+institutional scales. What is shared is the mathematical structure of a
+potential with competing short-range and long-range terms that creates a
+bounded stable basin between two catastrophic regimes.
+
+The gradient dynamics assumption (\(\dot{r} = -\mu V'(r)\)) models
+myopic adjustment: agents move in the direction of locally increasing
+net energy without strategic foresight. This is appropriate for modeling
+boundedly rational or habitual behavior and aligns with gradient-play
+dynamics in the potential games literature
+\citep{MondererShapley1996, Sandholm2010}. In multi-agent settings where
+agents simultaneously adjust coupling to a shared center, the
+separability of the multi-center potential
+(Theorem~\ref{thm-multi-center-attractor}) ensures that the system
+remains a potential game and gradient convergence is preserved.
+
+The model's dynamical predictions complement the static equilibrium
+analysis of \emph{Cooperative Equilibrium} \citep{TC-V}. Where that
+paper proves cooperation is the unique efficient Nash equilibrium, the
+present paper proves that the dynamical adjustment process converges to
+a stable cooperative configuration. The stability-cooperation feedback
+loop (Proposition~\ref{prop-stability-cooperation-feedback}) connects
+the two results: agents at the dynamical attractor sustain higher
+discount factors, which in turn satisfy the cooperation threshold.
+
+\subsection{Testable Predictions}\label{testable-predictions}
+
+The model generates falsifiable predictions:
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Prediction
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Source
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Falsified If\ldots{}
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Agents cluster near a characteristic coupling distance \(r^*\) that
+depends on coupling structure, not center mass &
+Theorem~\ref{thm-stability-coexistence-attractor},
+Definition~\ref{def-coexistence-attractor} & Empirical firm-worker or
+citizen-state engagement levels scale with institution size rather than
+with the ratio of autonomy cost to resource access \\
+Freedom bandwidth increases with center mass &
+Theorem~\ref{thm-freedom-bandwidth}(b) & Citizens of wealthier states or
+employees of larger firms consistently exhibit narrower (not wider)
+ranges of viable engagement levels \\
+Boundary transitions (dissolution, starvation) are irreversible past a
+critical threshold & Theorem~\ref{thm-irreversibility-dissolution},
+Theorem~\ref{thm-starvation-spiral} & Entities that have crossed the
+dissolution or starvation boundary routinely recover boundary integrity
+without external intervention \\
+Minimum viable center mass scales linearly with agent complexity \(B_i\)
+& Theorem~\ref{thm-existence-coexistence-band} & High-complexity agents
+(specialized organisms, research-intensive firms) thrive near small-mass
+centers as readily as low-complexity agents \\
+Diversified agents survive where single-source agents fail &
+Corollary~\ref{cor-diversification-benefit} & Agents with distributed
+coupling across multiple centers show no survival advantage over agents
+coupled to a single center of equivalent total mass \\
+Cascade collapse: center destruction eliminates all affiliated agents'
+viability simultaneously & Corollary~\ref{cor-cascade-collapse} &
+Destruction of a major institution leaves the viable operating range of
+affiliated agents unaffected \\
+\end{longtable}
+}
+
+\subsection{Applications}\label{applications}
+
+The results apply wherever self-maintaining agents couple to
+resource-providing centers.
+
+\textbf{Organizational economics.} The freedom bandwidth provides a
+quantitative measure of the autonomy range available to agents within an
+institution. The comparative statics results
+(Proposition~\ref{prop-value-mass-comparative-statics},
+Proposition~\ref{prop-boundary-integrity-comparative-statics}) predict
+that larger, wealthier organizations can sustain wider autonomy for
+their members, and that higher-complexity agents (specialized
+professionals, research divisions) have narrower viable coupling ranges.
+The dissolution and starvation thresholds correspond to observable
+organizational pathologies: assimilation of subsidiaries and
+isolation-induced decline, respectively. The center-competition
+mechanism (§\ref{center-competition-for-agents}) formalizes why
+institutions compete by increasing \(G\) (offering better resources) or
+decreasing \(\tau\) (reducing conformity pressure), matching the
+quality-of-life and autonomy dimensions that drive labor mobility.
+
+\textbf{Institutional fragility and cascade collapse.} The cascade
+collapse corollary (Corollary~\ref{cor-cascade-collapse}) predicts that
+destruction of a high-mass center simultaneously eliminates the
+viability of all \(N\) affiliated agents. This formalizes the empirical
+pattern in which institutional collapse (state failure, corporate
+bankruptcy, ecosystem destruction) has outsized consequences relative to
+the institution's own resource value, because the center's coexistence
+band supports an entire population. The total freedom destroyed,
+\(N \cdot w(\mathcal{M})\), provides a computable measure of systemic
+risk, complementing the accumulated negentropy analysis of
+\citep{TC-III}.
+
+\textbf{Ecological niche modeling.} The stable coexistence band is a
+mathematical analog of the ecological niche: a bounded region of
+parameter space within which a species maintains positive net energy
+\citep{Tilman1982}. The dependence of bandwidth on center mass parallels
+the empirical observation that productive habitats support wider niche
+breadth. The irreversibility results formalize the extinction vortex
+\citep{Gilpin1986}, the self-reinforcing decline of populations that
+fall below viability thresholds. The multi-center diversification
+benefit provides a formal basis for the resilience advantage of species
+with broader resource bases.
+
+\subsection{Limitations}\label{limitations}
+
+The model makes several simplifying assumptions. The coupling distance
+\(r\) is a scalar, whereas real agent-center coupling is
+multi-dimensional (economic, informational, political). A vector-valued
+extension \(\mathbf{r} \in \mathbb{R}^k\) would better represent this
+structure but would complicate the potential landscape and potentially
+introduce multiple local minima, depending on the cross-term structure.
+
+The gradient dynamics assumption models myopic adjustment. Agents with
+strategic foresight would solve an optimal control problem rather than
+following the gradient, potentially producing different transient
+behavior. However, since the coexistence attractor is the unique global
+minimum, the asymptotic destination is the same under any reasonable
+adjustment rule.
+
+The model parameters (\(G\), \(\tau\), \(\gamma\), \(\sigma\)) are
+treated as exogenous constants. In practice, all of these are
+endogenous: centers adjust their coupling parameters in response to
+agent behavior (§\ref{center-competition-for-agents}), and agents'
+boundary integrity co-evolves with their coupling state
+(§\ref{boundary-dynamics-and-irreversibility}). The coupled
+agent-boundary system (§\ref{the-coupled-agent-boundary-system})
+partially addresses this for \(B_i\) but leaves \(G\) and \(\tau\)
+fixed.
+
+Agent-agent interactions within a center's coexistence band are absent
+from the model. In reality, agents coupled to the same center influence
+one another through competition for the center's finite resources and
+through network effects. Incorporating these interactions would couple
+the \(N\) agents' dynamics and could produce coordination phenomena
+(clustering, stratification) not captured by the single-agent analysis.
+
+The separability of the multi-center potential
+(Theorem~\ref{thm-multi-center-attractor}) assumes no center-center
+interaction effects: coupling more tightly to center \(k\) does not
+alter the parameters of center \(k'\). In practice, centers may compete
+(joining one firm may constrain one's relationship with a rival) or
+complement (a university affiliation may enhance corporate coupling).
+Cross-coupling terms would break separability and could create multiple
+local minima.
+
+\textbf{Scope.} The results apply to any system of self-maintaining
+agents coupled to resource-providing centers in a finite-resource
+environment. The mathematical structure (potential well with short-range
+repulsion and long-range attraction) is generic; the specific functional
+forms (\(1/r^2\), \(1/r\)) are the simplest producing the correct
+qualitative behavior. Different exponent choices would shift the
+quantitative predictions (attractor location, bandwidth formula) while
+preserving the structural results (unique attractor, bounded coexistence
+band, irreversible transitions).
+
+\subsection{Future Work}\label{future-work}
+
+Several extensions follow naturally from the present results.
+
+\textbf{Vector-valued coupling.} Replacing the scalar \(r\) with a
+vector \(\mathbf{r} \in \mathbb{R}^k\) representing distinct coupling
+dimensions (economic, informational, political) would permit analysis of
+dimensional trade-offs: an agent might be closely coupled economically
+but loosely coupled politically. The potential landscape in higher
+dimensions may exhibit saddle points and ridges absent from the 1D
+analysis, and the gradient dynamics would produce richer trajectory
+geometry.
+
+\textbf{Stochastic perturbations.} Adding noise to the gradient dynamics
+(\(\dot{r} = -\mu V'(r) + \sigma_n \xi(t)\) with \(\xi\) a white noise
+process) would model exogenous shocks (economic crises, policy changes,
+natural disasters) and permit analysis of mean first-passage times from
+the attractor to the band boundaries. The depth of the potential well
+(\(D = G^2\mathcal{M}/(4\tau)\)) relative to noise intensity would
+determine the system's resilience to stochastic perturbation, connecting
+to the Kramers escape rate in chemical physics.
+
+\textbf{Endogenous parameter dynamics.} Modeling \(G\) and \(\tau\) as
+functions of system state (e.g., \(G\) increases with the number of
+agents in the coexistence band due to network effects, or \(\tau\)
+increases with \(\mathcal{M}\) due to bureaucratic growth) would
+introduce feedback loops that could create hysteresis, bifurcations, or
+limit cycles in the agent-center dynamics.
+
+\textbf{Agent-agent interactions.} Incorporating coupling between agents
+within a center's coexistence band, either through shared resource
+depletion or through cooperative surplus generation, would extend the
+single-agent model to a multi-agent dynamical system. Such an extension
+could connect to evolutionary game dynamics on networks and to the
+mean-field theory of interacting particle systems.
+
+\textbf{Empirical calibration.} The model parameters (\(G\), \(\tau\),
+\(\gamma\), \(B_i\)) are in principle measurable from institutional
+data: resource distributions, autonomy metrics, organizational turnover
+rates, and agent-complexity proxies. Calibrating the model against
+firm-worker, citizen-state, or ecological data would convert the
+qualitative predictions into quantitative forecasts and provide
+empirical tests of the bandwidth scaling laws.
+
+\textbf{Coupled agent-resource dynamics on production networks.} The
+present dynamical analysis treats resource stocks as parameters. A
+natural extension would couple agent-state dynamics to resource-stock
+dynamics through a flow equation in which each agent's output
+replenishes downstream inputs. This would double the phase space and
+admit new phenomena: production cycles (boom-bust oscillations), trophic
+cascades (single-agent dissolution propagating through the network),
+hysteresis (irreversibility of collapse when producer agents dissolve,
+connecting to \citep{TC-III}), and spectral stability conditions
+requiring the network's input-output matrix to have spectral radius
+below unity. Freedom bandwidth would acquire a supply-chain component,
+giving a formal measure of network fragility.
+
+\section{Conclusion}\label{conclusion}
+
+We have derived a dynamical systems model of agent-center coupling in
+which stable coexistence is a global attractor, the viable coupling
+region is bounded and measurable, and boundary transitions are
+irreversible. The coexistence attractor \(r^* = 2\tau/G\) is globally
+asymptotically stable
+(Theorem~\ref{thm-stability-coexistence-attractor}), with a convergence
+rate proportional to the center's value mass and the agent's mobility.
+The stable coexistence band exists if and only if the center's
+accumulated negentropy exceeds a threshold that scales with agent
+complexity (Theorem~\ref{thm-existence-coexistence-band}), and its
+width, the freedom bandwidth, increases with center mass and decreases
+with dissolution pressure and entropy leakage
+(Theorem~\ref{thm-freedom-bandwidth}). Outside the band, dissolution
+(Theorem~\ref{thm-irreversibility-dissolution}) and starvation
+(Theorem~\ref{thm-starvation-spiral}) proceed irreversibly under the
+coupled agent-boundary dynamics. The multi-center extension
+(Theorem~\ref{thm-multi-center-attractor}) proves that the potential
+separates across coupling dimensions, yielding componentwise convergence
+and a diversification benefit for agents coupled to multiple centers.
+
+These results connect to and extend the preceding papers in this series.
+The value mass \(\mathcal{M}\) that determines the coexistence band is
+the accumulated negentropy of \citep{TC-III}; the center destruction
+whose cascade consequences are quantified here
+(Corollary~\ref{cor-cascade-collapse}) illustrates a dynamical
+consequence of the irreplaceability result proved there. The boundary
+integrity \(B_i\) whose degradation drives the irreversibility results
+is maintained against the thermodynamic friction analyzed in
+\citep{TC-IV}. The stability-cooperation feedback
+(Proposition~\ref{prop-stability-cooperation-feedback}) links the
+dynamical attractor to the cooperation threshold of \citep{TC-V},
+closing a loop between static equilibrium selection and dynamical
+convergence. The constrained optimization framework of \citep{TC-I}
+provides the shadow-price interpretation of the dissolution threshold
+(§\ref{coupling-to-constrained-optimization}), and the information
+integrity results of \citep{TC-II} underpin the informational dimension
+of agent-center coupling. Together, the six papers provide a unified
+account of the thermodynamics of multi-agent cooperation: constraint
+necessity, information integrity, irreplaceability, friction costs,
+equilibrium selection, and dynamical stability.
+
+\addcontentsline{toc}{section}{References}
+\bibliography{../../shared/main}
+\end{document}

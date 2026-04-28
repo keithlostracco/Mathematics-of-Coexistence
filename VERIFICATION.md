@@ -13,7 +13,7 @@ that reports individual PASS/FAIL results and a final count.
 | Suite | Location | Scripts | Checks |
 |-------|----------|--------:|-------:|
 | Core derivations | `scripts/simulations/derivations/` | 6 | 744 |
-| AI applications | `scripts/simulations/case-studies/ai/` | 6 | 447 |
+| Applied case studies | `scripts/simulations/applied/` | 22 | 447 (CORE) |
 | **Total (CORE)** | | **12** | **1,191** |
 
 All 1,191 checks pass with 0 failures.
@@ -32,17 +32,45 @@ paper sections.
 | `verify_value_dynamics.py` | Value evolution equations, inequality dynamics (§V, Appendix A) |
 | `verify_accumulated_negentropy.py` | Negentropy integrals, destruction-irrationality ratio (§V, Appendix A) |
 
-## AI-Application Scripts
+## Applied Case-Study Scripts
 
-These verify the six AI-alignment applications in §VII and generate figure data.
+These verify the applied case studies and generate figure data.
+All 22 scripts live in `scripts/simulations/applied/`.
+
+### Empirical Case Studies
+
+Each applies the framework to a real-world scenario with historical data.
+
+| Script | Application |
+|--------|-------------|
+| `verify_nile_water.py` | Nile Basin water-rights allocation |
+| `verify_minimum_wage.py` | Minimum-wage constraint analysis |
+| `verify_iraq_war.py` | Iraq War thermodynamic conflict costs |
+| `verify_criminal_justice.py` | Criminal justice system friction |
+| `verify_social_media.py` | Social-media misinformation entropy |
+| `verify_corruption.py` | Corruption and institutional trust |
+| `verify_governance.py` | Governance mechanism design |
+| `verify_altruism.py` | Altruism as rational strategy |
+| `verify_amazon.py` | Amazon deforestation negentropy loss |
+| `verify_alexandria.py` | Library of Alexandria destruction cost |
+| `verify_inequality.py` | Wealth-inequality dynamics |
+| `verify_libya.py` | Libya intervention analysis |
+| `verify_tariff.py` | Predictive tariff-policy model |
+| `verify_alliance.py` | Alliance formation dynamics |
+| `verify_power_concentration.py` | Power-concentration instability |
+| `verify_tariff_value_dynamics.py` | Tariff-policy value-dynamics bandwidth |
+
+### Framework Case Studies
+
+These verify the six framework case studies and generate figure data.
 
 | Script | Application |
 |--------|-------------|
 | `verify_resource_constraints.py` | Finite-resource constraint satisfaction |
 | `verify_cooperative_equilibrium.py` | Multi-agent cooperative equilibrium |
 | `verify_deception_entropy.py` | Deception-entropy penalty |
-| `verify_misalignment_friction.py` | Reward-hacking friction cost |
-| `verify_foundation_collapse.py` | Foundation model ecosystem collapse |
+| `verify_adversarial_friction.py` | Adversarial exploitation friction cost |
+| `verify_institutional_collapse.py` | Institutional ecosystem collapse |
 | `verify_biosphere_preservation.py` | Biosphere-preservation rationality |
 
 ## How to Run
@@ -70,18 +98,18 @@ python scripts/run_verification.py -v
 Or run scripts individually:
 
 ```bash
-# Core derivations
+# Core
 for f in scripts/simulations/derivations/verify_*.py; do python "$f"; done
 
-# AI applications
-for f in scripts/simulations/case-studies/ai/verify_*.py; do python "$f"; done
+# Applied case studies
+for f in scripts/simulations/applied/verify_*.py; do python "$f"; done
 ```
 
 **PowerShell:**
 
 ```powershell
 Get-ChildItem scripts/simulations/derivations/verify_*.py | ForEach-Object { python $_.FullName }
-Get-ChildItem scripts/simulations/case-studies/ai/verify_*.py | ForEach-Object { python $_.FullName }
+Get-ChildItem scripts/simulations/applied/verify_*.py | ForEach-Object { python $_.FullName }
 ```
 
 ### Interpret Output
@@ -117,11 +145,11 @@ Six scripts in `scripts/figures/` produce the application figures:
 
 | Script | Output |
 |--------|--------|
-| `fig_foundation_collapse.py` | Foundation model ecosystem collapse |
+| `fig_institutional_collapse.py` | Institutional ecosystem collapse |
 | `fig_resource_pareto.py` | Resource-allocation Pareto frontier |
 | `fig_burning_library.py` | Burning-library negentropy visualization |
 | `fig_cooperative_equilibrium.py` | Cooperative equilibrium basin of attraction |
-| `fig_deceptive_alignment_entropy.py` | Deception-entropy cost surface |
-| `fig_reward_hacking_friction.py` | Reward-hacking friction landscape |
+| `fig_deception_entropy.py` | Deception-entropy cost surface |
+| `fig_adversarial_friction.py` | Adversarial friction landscape |
 
 Figures are saved to `output/figures/`.

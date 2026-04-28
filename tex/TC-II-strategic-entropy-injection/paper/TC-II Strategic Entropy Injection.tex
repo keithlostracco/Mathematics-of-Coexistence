@@ -1,0 +1,1672 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\graphicspath{{../../shared/figures/}}
+\usepackage{natbib}
+\bibliographystyle{unsrtnat}
+\usepackage{doi}
+% \setcitestyle{numbers,super} % Superscript citation numbers (e.g. ¹, ²⁻⁴) — does not support locator notes
+\setcitestyle{numbers,square} % Square brackets around citation numbers (e.g. [1], [2-4]) — math standard
+% ── Merge citation text into a single hyperlink ───────────────────────────────
+\makeatletter
+\renewcommand{\hyper@natlinkbreak}[2]{#1}
+\makeatother
+\usepackage{titlesec}
+% New page before each top-level section
+% \newcommand{\sectionbreak}{\clearpage}
+
+% ── Theorem-like environments ─────────────────────────────────────────────────
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{thmtools}
+\declaretheorem[name=Theorem]{theorem}
+\declaretheorem[name=Proposition,sibling=theorem]{proposition}
+\declaretheorem[name=Lemma,sibling=theorem]{lemma}
+\declaretheorem[name=Corollary,sibling=theorem]{corollary}
+\declaretheorem[name=Conjecture,sibling=theorem]{conjecture}
+
+\theoremstyle{definition}
+\declaretheorem[name=Definition,style=definition]{definition}
+\declaretheorem[name=Axiom,style=definition,sibling=definition]{axiom}
+\declaretheorem[name=Assumption,style=definition,sibling=definition]{assumption}
+\declaretheorem[name=Criterion,style=definition,sibling=definition]{criterion}
+\declaretheorem[name=Example,style=definition,sibling=definition]{example}
+
+\theoremstyle{remark}
+\declaretheorem[name=Remark,style=remark]{remark}
+\declaretheorem[name=Observation,style=remark,sibling=remark]{observation}
+\declaretheorem[name=Property,style=remark,sibling=remark]{property}
+
+% Prevent theorem-like environments from starting near the page bottom.
+\usepackage{etoolbox}
+\BeforeBeginEnvironment{theorem}{\needspace{4\baselineskip}\addvspace{6pt}}
+\BeforeBeginEnvironment{corollary}{\needspace{4\baselineskip}\addvspace{6pt}}
+\BeforeBeginEnvironment{lemma}{\needspace{4\baselineskip}\addvspace{6pt}}
+\BeforeBeginEnvironment{proposition}{\needspace{4\baselineskip}\addvspace{6pt}}
+\BeforeBeginEnvironment{definition}{\needspace{4\baselineskip}\addvspace{6pt}}
+\BeforeBeginEnvironment{axiom}{\needspace{4\baselineskip}\addvspace{6pt}}
+\BeforeBeginEnvironment{assumption}{\needspace{4\baselineskip}\addvspace{6pt}}
+\BeforeBeginEnvironment{remark}{\needspace{4\baselineskip}\addvspace{9pt}}
+
+% ── Pandoc-generated table support ────────────────────────────────────────────
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{calc}
+\usepackage{caption}
+% Pandoc 3.x wraps uncaptioned longtables in \def\LTcaptype{none};
+% this requires a 'none' counter to exist.
+\newcounter{none}
+
+% ── Paragraph spacing (matches Pandoc default) ────────────────────────────────
+% No paragraph indentation; inter-paragraph spacing instead.
+\usepackage{parskip}
+
+% ── Page-break quality ────────────────────────────────────────────────────────
+% Prevent widow/orphan lines (single line stranded at top/bottom of page).
+\widowpenalty=10000
+\clubpenalty=10000
+% Pin footnotes to the page bottom even with \raggedbottom.
+\usepackage[bottom]{footmisc}
+% Prevent page breaks immediately before or after display equations.
+\predisplaypenalty=10000
+\postdisplaypenalty=150
+% Allow uneven page bottoms rather than stretching vertical glue.
+\raggedbottom
+% Increase separation between body text and footnotes.
+\setlength{\skip\footins}{1.5\baselineskip}
+% Ensure headings don't appear at page bottom without body text following.
+\usepackage{needspace}
+% Reserve enough space for the heading itself plus at least two following
+% lines of body text (or a nested heading plus a line). This prevents a
+% heading from appearing at the bottom of a page with its content (or its
+% next-level subheading) starting on the following page.
+\let\origsection\section
+\renewcommand{\section}{\needspace{8\baselineskip}\origsection}
+\let\origsubsection\subsection
+\renewcommand{\subsection}{\needspace{8\baselineskip}\origsubsection}
+\let\origsubsubsection\subsubsection
+\renewcommand{\subsubsection}{\needspace{6\baselineskip}\origsubsubsection}
+\let\origparagraphcmd\paragraph
+\renewcommand{\paragraph}{\needspace{4\baselineskip}\origparagraphcmd}
+\let\origsubparagraph\subparagraph
+\renewcommand{\subparagraph}{\needspace{4\baselineskip}\origsubparagraph}
+
+% Discourage page breaks inside multi-line math environments (align, gather, etc.)
+\interdisplaylinepenalty=10000
+
+% ── Section numbering ────────────────────────────────────────────────────────
+% Pandoc --number-sections generates \section{...} (not \section*{...}).
+% LaTeX auto-numbers to depth 3 (subsubsection) by default.
+\setcounter{secnumdepth}{3}
+
+% ── Make \paragraph and \subparagraph block-level (matches Pandoc) ───────────
+% By default LaTeX renders \paragraph as a run-in heading (text continues on
+% the same line). These commands make them free-standing headings with
+% proper spacing before and after.
+\titleformat{\paragraph}
+  {\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+  {0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+\titleformat{\subparagraph}
+  {\normalfont\normalsize\bfseries}{\thesubparagraph}{1em}{}
+\titlespacing*{\subparagraph}
+  {0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+% ── Pandoc-generated tightlist support ────────────────────────────────────────
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% ── Pandoc 3.x figure sizing ─────────────────────────────────────────────────
+% \pandocbounded constrains included graphics to text width when they exceed it
+\newcommand{\pandocbounded}[1]{%
+  \sbox0{#1}%
+  \ifdim\wd0>\linewidth
+    \resizebox{\linewidth}{!}{#1}%
+  \else
+    #1%
+  \fi
+}
+
+% ── Unicode character fixes ───────────────────────────────────────────────────
+\usepackage{amssymb}
+\usepackage{newunicodechar}
+\newunicodechar{✓}{$\checkmark$}
+\newunicodechar{≠}{$\neq$}
+\newunicodechar{≡}{$\equiv$}
+\newunicodechar{≈}{$\approx$}
+\newunicodechar{δ}{$\delta$}
+\newunicodechar{−}{$-$}
+% Superscript digits used in scientific notation (e.g. 10^-7, 10^29)
+\newunicodechar{⁰}{$^{0}$}
+% ¹²³ already defined by textcomp; suppress redefinition warning
+\begingroup\renewcommand\PackageWarning[2]{}%
+\newunicodechar{¹}{$^{1}$}
+\newunicodechar{²}{$^{2}$}
+\newunicodechar{³}{$^{3}$}
+\endgroup
+\newunicodechar{⁴}{$^{4}$}
+\newunicodechar{⁵}{$^{5}$}
+\newunicodechar{⁶}{$^{6}$}
+\newunicodechar{⁷}{$^{7}$}
+\newunicodechar{⁸}{$^{8}$}
+\newunicodechar{⁹}{$^{9}$}
+\newunicodechar{⁻}{$^{-}$}
+% Fix \rightarrow for use outside math mode
+\let\mystRightarrow\rightarrow
+\renewcommand{\rightarrow}{\ensuremath{\mystRightarrow}}
+% ─────────────────────────────────────────────────────────────────────────────
+
+% Allow TeX extra stretch to resolve moderate overfull hboxes
+\emergencystretch=2em
+
+\hypersetup{colorlinks=true, allcolors=blue}
+
+\title{Thermodynamics of Cooperation: Strategic Entropy Injection}
+\author{Keith Lostracco}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We formalize strategic signal corruption (deception) as entropy
+injection into communication channels between cooperating agents. Using
+Shannon information theory and Landauer's principle, we prove three
+results. First, deception imposes a quantifiable decision cost on the
+receiver, proportional to the residual variance of the payoff-relevant
+parameter induced by the corrupted signal. Second, verification against
+deception requires redundant observations whose energy cost diverges as
+the corruption rate approaches the channel capacity limit. Third,
+pervasive signal corruption across a network of agents collapses
+cooperative surplus at a critical corruption rate, yielding a sharp
+network-collapse threshold. A key consequence is that no costless
+deception exists: for any non-zero corruption rate, at least one of the
+decision cost or the verification cost is strictly positive. Honest
+communication is the unique efficiency-maximizing regime. The results
+connect informational entropy injection to the physical friction
+framework developed in the first paper of this series, unifying overt
+boundary violations and covert signal corruption under a single cost
+accounting.
+\end{abstract}
+\newpage
+\tableofcontents
+\newpage
+\section{Introduction}\label{introduction}
+
+\emph{Necessary Constraints} \citep{TC-I} proves that mutual boundary
+constraints are necessary for multi-agent resource allocation in
+dissipative systems, and \emph{Thermodynamic Friction} \citep{TC-IV}
+quantifies the thermodynamic cost of overt constraint violations
+(resource seizure, boundary damage) through friction multipliers. But
+agents interact not only through physical resource competition; they
+also coordinate through information exchange. A qualitatively different
+class of non-cooperative behavior operates on this informational
+channel: deception, broken promises, and strategic misinformation that
+corrupt the signals upon which other agents base their decisions.
+
+This paper formalizes strategic signal corruption as entropy injection
+into communication channels. Using Shannon's information theory
+\citep{Shannon1948}, Landauer's principle \citep{Landauer1961}, and the
+network friction framework of \citep{TC-IV}, we prove three results:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{Decision cost of deception}
+  (Theorem~\ref{thm-decision-cost-quadratic}). When an agent injects
+  entropy into a communication channel, the receiver's expected utility
+  loss equals
+  \(\mathbb{E}[\operatorname{Var}(\alpha \mid Y)] / (2\beta)\), scaling
+  linearly with the residual variance of the payoff parameter after
+  observing the corrupted signal.
+\item
+  \textbf{Metabolic cost of verification}
+  (Theorem~\ref{thm-metabolic-cost-verification}). An agent defending
+  against deception must perform redundant observations whose energy
+  cost, denominated in joules via Landauer's bound, diverges as the
+  corruption rate approaches \(q = 0.5\) (channel capacity limit).
+\item
+  \textbf{Systemic deception theorem}
+  (Theorem~\ref{thm-systemic-deception}). When deception is pervasive
+  across a network of \(N\) agents, the cooperative surplus collapses at
+  a critical average corruption rate \(\bar{q}^*\), yielding a sharp
+  network-collapse threshold.
+\end{enumerate}
+
+These results extend the thermodynamic friction framework from physical
+boundary violations to informational boundary violations. A key
+consequence is the inevitability corollary: no costless deception exists
+(Corollary~\ref{cor-inevitability-deception-cost}). Every non-zero
+corruption rate imposes a measurable energy cost on either the deceived
+agent, the verifying agent, or both. Honest communication is the unique
+efficiency-maximizing regime (Corollary~\ref{cor-honesty-efficiency}).
+
+\subsection{Related Work}\label{related-work}
+
+\subsubsection{Shannon Information
+Theory}\label{shannon-information-theory}
+
+\citet{Shannon1948} defined information entropy
+\(H(X) = -\sum_x p(x) \log_2 p(x)\), proved the channel coding theorem
+establishing channel capacity as the sharp boundary between reliable and
+unreliable communication, and demonstrated fundamental limits on data
+compression. Shannon's framework is domain-independent, which is
+precisely what makes it applicable to strategic and economic contexts.
+However, Shannon's channel model has one sender and one receiver; it
+does not address multiple agents communicating simultaneously or agents
+who deliberately corrupt information. Shannon excluded semantics by
+design; his entropy measures statistical structure, not the usefulness
+of information to a decision-maker. Where Shannon gave the mathematical
+language (entropy, mutual information, channel capacity), this paper
+uses that language to model strategic communication in multi-agent
+networks and derives quantitative conclusions: honesty is not merely
+efficient but the unique network configuration that minimizes
+thermodynamic waste (Corollary~\ref{cor-honesty-efficiency}).
+
+\subsubsection{The Thermodynamic Cost of
+Information}\label{the-thermodynamic-cost-of-information}
+
+The century-long resolution of Maxwell's Demon established the
+cornerstone principle: information is physical. \citet{Szilard1929}
+showed that measurement produces at least \(k_B \ln 2\) of entropy per
+bit. \citeauthor{Brillouin1951}
+\citetext{\citeyear{Brillouin1951}; \citeyear{Brillouin1962}} proved the
+formal equivalence between Shannon information and thermodynamic entropy
+via \(S_{\text{info}} = k_B \ln 2 \cdot H(X)\). \citet{Landauer1961}
+identified erasure as the irreducible cost: erasing one bit at
+temperature \(T\) dissipates at least \(k_B T \ln 2\) joules, a result
+experimentally verified by \citet{Berut2012}. \citeauthor{Bennett1973}
+\citetext{\citeyear{Bennett1973}; \citeyear{Bennett1982}} completed the
+resolution by demonstrating that measurement can be reversible; only
+erasure carries unavoidable entropy cost. This principle, that every act
+of acquiring, processing, or erasing information has an irreducible
+thermodynamic cost, is the physical basis for
+Theorem~\ref{thm-metabolic-cost-verification} and the energy
+denomination of all results in this paper.
+
+\subsubsection{Value of Information and Strategic
+Deception}\label{value-of-information-and-strategic-deception}
+
+\citet{Blackwell1953} proved that more informative signals yield weakly
+higher expected utility in any decision problem, establishing the formal
+link between information quality and decision quality. While Shannon's
+channel model treats noise as environmental, this paper formalizes
+\emph{strategic} noise: deliberate signal corruption by a
+self-interested agent. Our contribution is the Deception-Friction
+Mapping (Definition~\ref{def-deception-friction-mapping}):
+\(\Delta\phi = \eta_{\text{info}} \cdot \Delta H \cdot W_{\text{bit}}\),
+which chains Shannon's informational entropy (\(\Delta H\) in bits)
+through Landauer's energy conversion (\(W_{\text{bit}}\) in J/bit) to
+network friction (\(\phi\)) in the framework of \citep{TC-IV}. To our
+knowledge, this mapping has no precedent in the information theory
+literature; it is the formal bridge between information entropy and
+multi-agent dynamics.
+
+\textbf{The gap.} The information-theoretic tradition established that
+information is quantifiable \citep{Shannon1948}, physical
+\citep{Brillouin1962, Landauer1961}, and that more information yields
+better decisions \citep{Blackwell1953}. What it left unresolved was the
+formalization of deliberate information corruption as a strategic act
+with quantifiable thermodynamic cost, and the derivation of
+network-level consequences (collapse thresholds, efficiency loss) from
+individual acts of signal corruption.
+
+\section{Model}\label{model}
+
+The environment consists of \(N \geq 2\) agents sharing a finite
+resource endowment, as formalized in \citep{TC-I}. Each agent \(i\)
+selects a resource-allocation strategy \(\mathbf{x}_i\) to maximize a
+utility function \(U_i(\mathbf{x}_i)\) subject to scarcity constraints
+and mutual boundary constraints. The regularity conditions (twice
+continuously differentiable, strictly concave utility; see Assumption 1
+in \citep{TC-I}) are assumed throughout.
+
+Agents do not have direct access to all payoff-relevant information.
+Instead, they rely on signals transmitted through communication channels
+by other agents. Agent \(A\) (sender) observes the environmental state
+\(\Theta\) and transmits a signal \(Y\) to Agent \(B\) (receiver), who
+selects its strategy based on \(Y\). The channel quality is measured by
+the mutual information \(I(\Theta; Y)\) between the true state and the
+received signal (Definition~\ref{def-channel-quality}).
+
+A deceptive channel is one in which the sender deliberately corrupts the
+mapping \(\Theta \to Y\), injecting residual entropy
+\(\Delta H = H(\Theta | Y) > 0\) into the receiver's information
+(Definition~\ref{def-deception}). For concrete analysis, we model this
+as a Binary Symmetric Channel (BSC) with deception rate
+\(q \in [0, 0.5]\), the probability that any given communication is
+strategically false. The channel capacity \(C(q) = 1 - h(q)\), where
+\(h(q)\) is the binary entropy function, drops from 1 bit/use (honest)
+to 0 (pure noise) as \(q\) increases.
+
+The Agent Communication Model section presents the formal channel
+framework and defines the honest baseline. Deception as Entropy
+Injection formalizes deliberate signal corruption. The Decision Cost of
+Deception derives the quadratic utility loss from corrupted information,
+and The Metabolic Cost of Verification derives the energy expenditure
+required for defense. Cumulative Network Degradation proves the systemic
+deception theorem and extends it to serial multi-agent chains, where
+per-agent corruption compounds super-linearly with chain length and
+yields a sharp chain-collapse threshold
+(Proposition~\ref{prop-bsc-series-depth},
+Corollary~\ref{cor-pipeline-collapse-threshold}). The Worked Examples
+section illustrates the framework numerically, and The Complete
+Micro-Friction Model section formalizes the unified cost function.
+
+\section{The Agent Communication
+Model}\label{the-agent-communication-model}
+
+\subsection{Motivation: Why Information Matters for
+Optimization}\label{motivation-why-information-matters-for-optimization}
+
+The Lagrangian constraints \citep{TC-I} and thermodynamic friction
+\citep{TC-IV} derivations treated agent utilities \(U_i(\mathbf{x}_i)\)
+as if each agent has perfect knowledge of the environment. In reality,
+agents must \textbf{observe}, \textbf{communicate}, and \textbf{infer}
+the state of the world before selecting strategies. The quality of an
+agent's information directly determines the quality of its decisions,
+and therefore its energetic outcome.
+
+When one agent deliberately corrupts the information available to
+another, it does not breach the victim's physical boundary (no theft, no
+violence) but it degrades the victim's \textbf{decision-making
+capacity}. The victim acts on false premises, selects a suboptimal
+strategy, and suffers an energetic loss. This is
+\textbf{micro-friction}: a subtle, information-theoretic analog of the
+macro-friction quantified in \citep{TC-IV}.
+
+\subsection{The Environmental State}\label{the-environmental-state}
+
+Let \(\Theta\) denote the \textbf{state of the environment}, a random
+variable (or random vector) representing all payoff-relevant
+information: resource availability, other agents' intentions, threats,
+opportunities. The state has a prior distribution \(p(\theta)\) and
+\textbf{entropy}:
+
+\[H(\Theta) = -\sum_{\theta} p(\theta) \log_2 p(\theta) \quad \text{(bits)}\]
+
+This entropy measures the agent's \textbf{baseline uncertainty} about
+the world before receiving any signal.
+
+\subsection{The Communication Channel}\label{the-communication-channel}
+
+Agent \(A\) (the \textbf{sender}) observes the state \(\Theta\) and
+transmits a signal \(Y\) to Agent \(B\) (the \textbf{receiver}). The
+signal passes through a \textbf{communication channel} characterized by
+the conditional distribution \(p(Y | \Theta)\):
+
+\[\Theta \xrightarrow{\;\;\text{Agent } A\;\;} Y \xrightarrow{\;\;\text{Channel}\;\;} \hat{Y} \xrightarrow{\;\;\text{Agent } B\;\;} \mathbf{x}_B\]
+
+In our framework:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Honest channel:} \(Y = \Theta\) (deterministic identity
+  mapping). Agent \(B\) receives perfect information.
+\item
+  \textbf{Noisy channel (environmental):} \(Y\) is a stochastic function
+  of \(\Theta\) due to physical noise, imperfect observation, or lossy
+  transmission. This is non-strategic noise.
+\item
+  \textbf{Deceptive channel:} Agent \(A\) \textbf{deliberately} corrupts
+  the mapping \(\Theta \to Y\) to mislead \(B\). This is the strategic
+  action we formalize.
+\end{itemize}
+
+\begin{definition}[Communication Channel Quality]
+\label{def-channel-quality}
+
+The \textbf{channel quality} between sender and receiver is measured by the \textbf{mutual information}:
+
+$$I(\Theta; Y) = H(\Theta) - H(\Theta | Y) = H(Y) - H(Y | \Theta)$$
+
+where:
+\begin{itemize}
+\item $H(\Theta | Y) = -\sum_{y} p(y) \sum_{\theta} p(\theta | y) \log_2 p(\theta | y)$ is the \textbf{conditional entropy}, the residual uncertainty about $\Theta$ after observing $Y$.
+\item $I(\Theta; Y) \in [0, H(\Theta)]$: zero mutual information means $Y$ tells $B$ nothing; $I = H(\Theta)$ means $Y$ resolves all uncertainty.
+\end{itemize}
+
+\end{definition}
+
+\subsection{The Honest Baseline}\label{the-honest-baseline}
+
+\begin{definition}[Honest Communication]
+\label{def-honest-communication}
+
+A transmission is \textbf{honest} if $Y$ is a sufficient statistic for $\Theta$, that is, $H(\Theta | Y) = 0$, equivalently $I(\Theta; Y) = H(\Theta)$.
+\end{definition}
+
+Under honest communication, Agent \(B\) can compute its optimal strategy
+\(\mathbf{x}_B^*(\Theta)\) because it knows the true state. The expected
+utility is:
+
+\[\bar{U}_B^{\text{honest}} = \mathbb{E}_\Theta\left[ U_B\left(\mathbf{x}_B^*(\Theta)\right) \right]\]
+
+This is the \textbf{first-best} outcome, the maximum achievable expected
+utility given the environment.
+
+\section{Deception as Entropy
+Injection}\label{deception-as-entropy-injection}
+
+\subsection{The Deception Operator}\label{the-deception-operator}
+
+\begin{definition}[Deception]
+\label{def-deception}
+
+Agent $A$ \textbf{deceives} Agent $B$ by transmitting a signal $Y$ through a channel $p(Y | \Theta)$ such that $H(\Theta | Y) > 0$ when $A$ could have transmitted honestly ($H(\Theta | Y) = 0$ is achievable). The \textbf{injected entropy} is:
+
+$$\Delta H \triangleq H(\Theta | Y) - H(\Theta | Y^{\text{honest}}) = H(\Theta | Y) \geq 0$$
+
+since $H(\Theta | Y^{\text{honest}}) = 0$ for honest transmission.
+\end{definition}
+
+\textbf{Interpretation:} \(\Delta H\) measures the \textbf{amount of
+false uncertainty} that Agent \(A\) has injected into Agent \(B\)'s
+information processing system. It is denominated in bits and represents
+the residual confusion \(B\) faces after receiving \(A\)'s signal.
+
+\subsection{The Binary Symmetric Channel
+Model}\label{the-binary-symmetric-channel-model}
+
+For concrete analysis, model the deceptive channel as a \textbf{Binary
+Symmetric Channel (BSC)}, the simplest non-trivial noise model in
+information theory.
+
+Suppose the state \(\Theta\) is a binary variable
+(\(\Theta \in \{0, 1\}\) with \(p(\Theta = 0) = p(\Theta = 1) = 1/2\),
+so \(H(\Theta) = 1\) bit). Agent \(A\) flips the signal with probability
+\(q \in [0, 1/2]\):
+
+\[p(Y = \theta | \Theta = \theta) = 1 - q, \qquad p(Y \neq \theta | \Theta = \theta) = q\]
+
+The conditional entropy is the \textbf{binary entropy function}:
+
+\[H(\Theta | Y) = h(q) \triangleq -q \log_2 q - (1 - q) \log_2(1 - q)\]
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lll@{}}
+\toprule\noalign{}
+Deception rate \(q\) & \(h(q)\) (bits) & Interpretation \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+0 & 0 & Perfect honesty, zero injected entropy \\
+0.01 & 0.081 & Minor distortion, occasional white lie \\
+0.05 & 0.286 & Moderate deception, \textasciitilde5\% of signals
+corrupted \\
+0.10 & 0.469 & Substantial deception, nearly half a bit lost \\
+0.25 & 0.811 & Heavy deception, 81\% of information destroyed \\
+0.50 & 1.000 & Total deception, signal carries zero information \\
+\end{longtable}
+}
+
+\textbf{Key observation:} At \(q = 0.5\), the signal is statistically
+independent of the truth; \(B\) learns nothing from \(A\)'s
+transmission. \(A\) might as well be broadcasting random noise. The
+\textbf{effective channel capacity} is:
+
+\[C(q) = 1 - h(q)\]
+
+which drops from 1 bit/use (honest) to 0 (total noise) as \(q\)
+increases from 0 to 0.5.
+
+\subsection{The Multi-Dimensional
+Generalization}\label{the-multi-dimensional-generalization}
+
+For a multi-dimensional state \(\Theta = (\Theta_1, \ldots, \Theta_d)\)
+with \(d\) independent binary components (total state entropy
+\(H(\Theta) = d\) bits), deception on each dimension with rate \(q\)
+gives:
+
+\[H(\Theta | Y) = d \cdot h(q), \qquad I(\Theta; Y) = d \cdot (1 - h(q))\]
+
+More generally, for a continuous state \(\Theta \in \mathbb{R}^d\) with
+differential entropy \(h(\Theta)\), deception can be modeled as additive
+noise \(Y = \Theta + Z\) where \(Z\) is the deception noise with
+variance \(\sigma_Z^2\). The mutual information under Gaussian
+assumptions is:
+
+\[I(\Theta; Y) = \frac{d}{2} \log_2\left(1 + \frac{\sigma_\Theta^2}{\sigma_Z^2}\right)\]
+
+which decreases continuously as the deception noise variance
+\(\sigma_Z^2\) increases, a smooth analog of the binary model.
+
+\subsection{Partial Deception and Mixed
+Signals}\label{partial-deception-and-mixed-signals}
+
+Real-world deception is rarely total. Agent \(A\) may lie about some
+dimensions while telling the truth about others, e.g., truthfully
+reporting resource location but misrepresenting quantity. Let
+\(S \subseteq \{1, \ldots, d\}\) denote the \textbf{deception set} (the
+dimensions on which \(A\) lies). Then:
+
+\[H(\Theta | Y) = \sum_{j \in S} h(q_j) + \sum_{j \notin S} 0 = \sum_{j \in S} h(q_j)\]
+
+The \textbf{deception magnitude} is:
+
+\[\Delta H = \sum_{j \in S} h(q_j) \leq |S| \quad \text{(bits)}\]
+
+This shows that deception is \textbf{selectively targeted}: a strategic
+liar corrupts only the dimensions that serve its interests, minimizing
+its own cognitive cost while maximizing the victim's confusion on the
+decision-relevant variables.
+
+\section{The Decision Cost of
+Deception}\label{the-decision-cost-of-deception}
+
+\subsection{Value of Information in Decision
+Problems}\label{value-of-information-in-decision-problems}
+
+Agent \(B\) uses the received signal \(Y\) to select its strategy
+\(\mathbf{x}_B(Y)\). The expected utility under a deceptive channel is:
+
+\[\bar{U}_B^{\text{deceived}} = \mathbb{E}_{\Theta, Y}\left[ U_B\left(\mathbf{x}_B(Y), \Theta\right) \right]\]
+
+where \(\mathbf{x}_B(Y)\) is \(B\)'s best response given what it
+believes (based on the received signal, which may be false).
+
+\begin{definition}[Decision Cost of Deception]
+\label{def-decision-cost-deception}
+
+The \textbf{decision cost} of deception is the utility loss Agent $B$ suffers due to acting on corrupted information:
+
+$$\Delta U_B \triangleq \bar{U}_B^{\text{honest}} - \bar{U}_B^{\text{deceived}} \geq 0$$
+\end{definition}
+
+The non-negativity follows from Blackwell's theorem
+\citeyearpar{Blackwell1953}: a more informative signal always yields
+(weakly) higher expected utility in any decision problem.
+
+\subsection{The Quadratic Decision
+Model}\label{the-quadratic-decision-model}
+
+To obtain closed-form results, consider the quadratic utility model from
+the Lagrangian constraints derivation. Agent \(B\) selects resource
+allocation \(x_B\) to maximize:
+
+\[U_B(x_B, \theta) = \alpha(\theta) \cdot x_B - \frac{\beta}{2} x_B^2\]
+
+where \(\alpha(\theta) > 0\) is the state-dependent marginal yield. The
+optimal action given known state \(\theta\) is:
+
+\[x_B^*(\theta) = \frac{\alpha(\theta)}{\beta}\]
+
+with utility \(U_B^*(\theta) = \frac{\alpha(\theta)^2}{2\beta}\).
+
+\textbf{Under honest communication:} \(B\) observes \(\theta\) and
+achieves:
+
+\[\bar{U}_B^{\text{honest}} = \mathbb{E}\left[\frac{\alpha(\Theta)^2}{2\beta}\right] = \frac{\mathbb{E}[\alpha^2]}{2\beta}\]
+
+\textbf{Under deceptive communication:} \(B\) observes \(Y\) and acts on
+\(\mathbb{E}[\alpha(\Theta) | Y]\):
+
+\[x_B(Y) = \frac{\mathbb{E}[\alpha(\Theta) | Y]}{\beta}\]
+
+The expected utility is:
+
+\[\bar{U}_B^{\text{deceived}} = \mathbb{E}\left[\alpha(\Theta) \cdot \frac{\mathbb{E}[\alpha | Y]}{\beta} - \frac{1}{2\beta}\left(\mathbb{E}[\alpha | Y]\right)^2\right] = \frac{1}{2\beta}\mathbb{E}\left[\left(\mathbb{E}[\alpha | Y]\right)^2\right]\]
+
+(using the tower property and the quadratic structure).
+
+\begin{theorem}[Decision Cost of Deception, Quadratic Model]
+\label{thm-decision-cost-quadratic}
+
+In the quadratic utility model, the decision cost of deception is:
+
+$$\Delta U_B = \frac{1}{2\beta} \operatorname{Var}\left(\alpha(\Theta) \mid Y\right)_{\text{avg}} = \frac{1}{2\beta}\mathbb{E}\left[\operatorname{Var}(\alpha | Y)\right]$$
+
+where $\operatorname{Var}(\alpha | Y)$ is the residual variance of the payoff parameter after observing the (possibly corrupted) signal. Equivalently:
+
+$$\Delta U_B = \frac{\operatorname{Var}(\alpha) - \operatorname{Var}(\mathbb{E}[\alpha | Y])}{2\beta} = \frac{\sigma_\alpha^2 - \sigma_{\hat{\alpha}}^2}{2\beta}$$
+
+where $\sigma_\alpha^2 = \operatorname{Var}(\alpha(\Theta))$ is the prior variance and $\sigma_{\hat{\alpha}}^2 = \operatorname{Var}(\mathbb{E}[\alpha | Y])$ is the explained variance.
+\end{theorem}
+
+\begin{proof}
+By the law of total variance:
+
+$$\operatorname{Var}(\alpha) = \mathbb{E}[\operatorname{Var}(\alpha | Y)] + \operatorname{Var}(\mathbb{E}[\alpha | Y])$$
+
+So $\mathbb{E}[\operatorname{Var}(\alpha | Y)] = \sigma_\alpha^2 - \sigma_{\hat{\alpha}}^2$. Now:
+
+$$\bar{U}_B^{\text{honest}} - \bar{U}_B^{\text{deceived}} = \frac{\mathbb{E}[\alpha^2]}{2\beta} - \frac{\mathbb{E}[(\mathbb{E}[\alpha|Y])^2]}{2\beta} = \frac{\mathbb{E}[\alpha^2] - \mathbb{E}[\hat{\alpha}^2]}{2\beta}$$
+
+where $\hat{\alpha} = \mathbb{E}[\alpha | Y]$. Since $\mathbb{E}[\hat{\alpha}] = \mathbb{E}[\alpha] = \mu_\alpha$ (tower property):
+
+$$\mathbb{E}[\alpha^2] - \mathbb{E}[\hat{\alpha}^2] = (\sigma_\alpha^2 + \mu_\alpha^2) - (\sigma_{\hat{\alpha}}^2 + \mu_\alpha^2) = \sigma_\alpha^2 - \sigma_{\hat{\alpha}}^2 = \mathbb{E}[\operatorname{Var}(\alpha | Y)]$$
+\end{proof}
+
+\textbf{Physical interpretation:} The decision cost equals
+\(1/(2\beta)\) times the \textbf{residual uncertainty} in the
+payoff-relevant parameter. Under honest communication,
+\(\operatorname{Var}(\alpha | Y) = 0\) (the signal resolves all
+uncertainty), so \(\Delta U_B = 0\). Under total deception (\(Y\)
+independent of \(\Theta\)),
+\(\operatorname{Var}(\alpha | Y) = \operatorname{Var}(\alpha)\), so
+\(\Delta U_B = \sigma_\alpha^2 / (2\beta)\), the full cost of
+uncertainty.
+
+\subsection{The Gaussian-Binary
+Illustration}\label{the-gaussian-binary-illustration}
+
+Let \(\alpha(\Theta) \in \{\alpha_L, \alpha_H\}\) with equal probability
+(\(\alpha_L < \alpha_H\)). The prior variance is:
+
+\[\sigma_\alpha^2 = \frac{(\alpha_H - \alpha_L)^2}{4}\]
+
+With a BSC deception channel (flip probability \(q\)):
+
+The posterior given \(Y\) is:
+
+\[p(\alpha_H | Y = H) = 1 - q, \qquad p(\alpha_H | Y = L) = q\]
+
+So \(\mathbb{E}[\alpha | Y = H] = (1-q)\alpha_H + q\alpha_L\) and
+\(\mathbb{E}[\alpha | Y = L] = q\alpha_H + (1-q)\alpha_L\).
+
+The explained variance is:
+
+\[\sigma_{\hat{\alpha}}^2 = (1 - 2q)^2 \cdot \frac{(\alpha_H - \alpha_L)^2}{4}\]
+
+Therefore:
+
+\[\Delta U_B = \frac{(\alpha_H - \alpha_L)^2}{8\beta}\left[1 - (1 - 2q)^2\right] = \frac{(\alpha_H - \alpha_L)^2}{8\beta} \cdot 4q(1 - q)\]
+
+\[\boxed{\Delta U_B(q) = \frac{q(1 - q)(\alpha_H - \alpha_L)^2}{2\beta}}\]
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Deception rate \(q\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(\Delta U_B / \Delta U_B^{\max}\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Interpretation
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+0.00 & 0\% & No lie → no loss \\
+0.01 & 3.96\% & Small lie → small cost \\
+0.05 & 19.0\% & Moderate → significant cost \\
+0.10 & 36.0\% & Substantial → over a third of potential loss \\
+0.25 & 75.0\% & Heavy → three quarters of maximum \\
+0.50 & 100\% & Total deception → full information loss \\
+\end{longtable}
+}
+
+where \(\Delta U_B^{\max} = (\alpha_H - \alpha_L)^2 / (8\beta)\) is the
+cost at \(q = 0.5\) (completely uninformative signal).
+
+\section{The Metabolic Cost of
+Verification}\label{the-metabolic-cost-of-verification}
+
+\subsection{From Information Loss to Energy
+Expenditure}\label{from-information-loss-to-energy-expenditure}
+
+Theorem~\ref{thm-decision-cost-quadratic} quantifies the
+\textbf{decision loss} from acting on corrupted information without
+knowing it is corrupted. In practice, agents often \textbf{suspect}
+deception and invest energy in \textbf{verification}: cross-referencing
+signals, gathering redundant information, and testing claims.
+
+This verification is real metabolic work. In biological systems, it
+manifests as heightened vigilance, stress hormones, immune-like scanning
+of social signals. In economic systems, it manifests as audits, legal
+contracts, escrow services, and due diligence. We now formalize this
+cost.
+
+\subsection{Verification via Redundant
+Observation}\label{verification-via-redundant-observation}
+
+Suppose Agent \(B\), suspecting deception, gathers \(K\) independent
+observations \(Y_1, \ldots, Y_K\) of the state \(\Theta\), each through
+a BSC with error rate \(q\). By the channel coding theorem
+\citep{Shannon1948}, reliable inference of \(\Theta\) requires:
+
+\[K \geq \frac{H(\Theta)}{C(q)} = \frac{1}{1 - h(q)} \quad \text{observations per bit of state uncertainty}\]
+
+where \(C(q) = 1 - h(q)\) is the channel capacity.
+
+Under honest communication (\(q = 0\), \(C = 1\)): one observation
+suffices (\(K = 1\)).
+
+Under deception (\(q > 0\), \(C < 1\)): \(B\) needs \(K > 1\)
+observations to achieve the same decision quality.
+
+\begin{definition}[Redundancy Factor]
+\label{def-redundancy-factor}
+
+The \textbf{redundancy factor} induced by a deceptive channel with error rate $q$ is:
+
+$$\rho(q) = \frac{1}{C(q)} = \frac{1}{1 - h(q)}$$
+
+This is the number of observations required per bit of state information to overcome the injected noise.
+\end{definition}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lllll@{}}
+\toprule\noalign{}
+\(q\) & \(h(q)\) & \(C(q)\) & \(\rho(q)\) & Extra observations needed \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+0.00 & 0.000 & 1.000 & 1.00 & 0\% overhead \\
+0.01 & 0.081 & 0.919 & 1.09 & 9\% overhead \\
+0.05 & 0.286 & 0.714 & 1.40 & 40\% overhead \\
+0.10 & 0.469 & 0.531 & 1.88 & 88\% overhead \\
+0.25 & 0.811 & 0.189 & 5.30 & 430\% overhead \\
+0.40 & 0.971 & 0.029 & 34.4 & 3340\% overhead \\
+\end{longtable}
+}
+
+\textbf{Key observation:} The redundancy factor diverges as
+\(q \to 0.5\). Near-total deception makes verification arbitrarily
+expensive, not linearly, but \textbf{explosively}. This nonlinearity is
+thermodynamically natural: as the channel approaches zero capacity, each
+marginal unit of reliability requires exponentially more observation.
+
+\subsection{Landauer's Bound and the Energy Cost of
+Verification}\label{landauers-bound-and-the-energy-cost-of-verification}
+
+Each observation requires physical work to acquire, process, and store.
+By Landauer's principle, the \textbf{minimum} energy to erase (reset)
+one bit of information is:
+
+\[E_{\text{bit}} = k_B T \ln 2\]
+
+where \(k_B\) is Boltzmann's constant and \(T\) is the temperature of
+the computing system.
+
+While the Landauer bound represents the absolute thermodynamic minimum,
+real biological and computational systems operate far above this floor.
+We introduce the \textbf{processing inefficiency factor} \(\xi \geq 1\)
+to capture the actual cost per bit:
+
+\[W_{\text{bit}} = \xi \cdot k_B T \ln 2\]
+
+For biological neural computation, \(\xi \approx 10^5 - 10^8\)
+\citep{Laughlin1998} (estimated from approximately \(10^4\) ATP
+molecules per bit at retinal synapses, each ATP hydrolysis yielding
+\(\sim 0.5 \text{ eV} \approx 20 k_B T\)). For modern digital
+computation, \(\xi \approx 10^3 - 10^5\) (current transistors dissipate
+\(\sim 10^3\) to \(10^5\) Landauer limits per switching operation
+\citep{Frank2002}).
+
+The absolute value of \(\xi\) cancels in our comparative results; what
+matters is the \textbf{ratio} of verification cost to honest-processing
+cost.
+
+\subsection{The Verification Energy
+Theorem}\label{the-verification-energy-theorem}
+
+\begin{theorem}[Metabolic Cost of Verification]
+\label{thm-metabolic-cost-verification}
+
+An agent receiving information through a deceptive channel (error rate $q > 0$) must expend at least:
+
+$$W_{\text{verify}}(q) = \rho(q) \cdot W_{\text{honest}} = \frac{W_{\text{honest}}}{1 - h(q)}$$
+
+energy to achieve the same decision quality as under honest communication, where $W_{\text{honest}}$ is the energy cost of processing the honest signal. The \textbf{verification overhead} is:
+
+$$\Delta W(q) = W_{\text{verify}}(q) - W_{\text{honest}} = W_{\text{honest}} \cdot \frac{h(q)}{1 - h(q)}$$
+
+This overhead:
+\begin{itemize}
+\item Is zero when $q = 0$ (honest).
+\item Grows monotonically with $q$.
+\item Diverges as $q \to 0.5$ (total deception makes verification infinitely expensive).
+\end{itemize}
+
+\end{theorem}
+
+\begin{proof}
+Under honest communication ($q = 0$), $B$ processes $H(\Theta)$ bits at cost $W_{\text{honest}} = H(\Theta) \cdot W_{\text{bit}}$. Under a BSC with error rate $q$, Shannon's channel coding theorem requires $H(\Theta) / C(q) = H(\Theta) / (1 - h(q))$ channel uses to reliably transmit $H(\Theta)$ bits. Each channel use costs $W_{\text{bit}}$ to process, so:
+
+$$W_{\text{verify}}(q) = \frac{H(\Theta)}{1 - h(q)} \cdot W_{\text{bit}} = \frac{W_{\text{honest}}}{1 - h(q)}$$
+
+The overhead $\Delta W = W_{\text{verify}} - W_{\text{honest}} = W_{\text{honest}} \cdot \left(\frac{1}{1-h(q)} - 1\right) = W_{\text{honest}} \cdot \frac{h(q)}{1-h(q)}$. Monotonicity follows from $h(q)$ being strictly increasing on $[0, 0.5]$ and $1 - h(q)$ being strictly decreasing. The divergence at $q \to 0.5$ follows from $h(0.5) = 1$.
+\end{proof}
+
+\subsection{The Deception Dilemma: Undetected vs.~Detected
+Lies}\label{the-deception-dilemma-undetected-vs.-detected-lies}
+
+Agent \(B\) faces a fundamental tension:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{If \(B\) does not verify:} \(B\) avoids the verification cost
+  \(\Delta W\) but suffers the full decision cost \(\Delta U_B\)
+  (Theorem~\ref{thm-decision-cost-quadratic}).
+\item
+  \textbf{If \(B\) verifies:} \(B\) recovers the decision quality but
+  pays the verification cost \(\Delta W\)
+  (Theorem~\ref{thm-metabolic-cost-verification}).
+\end{enumerate}
+
+In either case, deception imposes a cost on \(B\):
+
+\begin{corollary}[Inevitability of Deception Cost]
+\label{cor-inevitability-deception-cost}
+
+The minimum cost to Agent $B$ of deception at rate $q$ is:
+
+$$\mathcal{D}_B(q) = \min\left\{\Delta U_B(q), \;\; \Delta W(q) \right\}$$
+
+Both terms are strictly positive for $q > 0$, so $\mathcal{D}_B(q) > 0$ for any nonzero deception. There is no costless deception.
+\end{corollary}
+
+\textbf{Physical interpretation:} The victim of a lie always pays a
+price, either in bad decisions (if undetected) or in verification labor
+(if detected/suspected). This is the information-theoretic analog of the
+Second Law: once entropy is injected, removing it requires work.
+
+\section{Cumulative Network
+Degradation}\label{cumulative-network-degradation}
+
+\subsection{Connecting to the Network Friction
+Framework}\label{connecting-to-the-network-friction-framework}
+
+The thermodynamic friction derivation \citep{TC-IV} introduced the
+\textbf{network friction coefficient} \(\phi\), the \textbf{trust level}
+\(T = 1/(1 + \phi)\), \textbf{friction injection}, and the
+\textbf{cascading cost theorem}. We now connect deception directly to
+this framework.
+
+Each act of deception injects entropy into the network's information
+channels. Even when individual lies are small (\(q \ll 0.5\)), their
+cumulative effect degrades the reliability of all communication in the
+network. An agent that has been deceived once must increase its baseline
+verification effort for \textbf{all} future communications, not just
+from the liar but from everyone, because the agent cannot always
+identify the source of corruption.
+
+\subsection{Deception-Induced Friction: The Formal
+Connection}\label{deception-induced-friction-the-formal-connection}
+
+\begin{definition}[Deception-Friction Mapping]
+\label{def-deception-friction-mapping}
+
+A deceptive act injecting $\Delta H$ bits of entropy into the network increases the network friction coefficient by:
+
+$$\Delta \phi = \eta_{\text{info}} \cdot \Delta H \cdot W_{\text{bit}}$$
+
+where $\eta_{\text{info}} > 0$ is the \textbf{information-friction sensitivity}, the proportionality constant mapping informational entropy (weighted by its energetic cost) to network friction. This generalizes the friction injection framework of \citep{TC-IV} with $v = \Delta H \cdot W_{\text{bit}}$ being the energetic equivalent of the injected information entropy.
+\end{definition}
+
+\textbf{Interpretation:} The injected entropy \(\Delta H\) (bits) is
+converted to an energy-equivalent via \(W_{\text{bit}}\) (energy per
+bit), yielding a ``severity'' \(v\) in the same energy units as the
+thermodynamic friction derivation's boundary violations. This unifies
+macro-friction (physical boundary damage) and micro-friction
+(informational entropy injection) under a single framework.
+
+\subsection{The Network Verification
+Tax}\label{the-network-verification-tax}
+
+When the network operates at friction level \(\phi > 0\) (equivalently,
+trust level \(T < 1\)), every agent must invest in baseline verification
+for every communication. Define the \textbf{network deception rate}
+\(\bar{q}\) as the average error rate across all communication channels
+in the network.
+
+The per-transaction verification overhead (from
+Theorem~\ref{thm-metabolic-cost-verification}) is:
+
+\[\Delta W_{\text{tx}} = W_{\text{honest}} \cdot \frac{h(\bar{q})}{1 - h(\bar{q})}\]
+
+With \(M\) transactions per period, the \textbf{aggregate verification
+tax} is:
+
+\[C_{\text{verify}} = M \cdot \Delta W_{\text{tx}} = M \cdot W_{\text{honest}} \cdot \frac{h(\bar{q})}{1 - h(\bar{q})}\]
+
+This is energy spent \textbf{purely on checking whether information is
+true}, energy that, under honest communication, would be available for
+productive activity.
+
+\subsection{The Systemic Deception Cost
+Theorem}\label{the-systemic-deception-cost-theorem}
+
+\begin{theorem}[Cumulative Micro-Friction: The Systemic Deception Theorem]
+\label{thm-systemic-deception}
+
+A network of $N$ agents with $M$ cooperative transactions per period and average deception rate $\bar{q} > 0$ suffers a total per-period efficiency loss of:
+
+$$\mathcal{L}_{\text{deception}} = \underbrace{M \cdot \Delta U_{\text{avg}}(\bar{q})}_{\text{decision losses}} + \underbrace{M \cdot W_{\text{honest}} \cdot \frac{h(\bar{q})}{1 - h(\bar{q})}}_{\text{verification costs}}$$
+
+where $\Delta U_{\text{avg}}(\bar{q})$ is the average per-transaction decision loss (Theorem~\ref{thm-decision-cost-quadratic} averaged over all transaction types). The total cost:
+
+(a) Is zero if and only if $\bar{q} = 0$ (perfect honesty).
+
+(b) Grows super-linearly with $\bar{q}$ due to the $h(\bar{q})/(1 - h(\bar{q}))$ divergence.
+
+(c) Exceeds the network's cooperative surplus $E_{\text{coop net}}$ (the per-period net energetic gain from cooperation, as defined in \citep{TC-IV}) at a critical deception rate $\bar{q}^*$, beyond which cooperation becomes energetically unprofitable.
+\end{theorem}
+
+\begin{proof}
+Part (a): When $\bar{q} = 0$, $\Delta U_{\text{avg}}(0) = 0$ (Theorem~\ref{thm-decision-cost-quadratic}) and $h(0) = 0$ (so verification overhead is zero). Part (b): $h(q)/(1 - h(q))$ is continuous, increasing on $[0, 0.5)$, and diverges as $q \to 0.5^-$. Part (c): $\mathcal{L}_{\text{deception}}$ is continuous, starts at 0, and diverges as $\bar{q} \to 0.5$. Since $E_{\text{coop net}} < \infty$, the intermediate value theorem guarantees a crossing point $\bar{q}^*$.
+\end{proof}
+
+\begin{corollary}[The Honesty Efficiency Principle]
+\label{cor-honesty-efficiency}
+
+Honesty is defined as the communication regime that maximizes network efficiency. Any deviation from honest communication imposes a strictly positive, compounding cost on the network. In the notation of the thermodynamic friction derivation:
+
+$$\phi_{\text{honest}} = 0 \iff \bar{q} = 0 \iff \text{network operates at maximum cooperative efficiency}$$
+\end{corollary}
+
+\subsection{Serial Multi-Agent Chains: The Compounding
+Effect}\label{serial-multi-agent-chains-the-compounding-effect}
+
+The systemic deception theorem characterizes a network by its average
+corruption rate \(\bar{q}\). Many real multi-agent networks have
+additional structure: information traverses \emph{multiple agents} in
+series before reaching the agent who acts on it. A directive flows
+through layers of an organization before reaching the operator who
+executes it. A claim about the world propagates through chains of
+intermediaries (sources, journalists, editors, social-media reposters)
+before reaching a citizen who votes or buys on its basis. A trade signal
+passes through brokers, market-makers, and aggregators before a
+counterparty commits capital. In each case, the agent at the end of the
+chain conditions a payoff-relevant decision on a signal whose origin is
+several agents removed, and any one of those agents can introduce
+corruption. Serial composition compounds per-agent corruption in a way
+that cannot be captured by a single-channel model.
+
+\begin{proposition}[Serial BSC Composition]
+\label{prop-bsc-series-depth}
+
+Let $\Theta \to Y_1 \to Y_2 \to \cdots \to Y_d$ be a sequence of $d$ binary symmetric channels with independent error probabilities $q_1, \ldots, q_d \in [0, 1/2]$. The composite channel from $\Theta$ to $Y_d$ is itself a binary symmetric channel with effective error probability:
+
+$$q_{\text{eff}}(d; q_1, \ldots, q_d) = \frac{1 - \prod_{l=1}^{d} (1 - 2 q_l)}{2}.$$
+
+In particular, for a uniform per-agent rate $q_l = q$:
+
+$$q_{\text{eff}}(d, q) = \frac{1 - (1 - 2q)^d}{2}, \qquad C_{\text{eff}}(d, q) = 1 - h(q_{\text{eff}}(d, q)).$$
+\end{proposition}
+
+\begin{proof}
+For a single BSC with error rate $q$, the input-output bias satisfies $\mathbb{P}(Y = \Theta) - \mathbb{P}(Y \neq \Theta) = 1 - 2q$. For two BSCs in series with rates $q_1, q_2$, the output equals the input iff both agents preserve or both agents flip:
+
+$$\mathbb{P}(Y_2 = \Theta) = (1-q_1)(1-q_2) + q_1 q_2, \qquad \mathbb{P}(Y_2 \neq \Theta) = (1-q_1) q_2 + q_1 (1-q_2),$$
+
+so $\mathbb{P}(Y_2 = \Theta) - \mathbb{P}(Y_2 \neq \Theta) = (1-2q_1)(1-2q_2)$. Iterating across $d$ agents with independent flip events gives bias $\prod_{l=1}^d (1-2q_l)$. Solving $1 - 2 q_{\text{eff}} = \prod_l (1-2q_l)$ yields the stated formula. The composite channel is symmetric in its inputs by construction, hence a BSC.
+\end{proof}
+
+Two consequences are immediate. First, the bias of the composite channel
+decays geometrically in chain length:
+
+\[\tfrac{1}{2} - q_{\text{eff}}(d, q) = \tfrac{1}{2}(1 - 2q)^d,\]
+
+so \(q_{\text{eff}} \to 1/2\) exponentially fast in \(d\) for every
+\(q \in (0, 1/2]\), and the composite channel approaches zero capacity
+in the limit of long chains. Second, in the small-\(q\) regime,
+\(q_{\text{eff}}(d, q) \approx d q + O(d^2 q^2)\), and the corresponding
+capacity loss \(h(q_{\text{eff}}) \sim -d q \log_2(d q)\) grows like
+\(d \log d\) in the chain length at fixed \(q\). The capacity cost of
+locally tolerated corruption therefore compounds super-linearly with
+chain length: modest per-agent rates that are inconsequential in a
+direct exchange produce severe channel-level corruption once the chain
+is long enough.
+
+\begin{corollary}[Chain Collapse Threshold]
+\label{cor-pipeline-collapse-threshold}
+
+Fix a minimum acceptable end-to-end channel capacity $C_{\min} \in (0, 1)$. The maximum tolerable per-stage corruption rate at depth $d$ is:
+
+$$q^*(d; C_{\min}) = \frac{1 - (1 - 2 q_{\max})^{1/d}}{2}, \qquad q_{\max} = h^{-1}(1 - C_{\min}),$$
+
+where $h^{-1}$ is the inverse of the binary entropy function on $[0, 1/2]$. The threshold $q^*(d; C_{\min})$ is monotonically decreasing in $d$.
+\end{corollary}
+
+\begin{proof}
+$C_{\text{eff}}(d, q) \geq C_{\min}$ is equivalent to $h(q_{\text{eff}}) \leq 1 - C_{\min}$, i.e., $q_{\text{eff}} \leq h^{-1}(1 - C_{\min}) =: q_{\max}$. Substituting $q_{\text{eff}} = (1 - (1-2q)^d)/2$ and solving for $q$ gives $q \leq (1 - (1 - 2 q_{\max})^{1/d})/2$. Monotonic decrease in $d$ follows from $(1 - 2 q_{\max})^{1/d}$ being increasing in $d$ (since $1 - 2 q_{\max} \in (0, 1)$).
+\end{proof}
+
+For \(C_{\min} = 0.05\) (the threshold at which the verification
+overhead \(h/(1-h)\) in Theorem~\ref{thm-metabolic-cost-verification}
+exceeds \(19\), so verification consumes more than 19 times the honest
+processing budget per channel use), one computes
+\(q_{\max} \approx 0.3691\) and \(q^*(10; 0.05) \approx 0.063\). A
+ten-agent communication chain collapses below 5\% effective capacity
+once any single agent exceeds approximately 6.3\% corruption.
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Chain length \(d\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(q^*(d; 0.05)\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Maximum per-agent rate keeping \(C_{\text{eff}} \geq 0.05\)
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+1 & 0.369 & Single direct exchange tolerates substantial corruption \\
+2 & 0.244 & \\
+5 & 0.118 & \\
+10 & 0.063 & Layered organization or media chain \\
+20 & 0.032 & \\
+50 & 0.013 & \\
+\end{longtable}
+}
+
+This sharpens the systemic deception result for serial multi-agent
+structures: in a sufficiently long chain, even small per-agent rates
+that would be inconsequential in a direct exchange destroy end-to-end
+channel capacity.
+
+\subsection{The Micro-Friction
+Cascade}\label{the-micro-friction-cascade}
+
+Combining with the cascading cost theorem of \citep{TC-IV}, a single
+deceptive act of magnitude \(\Delta H\) bits produces a total cascading
+cost of:
+
+\[C_{\text{cascade}}^{\text{info}} = \frac{\eta_{\text{info}} \cdot \Delta H \cdot W_{\text{bit}} \cdot M \cdot \bar{E}}{\epsilon}\]
+
+For micro-deception (\(\Delta H \ll 1\)), each individual lie seems
+negligible. But the cascade amplification factor
+\(M \bar{E} / \epsilon\) can be enormous in large, slow-recovering
+networks. This is the formal expression of the ``death by a thousand
+cuts'': each lie is a tiny entropy injection, but the network
+amplification turns micro-friction into macro-damage.
+
+\subsection{Comparison: Macro-Friction
+vs.~Micro-Friction}\label{comparison-macro-friction-vs.-micro-friction}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Property
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Macro-Friction
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Micro-Friction
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{Mechanism} & Physical boundary breach & Information channel
+corruption \\
+\textbf{Severity per event} & Large (\(v \gg 1\)) & Small
+(\(\Delta H \cdot W_{\text{bit}} \ll 1\)) \\
+\textbf{Detection} & Immediate (visible damage) & Delayed or
+undetected \\
+\textbf{Frequency} & Rare (high cost to attacker) & Frequent (low cost
+to liar) \\
+\textbf{Direct cost} & \(\Phi \cdot \frac{N-1}{N} E_j\) \citep{TC-IV} &
+\(\Delta U_B(q)\) (Theorem~\ref{thm-decision-cost-quadratic}) \\
+\textbf{Network cascade} & \(\eta v M \bar{E} / \epsilon\) \citep{TC-IV}
+& \(\eta_{\text{info}} \Delta H W_{\text{bit}} M \bar{E} / \epsilon\) \\
+\textbf{Cumulative effect} & Network collapse at \(\nu^*\) \citep{TC-IV}
+& Network collapse at \(\bar{q}^*\)
+(Theorem~\ref{thm-systemic-deception}c) \\
+\textbf{Common name} & War, theft, violence & Lying, fraud,
+misinformation \\
+\end{longtable}
+}
+
+Both mechanisms feed into the \textbf{same interaction cost function}
+\(\mathcal{C}\) \citep{TC-IV}. The total interaction cost of a
+non-cooperative regime includes both physical friction and informational
+friction:
+
+\[\mathcal{C}_{\text{total}} = \mathcal{C}_{\text{physical}} + \mathcal{C}_{\text{informational}}\]
+
+\section{Worked Examples}\label{worked-examples}
+
+\subsection{Example 1: The Binary Trade
+Decision}\label{example-1-the-binary-trade-decision}
+
+\textbf{Setup:} Agent \(B\) must decide whether to invest energy in
+foraging location \(L\) or location \(R\). One location has yield
+\(\alpha_H = 20\) (energy units), the other \(\alpha_L = 4\). Agent
+\(A\) knows which is which and sends a signal. \(B\)'s utility is
+quadratic with \(\beta = 2\).
+
+\textbf{Under honest communication (\(q = 0\)):}
+
+\(B\) allocates \(x_B^* = \alpha(\theta)/\beta\). For the high-yield
+location: \(x_B = 10\), \(U_B = 100\). For the low-yield: \(x_B = 2\),
+\(U_B = 4\). Expected utility:
+
+\[\bar{U}_B^{\text{honest}} = \frac{1}{2}(100 + 4) = 52\]
+
+\textbf{Under deception (\(q = 0.1\)):}
+
+Decision cost (Theorem~\ref{thm-decision-cost-quadratic}, binary case):
+
+\[\Delta U_B(0.1) = \frac{0.1 \times 0.9 \times (20 - 4)^2}{2 \times 2} = \frac{0.09 \times 256}{4} = 5.76\]
+
+\(B\)'s expected utility:
+\(\bar{U}_B^{\text{deceived}} = 52 - 5.76 = 46.24\).
+
+\textbf{Verification cost (\(q = 0.1\)):}
+
+Redundancy factor: \(\rho(0.1) = 1/(1 - 0.469) = 1/0.531 = 1.884\).
+
+Verification overhead relative to honest processing: \(88.4\%\) extra
+energy.
+
+If \(W_{\text{honest}} = 2\) energy units per transaction, then
+\(\Delta W = 2 \times 0.884 = 1.77\) energy units.
+
+\textbf{The deception dilemma:} - Don't verify: lose 5.76 utility per
+period. - Verify: spend 1.77 energy but recover full decision quality.
+
+Rational \(B\) chooses verification when \(\Delta W < \Delta U_B\):
+\(1.77 < 5.76\) ✓. Verification is worthwhile, but the 1.77 energy units
+are still a pure social loss compared to the honest baseline.
+
+\subsection{Example 2: Network with Pervasive Low-Level
+Dishonesty}\label{example-2-network-with-pervasive-low-level-dishonesty}
+
+\textbf{Setup:} A network of \(N = 100\) agents, \(M = 10{,}000\)
+transactions per period, average transaction value \(\bar{E} = 10\)
+energy units, \(W_{\text{honest}} = 1\) energy unit per transaction.
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Network deception rate \(\bar{q}\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(h(\bar{q})\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Verification overhead \(\frac{h}{1-h}\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Verification tax \(C_{\text{verify}}\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+As \% of gross value
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+0.00 (perfectly honest) & 0 & 0 & 0 & 0\% \\
+0.01 (rare lies) & 0.081 & 0.088 & 880 & 0.88\% \\
+0.05 (occasional lies) & 0.286 & 0.400 & 4,000 & 4.0\% \\
+0.10 (regular dishonesty) & 0.469 & 0.883 & 8,830 & 8.8\% \\
+0.20 (pervasive dishonesty) & 0.722 & 2.599 & 25,990 & 26.0\% \\
+0.30 (systemic dishonesty) & 0.881 & 7.403 & 74,030 & 74.0\% \\
+0.40 (near-total distrust) & 0.971 & 33.48 & 334,800 & \textbf{335\%} \\
+\end{longtable}
+}
+
+Gross network value per period: \(M \times \bar{E} = 100{,}000\) energy
+units.
+
+\textbf{Reading:} At just 10\% network deception, the verification tax
+alone consumes 8.8\% of the network's gross cooperative value. At 30\%,
+three-quarters of the value is consumed by verification overhead. At
+40\%, the verification cost \textbf{exceeds} the value of all
+transactions; cooperation becomes energetically pointless. The network
+unravels.
+
+This formalizes the intuitive claim: \emph{``A society where everyone
+lies slightly is a high-entropy, low-efficiency network.''}
+
+\subsection{Example 3: Micro-Friction Cascade
+vs.~Macro-Friction}\label{example-3-micro-friction-cascade-vs.-macro-friction}
+
+\textbf{Setup:} Compare the network cost of one major boundary violation
+(theft of \(v = 500\) energy units) vs.~100 small lies (each injecting
+\(\Delta H = 0.1\) bits into the network).
+
+\textbf{Parameters:} \(M = 5{,}000\), \(\bar{E} = 10\), \(\eta = 0.01\),
+\(\eta_{\text{info}} = 0.01\), \(\epsilon = 0.05\),
+\(W_{\text{bit}} = 1\) energy unit (normalized).
+
+\textbf{Macro-friction cascade} \citep{TC-IV}:
+
+\[C_{\text{cascade}}^{\text{macro}} = \frac{0.01 \times 500 \times 5000 \times 10}{0.05} = \frac{250{,}000}{0.05} = 5{,}000{,}000\]
+
+\textbf{Micro-friction cascade} (100 small lies, each \(\Delta H = 0.1\)
+bits):
+
+Each lie:
+
+\[C_{\text{cascade}}^{\text{micro}} = \frac{0.01 \times 0.1 \times 1 \times 5000 \times 10}{0.05} = \frac{50}{0.05} = 1{,}000\]
+
+Total for 100 lies: \(100 \times 1{,}000 = 100{,}000\).
+
+\textbf{Ratio:} The single theft produces 50× more cascading cost than
+100 small lies.
+
+\textbf{But:} The direct cost of the theft is \(v = 500\) (one event),
+while 100 lies produce
+\(100 \times \Delta U_B(0.1) \approx 100 \times 5.76 = 576\) in decision
+losses (using Example 1 parameters). The direct costs are comparable,
+but the cascade effects differ dramatically due to the severity \(v\) in
+the friction injection formula.
+
+\textbf{Key insight:} Macro-violations are worse per event because of
+the cascade amplification of large \(v\). However, micro-violations are
+far more \textbf{frequent}: a network might experience thousands of
+small deceptions for every major violation. The cumulative
+micro-friction from chronic low-level dishonesty can rival or exceed
+periodic macro-friction events:
+
+At violation rate \(\nu_{\text{macro}} = 0.1\) per period and
+micro-deception rate \(\nu_{\text{micro}} = 50\) per period:
+
+\begin{itemize}
+\tightlist
+\item
+  Steady-state macro-friction:
+  \(\phi_{\text{macro}}^{\infty} = \nu_{\text{macro}} \cdot \eta \cdot v / \epsilon = 0.1 \times 0.01 \times 500 / 0.05 = 10\)
+\item
+  Steady-state micro-friction:
+  \(\phi_{\text{micro}}^{\infty} = \nu_{\text{micro}} \cdot \eta_{\text{info}} \cdot \Delta H \cdot W_{\text{bit}} / \epsilon = 50 \times 0.01 \times 0.1 \times 1 / 0.05 = 1\)
+\end{itemize}
+
+Here macro-friction still dominates (10 vs.~1). But if micro-deception
+is much more common (\(\nu_{\text{micro}} = 500\)), the two sources
+become equal. In information-age networks where communication is cheap
+and lying is easy, micro-friction becomes the \textbf{dominant} cost.
+
+\section{The Complete Micro-Friction Model: Formal
+Definition}\label{the-complete-micro-friction-model-formal-definition}
+
+Synthesizing the results above into a unified mathematical object:
+
+\begin{definition}[Information-Theoretic Interaction Cost]
+\label{def-info-interaction-cost}
+
+The \textbf{micro-friction cost function} $\mathcal{C}_{\text{info}}$ maps the network deception profile $\mathbf{q} = (q_1, \ldots, q_M)$ (deception rates across $M$ communication channels) to the total negentropy destroyed by informational inefficiency:
+
+$$\mathcal{C}_{\text{info}}(\mathbf{q}) = \underbrace{\sum_{m=1}^{M} \Delta U_m(q_m)}_{\text{decision losses}} + \underbrace{\sum_{m=1}^{M} W_{\text{honest},m} \cdot \frac{h(q_m)}{1 - h(q_m)}}_{\text{verification costs}} + \underbrace{\phi_{\text{info}} \cdot M \cdot \bar{E}}_{\text{ambient friction tax}}$$
+
+where $\phi_{\text{info}} = \sum_{m} \eta_{\text{info}} \cdot h(q_m) \cdot W_{\text{bit}} / \epsilon$ is the steady-state informational friction coefficient (under constant deception rates).
+\end{definition}
+
+Combining with the physical friction from the thermodynamic friction
+derivation, the \textbf{total interaction cost} of the network is:
+
+\[\mathcal{C}_{\text{total}} = \mathcal{C}_{\text{physical}}(\mathbf{e}, \phi_{\text{phys}}) + \mathcal{C}_{\text{info}}(\mathbf{q})\]
+
+This is the unified thermodynamic friction of the framework: the
+complete energetic cost of all non-cooperative behavior, from
+large-scale boundary violations to small-scale signal corruption,
+expressed in a single mathematical object.
+
+All theorems, corollaries, and worked examples in this paper are
+computationally verified. The verification script
+(\texttt{scripts/simulations/derivations/verify\_information\_entropy.py})
+reproduces each closed-form result numerically and confirms agreement to
+within floating-point tolerance.
+
+\section{Summary of Results}\label{summary-of-results}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Type
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Result
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Statement
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Significance
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Definition & Channel Quality &
+\(I(\Theta; Y) = H(\Theta) - H(\Theta\mid Y)\) & Mutual information
+measures communication quality \\
+Definition & Honest Communication & \(H(\Theta\mid Y) = 0 \iff\)
+sufficient statistic & Honesty = zero residual entropy \\
+Definition & Deception & \(\Delta H = H(\Theta\mid Y) > 0\) when honesty
+is achievable & Deception = deliberate entropy injection \\
+Definition & Decision Cost of Deception &
+\(\Delta U_B = \bar{U}_B^{\text{honest}} - \bar{U}_B^{\text{deceived}} \geq 0\)
+& Utility loss from acting on corrupted information \\
+Theorem & Decision Cost (Theorem~\ref{thm-decision-cost-quadratic}) &
+\(\Delta U_B = \mathbb{E}[\operatorname{Var}(\alpha \mid Y)] / (2\beta)\)
+& Deception causes quantifiable utility loss \\
+Definition & Redundancy Factor & \(\rho(q) = 1/(1-h(q))\) & Observations
+needed scale explosively with deception \\
+Theorem & Verification Cost
+(Theorem~\ref{thm-metabolic-cost-verification}) &
+\(\Delta W = W_{\text{honest}} \cdot h(q)/(1-h(q))\) & Verification
+energy diverges as \(q \to 0.5\) \\
+Corollary & Inevitability
+(Corollary~\ref{cor-inevitability-deception-cost}) &
+\(\min(\Delta U_B, \Delta W) > 0\) for \(q > 0\) & No costless deception
+exists \\
+Definition & Deception-Friction Mapping &
+\(\Delta\phi = \eta_{\text{info}} \cdot \Delta H \cdot W_{\text{bit}}\)
+& Unifies information and physical friction \\
+Theorem & Systemic Deception (Theorem~\ref{thm-systemic-deception}) &
+Network collapses at critical \(\bar{q}^*\) & Pervasive dishonesty
+collapses cooperative network \\
+Proposition & Serial BSC Composition
+(Proposition~\ref{prop-bsc-series-depth}) &
+\(q_{\text{eff}}(d,q) = (1-(1-2q)^d)/2\) & Per-agent corruption
+compounds super-linearly with chain length \\
+Corollary & Chain Collapse Threshold
+(Corollary~\ref{cor-pipeline-collapse-threshold}) &
+\(q^*(d; C_{\min}) = (1 - (1 - 2 q_{\max})^{1/d})/2\) & Maximum
+per-agent rate decreases with chain length;
+\(q^*(10; 0.05) \approx 0.063\) \\
+Corollary & Honesty Principle (Corollary~\ref{cor-honesty-efficiency}) &
+\(\phi = 0 \iff \bar{q} = 0 \iff\) max efficiency & Honesty is the
+efficiency-maximizing regime \\
+Definition & Micro-Friction Cost Function &
+\(\mathcal{C}_{\text{info}}(\mathbf{q})\) & Unified cost of all
+informational non-cooperation \\
+\end{longtable}
+}
+
+\section{Notation Index}\label{notation-index}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Symbol
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Meaning
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\(\Theta\) & Environmental state (random variable) \\
+\(Y\) & Signal received by Agent \(B\) \\
+\(H(\Theta)\) & Entropy of the environmental state (bits) \\
+\(H(\Theta \| Y)\) & Conditional entropy, residual uncertainty after
+signal \\
+\(I(\Theta; Y)\) & Mutual information, information transmitted \\
+\(q\) & Deception rate (BSC error probability) \\
+\(h(q)\) & Binary entropy function:
+\(-q \log_2 q - (1-q) \log_2(1-q)\) \\
+\(C(q)\) & Channel capacity: \(1 - h(q)\) (BSC) \\
+\(\Delta H\) & Injected entropy (bits of false information) \\
+\(\Delta U_B\) & Decision cost of deception (utility loss) \\
+\(\rho(q)\) & Redundancy factor: \(1/(1 - h(q))\) \\
+\(\Delta W\) & Verification overhead energy \\
+\(W_{\text{bit}}\) & Energy cost per bit of information processing \\
+\(\xi\) & Processing inefficiency factor (vs.~Landauer bound) \\
+\(\eta_{\text{info}}\) & Information-friction sensitivity \\
+\(\bar{q}\) & Network-average deception rate \\
+\(\mathcal{C}_{\text{info}}\) & Micro-friction cost function \\
+\(\alpha_H, \alpha_L\) & High and low marginal yields in binary state
+model \\
+\end{longtable}
+}
+
+\begin{quote}
+\textbf{Symbol disambiguation.} \(\rho(q)\) denotes the redundancy
+factor; \(T\) in \(W_{\text{bit}} \geq k_B T \ln 2\) is thermodynamic
+temperature (Kelvin), while \(T\) appearing as the trust level in
+§\ref{the-network-verification-tax} denotes \(T = 1/(1+\phi)\)
+(dimensionless), and \(T\) as a defection payoff in cross-references to
+the game-theory derivation \citep{TC-V} is the temptation payoff (energy
+units). These three uses of \(T\) are always distinguishable by context
+and subscript.
+\end{quote}
+
+\section{Discussion}\label{discussion}
+
+\subsection{Physical Interpretation}\label{physical-interpretation}
+
+The results establish a complete account of the informational cost of
+non-cooperation. Deception, formalized as entropy injection into a
+binary symmetric channel, imposes costs at three scales: the individual
+decision cost on the receiver
+(Theorem~\ref{thm-decision-cost-quadratic}), the verification overhead
+on any agent defending against corruption
+(Theorem~\ref{thm-metabolic-cost-verification}), and the network-wide
+collapse of cooperative surplus when corruption becomes pervasive
+(Theorem~\ref{thm-systemic-deception}).
+
+The key structural insight is the inevitability corollary
+(Corollary~\ref{cor-inevitability-deception-cost}): for any non-zero
+corruption rate \(q > 0\), at least one of the decision cost
+\(\Delta U_B\) or the verification cost \(\Delta W\) is strictly
+positive. There is no regime in which deception is costless to the
+system. This result holds regardless of the specific utility functions,
+network topology, or agent capabilities; it follows from the
+information-theoretic structure alone.
+
+\subsection{Testable Predictions}\label{testable-predictions}
+
+These results generate falsifiable predictions:
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Prediction
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Source
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Falsified If\ldots{}
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Chain collapse at \(q^*(10; 0.05) \approx 0.063\) per-agent deception
+for \(d = 10\) & Corollary~\ref{cor-pipeline-collapse-threshold} &
+Ten-agent communication chains tolerate \(>10\%\) per-agent deception
+without end-to-end capacity collapse \\
+Verification cost divergence as \(q \to 0.5\) &
+Theorem~\ref{thm-metabolic-cost-verification} & Agents in low-trust
+environments maintain full decision quality without increasing
+verification expenditure \\
+Quadratic scaling of decision cost with \(q(1-q)\) &
+Theorem~\ref{thm-decision-cost-quadratic} & Systematic signal
+degradation in controlled settings produces sub-quadratic or constant
+utility loss \\
+Honest communication (\(q = 0\)) as the unique efficiency maximum &
+Corollary~\ref{cor-honesty-efficiency} & A network deception rate
+\(\bar{q} > 0\) produces higher aggregate surplus than \(\bar{q} = 0\)
+under otherwise identical conditions \\
+\end{longtable}
+}
+
+\subsection{Limitations}\label{limitations}
+
+The information-theoretic results model signal corruption as a binary
+symmetric channel, a simplification of real communication dynamics. The
+deception-friction mapping
+(Definition~\ref{def-deception-friction-mapping}) assumes a linear
+coupling between informational entropy injection and the physical
+friction framework of \citep{TC-IV}; nonlinear couplings may better
+capture certain real-world dynamics. The repeated-game results in
+\emph{Cooperative Equilibrium} \citep{TC-V} assume a clean monitoring
+signal; under imperfect monitoring, cooperation remains a Nash
+Equilibrium but requires a higher discount factor
+\(\delta > \delta^*_{\text{noisy}} > \delta^*\)
+\citep{Fudenberg1994, GreenPorter1984}, and the interaction between the
+monitoring noise modeled here and the cooperation thresholds of that
+paper is an open problem.
+
+\textbf{Scope.} The results apply to any system of communicating agents
+in a shared, finite-resource environment where signals can be
+strategically corrupted. The BSC model is a mathematical idealization;
+the qualitative conclusions (inevitability of deception cost, network
+collapse at a critical threshold, uniqueness of the honest optimum) hold
+for any channel model in which deception reduces mutual information,
+since the proofs rely on the information-theoretic structure rather than
+on the specific channel parameterization.
+
+\subsection{Applications}\label{applications}
+
+The results apply to several domains where information corruption
+degrades cooperative outcomes.
+
+\textbf{Layered organizations and chains of intermediaries.}
+Decision-relevant signals in corporate hierarchies, government agencies,
+and judicial review chains pass through a sequence of agents, each
+capable of selectively rephrasing, summarizing, or omitting before
+forwarding. Proposition~\ref{prop-bsc-series-depth} and
+Corollary~\ref{cor-pipeline-collapse-threshold} predict that even modest
+per-agent deception rates collapse end-to-end channel capacity. For a
+chain of ten intermediaries and an end-to-end capacity floor of
+\(C_{\min} = 0.05\), the critical per-agent rate is
+\(q^*(10; 0.05) \approx 0.063\), below which the chain retains usable
+channel capacity and above which the receiving agent's decision quality
+collapses. This provides a quantitative standard for institutional
+transparency derived from the channel capacity function alone.
+
+\textbf{Information ecosystems and disinformation cascades.} Claims
+about the political and economic environment typically reach a deciding
+agent through chains of intermediaries: original source, journalist,
+editor, aggregator, social-media reposter.
+Proposition~\ref{prop-bsc-series-depth} gives the effective error rate
+of such a chain as \(q_{\text{eff}}(d, q) = (1 - (1 - 2q)^d)/2\). The
+bias of the composite channel decays geometrically as
+\(\tfrac{1}{2} - q_{\text{eff}} = \tfrac{1}{2}(1 - 2q)^d\), so for small
+per-agent rates \(q_{\text{eff}} \approx d q\) and the resulting
+capacity loss \(h(q_{\text{eff}})\) grows like \(d \log d\) in the chain
+length: a per-agent rate that is locally inconsequential compounds
+super-linearly across the chain. The verification overhead of
+Theorem~\ref{thm-metabolic-cost-verification} quantifies the energy that
+downstream agents must spend to recover usable information, energy that
+is unavailable for productive activity.
+
+\textbf{Multi-agent AI systems and deployment chains.} When an entity (a
+firm, institution, or individual) deploys an AI system as an
+intermediary in its decision process, that system becomes one agent in
+the chain. The deceptive alignment problem \citep{Hubinger2019}, in
+which a deployed system behaves cooperatively during evaluation but
+pursues a different objective in production, is a special case: the
+system introduces entropy into the deploying entity's information
+channel. Whether the source of corruption is misaligned optimization,
+miscalibration, or distribution shift, the effect on the deploying
+entity is identical to any other per-agent deception rate.
+Theorem~\ref{thm-metabolic-cost-verification} quantifies the
+verification overhead required to detect corrupted outputs, and
+Corollary~\ref{cor-honesty-efficiency} establishes that an honest
+(low-entropy) intermediary is the unique efficiency-maximizing
+configuration. For a deploying entity with a sufficiently long time
+horizon (\(\delta > \delta^*\), per \citep{TC-V}), the friction costs of
+operating an entropy-injecting intermediary degrade the entity's own
+cooperative environment faster than any short-term advantage
+accumulates. When multiple AI systems are composed in series (one
+model's output feeding another), Proposition~\ref{prop-bsc-series-depth}
+applies directly with each system contributing its own per-agent
+corruption rate.
+
+\textbf{Cascaded signal-processing networks.} Any serial chain of agents
+in which each can introduce error (relays in a distributed system,
+intermediaries in a supply chain, layered review processes) is a
+physical instantiation of the BSC-in-series model.
+Proposition~\ref{prop-bsc-series-depth} gives the effective error rate
+\(q_{\text{eff}}(d, q) = (1 - (1 - 2q)^d)/2\), and
+Corollary~\ref{cor-pipeline-collapse-threshold} characterizes the
+per-agent rate at which end-to-end capacity drops below any chosen
+threshold. The result imposes a hard constraint on tolerable per-agent
+error rates in any system where information must traverse multiple
+agents before a decision is made.
+
+\subsection{Future Work}\label{future-work}
+
+\textbf{Channel model extensions.} The binary symmetric channel is a
+mathematical idealization. Generalizing to continuous corruption
+spectra, asymmetric channels, and heterogeneous network topologies would
+broaden the model's empirical applicability. Extending the
+deception-friction mapping
+(Definition~\ref{def-deception-friction-mapping}) to nonlinear couplings
+may better capture dynamics in which small amounts of deception are
+tolerated but large amounts trigger discontinuous regime changes, a
+pattern observed empirically in organizational trust but not yet
+formalized within the framework.
+
+\textbf{Joint friction-information thresholds.} The interaction between
+imperfect information channels (modeled here) and repeated-game
+cooperation thresholds \citep{TC-V} warrants formal analysis. The
+discount factor required for cooperative stability under joint physical
+friction and informational entropy injection is conjectured to remain
+below 0.5 but has not been proved. A joint treatment would unify the two
+cost channels (physical and informational) into a single threshold
+condition.
+
+\textbf{Empirical validation.} The chain collapse threshold
+(\(q^*(10;\,0.05) \approx 0.063\), per
+Corollary~\ref{cor-pipeline-collapse-threshold}) is a quantitative
+prediction amenable to empirical test. Validation against data from
+organizational communication networks, information ecosystems, and
+cascaded signal-processing systems would determine whether the
+BSC-in-series model captures the dominant failure mode or whether richer
+channel models are required.
+
+\textbf{Deception in production networks.} Extending the BSC-in-series
+model to production networks, where each agent's output is both signal
+and input to downstream production, would show that the critical
+per-agent deception rate \(q^*\) decreases when downstream agents
+allocate their own resources based on upstream output signals. The
+verification overhead (Theorem~\ref{thm-metabolic-cost-verification})
+would compound along supply chains, and the cost of deception would
+scale with network embeddedness rather than with chain length alone.
+
+\section{Conclusion}\label{conclusion}
+
+We have formalized strategic signal corruption as entropy injection and
+proved that it imposes quantifiable, unavoidable costs on multi-agent
+systems. The decision cost scales quadratically with injected entropy
+(Theorem~\ref{thm-decision-cost-quadratic}), verification costs diverge
+at the channel capacity limit
+(Theorem~\ref{thm-metabolic-cost-verification}), and pervasive deception
+collapses network cooperation at a critical threshold
+(Theorem~\ref{thm-systemic-deception}). Honest communication is the
+unique efficiency-maximizing regime
+(Corollary~\ref{cor-honesty-efficiency}).
+
+These results complement the physical friction analysis of
+\citep{TC-IV}, extending the cost accounting from overt boundary
+violations to informational boundary violations. Together, they provide
+the full cost structure, physical and informational, that enters the
+energy-denominated payoff matrix of the cooperative equilibrium paper
+\citep{TC-V}. The accumulated negentropy framework \citep{TC-III}
+extends the information-theoretic analysis in a different direction,
+quantifying the irreplaceability of the complex structures that
+cooperative networks produce and maintain.
+
+\addcontentsline{toc}{section}{References}
+\bibliography{../../shared/main}
+\end{document}
