@@ -1,11 +1,12 @@
 # Verification Summary
 
 This document describes the computational verification infrastructure for
-*The Mathematics of Coexistence*.
+the *Thermodynamics of Cooperation* series, *A Theory of Ethics from First Principles* series,
+and the *Mathematics of Coexistence* monograph.
 
 ## Overview
 
-Every theorem, proposition, and key equation in the paper is independently
+Every theorem, proposition, and key equation in the paper series is independently
 verified by at least one automated script. The scripts use a shared
 `check()` / `section()` / `summary()` harness (defined in `modules/verify.py`)
 that reports individual PASS/FAIL results and a final count.

@@ -83,15 +83,15 @@
 % heading from appearing at the bottom of a page with its content (or its
 % next-level subheading) starting on the following page.
 \let\origsection\section
-\renewcommand{\section}{\needspace{8\baselineskip}\origsection}
+\renewcommand{\section}{\needspace{6\baselineskip}\origsection}
 \let\origsubsection\subsection
-\renewcommand{\subsection}{\needspace{8\baselineskip}\origsubsection}
+\renewcommand{\subsection}{\needspace{6\baselineskip}\origsubsection}
 \let\origsubsubsection\subsubsection
-\renewcommand{\subsubsection}{\needspace{6\baselineskip}\origsubsubsection}
+\renewcommand{\subsubsection}{\needspace{4\baselineskip}\origsubsubsection}
 \let\origparagraphcmd\paragraph
-\renewcommand{\paragraph}{\needspace{4\baselineskip}\origparagraphcmd}
+\renewcommand{\paragraph}{\needspace{3\baselineskip}\origparagraphcmd}
 \let\origsubparagraph\subparagraph
-\renewcommand{\subparagraph}{\needspace{4\baselineskip}\origsubparagraph}
+\renewcommand{\subparagraph}{\needspace{3\baselineskip}\origsubparagraph}
 
 % Discourage page breaks inside multi-line math environments (align, gather, etc.)
 \interdisplaylinepenalty=10000
