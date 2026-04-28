@@ -35,7 +35,7 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
 # Scripts are discovered automatically — just drop a new file in the folder.
 SCRIPT_DIRS = [
     "scripts/simulations/derivations",
-    # "scripts/simulations/applied",
+    "scripts/simulations/applied",
     # "scripts/simulations/applied_extras",
 ]
 
