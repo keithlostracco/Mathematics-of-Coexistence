@@ -19,8 +19,7 @@
 % ── Theorem-like environments ─────────────────────────────────────────────────
 \usepackage{amsmath}
 \usepackage{amsthm}
-% Indicator function: \mathbbm{1} renders as bold 1 (no external package needed)
-\newcommand{\mathbbm}[1]{\boldsymbol{#1}}
+\usepackage{dsfont} % double-struck numerals (\mathds{1} for indicator functions)
 \usepackage{thmtools}
 \declaretheorem[name=Theorem]{theorem}
 \declaretheorem[name=Proposition,sibling=theorem]{proposition}
@@ -597,7 +596,7 @@ B's total resource intake cannot be reduced below threshold \(\tau_B\) &
 where \(|\mathbf{R}| = \sum_j R_j\) & A's total consumption is
 bounded \\
 B's spatial boundary \(\Omega_B\) is inviolable &
-\(g_{Bk}(\mathbf{x}_A) = \mathbbm{1}[\mathbf{x}_A \cap \Omega_B \neq \emptyset]\)
+\(g_{Bk}(\mathbf{x}_A) = \mathds{1}[\mathbf{x}_A \cap \Omega_B \neq \emptyset]\)
 & A's action vector cannot penetrate B's physical/informational
 boundary \\
 \end{longtable}
@@ -605,7 +604,7 @@ boundary \\
 
 \begin{quote}
 \textbf{Note.} The spatial boundary example uses an indicator function
-for conceptual clarity. Since \(\mathbbm{1}[\cdot]\) is neither
+for conceptual clarity. Since \(\mathds{1}[\cdot]\) is neither
 continuously differentiable nor convex, in practice it is replaced by a
 smooth convex approximation (e.g., a distance-based penalty for convex
 \(\Omega_B\)) satisfying Definition~\ref{def-boundary-constraint}'s

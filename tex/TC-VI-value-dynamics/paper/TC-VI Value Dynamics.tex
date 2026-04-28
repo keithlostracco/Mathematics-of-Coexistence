@@ -19,8 +19,7 @@
 % ── Theorem-like environments ─────────────────────────────────────────────────
 \usepackage{amsmath}
 \usepackage{amsthm}
-% Indicator function: \mathbbm{1} renders as bold 1 (no external package needed)
-\newcommand{\mathbbm}[1]{\boldsymbol{#1}}
+\usepackage{dsfont} % double-struck numerals (\mathds{1} for indicator functions)
 \usepackage{thmtools}
 \declaretheorem[name=Theorem]{theorem}
 \declaretheorem[name=Proposition,sibling=theorem]{proposition}
