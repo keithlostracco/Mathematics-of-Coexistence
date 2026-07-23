@@ -1,0 +1,250 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{graphicx}
+
+% ── Paragraph spacing ────────────────────────────────────────────────────────
+\usepackage{parskip}
+
+% ── Page-break quality ───────────────────────────────────────────────────────
+\widowpenalty=10000
+\clubpenalty=10000
+\raggedbottom
+
+% ── Suppress automatic section numbering ─────────────────────────────────────
+\setcounter{secnumdepth}{-1}
+
+% ── Pandoc-generated table support ───────────────────────────────────────────
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{calc}
+\usepackage{caption}
+\newcounter{none}
+
+% ── Math support ─────────────────────────────────────────────────────────────
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% ── Make \paragraph and \subparagraph block-level ────────────────────────────
+\usepackage{titlesec}
+\titleformat{\paragraph}
+  {\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+  {0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+\titleformat{\subparagraph}
+  {\normalfont\normalsize\bfseries}{\thesubparagraph}{1em}{}
+\titlespacing*{\subparagraph}
+  {0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+% ── Pandoc-generated tightlist support ───────────────────────────────────────
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% ── Pandoc 3.x figure sizing ────────────────────────────────────────────────
+\newcommand{\pandocbounded}[1]{%
+  \sbox0{#1}%
+  \ifdim\wd0>\linewidth
+    \resizebox{\linewidth}{!}{#1}%
+  \else
+    #1%
+  \fi
+}
+
+% ── Unicode character fixes ──────────────────────────────────────────────────
+\usepackage{newunicodechar}
+\newunicodechar{✓}{$\checkmark$}
+\newunicodechar{≠}{$\neq$}
+\newunicodechar{≡}{$\equiv$}
+\newunicodechar{≈}{$\approx$}
+\newunicodechar{δ}{$\delta$}
+\newunicodechar{−}{$-$}
+\let\mystRightarrow\rightarrow
+\renewcommand{\rightarrow}{\ensuremath{\mystRightarrow}}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\hypersetup{colorlinks=true, allcolors=blue}
+
+\title{Technical Summary: Cooperative Equilibrium from
+Energy-Denominated Payoffs}
+\author{Keith Lostracco}
+\date{}
+
+\begin{document}
+\maketitle
+
+\subsection{Model}\label{model}
+
+Each agent selects from two meta-strategies per interaction:
+\textbf{Cooperate} (respect boundary constraints, accept the constrained
+allocation, incur coordination cost \(c > 0\)) or \textbf{Defect}
+(violate boundary constraints, trigger conflict contest and/or
+deception, incur associated thermodynamic costs). Payoffs are
+denominated in conserved physical energy, importing three structural
+constraints: conservation (conflict cannot create energy), positivity of
+costs (all physical actions require energy), and persistent state
+coupling (payoffs depend on the network friction state \(\phi\)).
+
+For a pairwise interaction over resource \(E_R > 0\) with exploitation
+efficiency \(\theta \in (0,1)\), friction multiplier
+\(\Phi = 1 + \kappa(\psi^{\text{off}} + \psi^{\text{def}})\), and
+coordination cost \(c \ll E_R\), the single-round payoffs are:
+
+\[T = E_R\left[1 - \theta(1 + \kappa\psi^{\text{off}})\right], \qquad R = \frac{E_R}{2} - c\]
+
+\[P = \frac{E_R}{2}\left(1 - \frac{\Phi}{2}\right), \qquad S = -\theta E_R\kappa\psi^{\text{def}}\]
+
+When \(\Phi > 2\) (equivalently \(\kappa\psi > 1\), combined boundary
+damage above \(1/\kappa\) --- the destructive regime): \(P < 0\), so
+mutual defection is net-negative. The baseline parameterization
+(\(E_R = 100\), \(c = 2\), \(\theta = 0.15\),
+\(\psi^{\text{off}} = 0.15\), \(\psi^{\text{def}} = 0.25\),
+\(\kappa = 2\)) gives \(\Phi = 1.8\), \(T = 80.5\), \(R = 48\),
+\(P = 5\), \(S = -7.5\) --- the mild regime, with \(P > 0\); the
+destructive parameterization (\(\psi^{\text{off}} = 0.25\),
+\(\psi^{\text{def}} = 0.35\), so \(\psi = 0.6 > 1/2\)) gives
+\(\Phi = 2.2\), \(T = 77.5\), \(P = -5\), \(S = -10.5\).
+
+The discount factor \(\delta = \sigma \cdot e^{-r}\) captures how agents
+value future payoffs (\(\sigma\): survival probability, \(r\):
+time-preference rate). In the \(N\)-player public goods game, \(N\)
+agents choose to cooperate (contribute \(c_i\)) or defect; contributions
+multiply by \(\alpha > 1\) and are split equally.
+
+\subsection{Results}\label{results}
+
+\textbf{Proposition (Physical Prisoner's Dilemma).} Under the
+energy-based payoff model with physical constraints (\(E_R > 0\),
+\(c \ll E_R\)), the single-round game has the PD structure
+\(T > R > P > S\) when
+\(\theta < (1/2 + c/E_R)/(1 + \kappa\psi^{\text{off}})\) and
+\(1 < \Phi < \Phi_{\text{PD}} = 2 + 4\theta\kappa\psi^{\text{def}}\).
+Defection is the dominant strategy; the unique NE is \((D,D)\) with
+payoffs \((P,P)\), even though \((C,C)\) is Pareto-superior.
+
+\textbf{Theorem 11 (The Cooperation Theorem).} In the infinitely
+repeated energy-based game with discount factor \(\delta\) and the PD
+ordering (\(P > S\)), universal cooperation \((C,C)\) in every period is
+sustainable as a Nash Equilibrium (under grim trigger) if and only if:
+
+\[\delta \geq \delta^* = \frac{T - R}{T - P}\]
+
+In the Chicken regime (\(S > P\)) the threshold is instead
+\((T-R)/(T-S)\). Under the baseline physical parameterization:
+\(\delta^* = \frac{80.5 - 48}{80.5 - 5} = \frac{32.5}{75.5} \approx 0.431\).
+
+\textbf{Corollary 11.1 (Low Cooperation Threshold).} Under the physical
+payoff model, \(\delta^* < 0.5\) if and only if \(T + P < 2R\); this
+holds directly at baseline (\(T + P = 85.5 < 96 = 2R\)), giving
+\(\delta^* \approx 0.431\) --- agents need only value the future at more
+than approximately 43\% of the present to sustain cooperation. In the
+destructive regime, a sufficient condition for \(\delta^* < 0.5\) is
+that both \(\Phi > 2\) (net-negative mutual defection) and
+\(c < (\theta E_R/2)(1 + \kappa\psi^{\text{off}})\) hold.
+
+\textbf{Theorem 12 (Network-Adjusted Cooperation).} When network
+friction effects are included, the effective punishment payoff becomes
+\(\tilde{P} = P - C_{\text{defector}}^{\text{cascade}} / (1/\epsilon)\),
+where
+\(C_{\text{defector}}^{\text{cascade}} = \eta v M \bar{E} / (N\epsilon)\).
+The network-adjusted threshold:
+
+\[\tilde{\delta}^* = \frac{T - R}{T - \tilde{P}} < \delta^*\]
+
+Network friction makes cooperation strictly easier to sustain. Under
+baseline parameters: \(\tilde{\delta}^* = 0.185\).
+
+\textbf{Theorem 13 (\(N\)-Player Cooperation).} In the infinitely
+repeated \(N\)-player energy public goods game with grim trigger,
+cooperation is a NE if:
+
+\[\delta \geq \delta_N^* = \frac{c(N - \alpha)}{\alpha(N-1)c + N\phi_0\bar{E}}\]
+
+For \(\phi_0 > 0\):
+\(\lim_{N \to \infty} \delta_N^* = c / (\alpha c + \phi_0 \bar{E}) < 1\).
+Cooperation remains accessible even in arbitrarily large populations.
+
+\textbf{Corollary 13.1 (Cooperation Strengthens with Friction).}
+\(\partial \delta_N^* / \partial \phi_0 < 0\). Higher network friction
+makes the all-defect state harsher, easing the cooperation condition.
+
+\textbf{Corollary 13.2 (Cooperation Strengthens with Scale).} When
+\(\phi_0 > 0\), \(\delta_N^*\) remains bounded below 1 as
+\(N \to \infty\), unlike the frictionless case, where the threshold
+rises to the ceiling \(1/\alpha\) (approaching \(1\) as
+\(\alpha \to 1^+\), the canonical free-rider collapse).
+
+\textbf{Theorem 14 (Defection Invasion Barrier).} In a population of
+\(N\) TFT-playing agents with \(\delta > \delta^*\), a mutant
+Always-Defect agent earns
+\(V_{\text{ALLD}} = T + \delta P / (1 - \delta)\), strictly less than
+\(V_{\text{TFT}} = R / (1 - \delta)\). The ALLD mutant is dominated:
+defection cannot invade a cooperative population.
+
+\textbf{Theorem 15 (Defection Profit Erasure).} An agent that defects
+once against a TFT population and returns to cooperation incurs a net
+lifetime loss when \(\delta > (T-R)/(R-S)\). Under baseline parameters:
+\(\delta > 0.586\) without friction; \(\delta \approx 0.183\) with
+network friction costs included. The short-term defection profit is an
+energetic ``payday loan'' with punishing interest.
+
+\textbf{Theorem 16 (Cooperation Maximizes Welfare).} Among all strategy
+profiles in the repeated \(N\)-player game, universal cooperation
+uniquely maximizes per-period system welfare:
+
+\[SW^{CC} = N(\alpha - 1)c \geq SW^s \quad \forall \text{ strategy profiles } s\]
+
+with equality only when \(s\) is also universally cooperative. The
+welfare gap is:
+
+\[SW^{CC} - SW^s = n_D(\alpha - 1)c + n_D\, \phi(s) \bar{E} > 0\]
+
+for any profile with \(n_D \geq 1\) defectors; the ambient per-period
+transaction tax \(\phi(s) M \bar{E}\) enters \(SW\) through
+\(\mathcal{C}_{\text{total}}\) and only widens this gap.
+
+\textbf{Corollary 16.1 (Unique Efficient Nash Equilibrium).} In the
+infinitely repeated energy-based game with \(\delta > \delta^*\):
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\item
+  Universal cooperation is a Nash Equilibrium.
+\item
+  Universal cooperation uniquely maximizes system welfare.
+\item
+  Universal cooperation minimizes total interaction cost
+  (\(\mathcal{C}_{\text{total}} = 0\)).
+\end{enumerate}
+
+The cooperative profile is the unique NE that is also Pareto-optimal and
+welfare-maximizing.
+
+\subsection{Notation}\label{notation}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Symbol & Meaning \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\(E_R\) & Energy value of the contested resource \\
+\(c\) & Coordination cost (cooperation overhead) \\
+\(\theta\) & Exploitation efficiency (cost to seize from a
+cooperator) \\
+\(\Phi\) & Total friction multiplier \\
+\(T, R, P, S\) & Temptation, Reward, Punishment, Sucker payoffs \\
+\(\delta\) & Discount factor: \(\sigma \cdot e^{-r}\) \\
+\(\delta^*\) & Critical discount factor: \((T-R)/(T-P)\) \\
+\(\tilde{\delta}^*\) & Network-adjusted critical discount factor \\
+\(\delta_N^*\) & \(N\)-player critical discount factor \\
+\(\alpha\) & Cooperative multiplier in \(N\)-player public goods game \\
+\(n_C, n_D\) & Number of cooperators and defectors \\
+\(\phi_0\) & Background network friction \\
+\(SW\) & System welfare \\
+\end{longtable}
+}
+
+\end{document}

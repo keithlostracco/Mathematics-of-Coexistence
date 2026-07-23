@@ -1,0 +1,195 @@
+\begin{thebibliography}{28}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Lostracco(2026{\natexlab{a}})]{TC-I}
+Keith Lostracco.
+\newblock Thermodynamics of cooperation: Necessary constraints,
+  2026{\natexlab{a}}.
+\newblock URL \url{https://doi.org/10.5281/zenodo.19635523}.
+\newblock \doi{10.5281/zenodo.19635523}.
+
+\bibitem[Tullock(1980)]{Tullock1980}
+Gordon Tullock.
+\newblock Efficient rent seeking.
+\newblock In James~M. Buchanan, Robert~D. Tollison, and Gordon Tullock,
+  editors, \emph{Toward a Theory of the Rent-Seeking Society}, pages 97--112.
+  Texas A\&M University Press, 1980.
+
+\bibitem[Lostracco(2026{\natexlab{b}})]{TC-V}
+Keith Lostracco.
+\newblock Thermodynamics of cooperation: Cooperative equilibrium,
+  2026{\natexlab{b}}.
+\newblock URL \url{https://doi.org/10.5281/zenodo.19635856}.
+\newblock \doi{10.5281/zenodo.19635856}.
+
+\bibitem[Skaperdas(1996)]{Skaperdas1996}
+Stergios Skaperdas.
+\newblock Contest success functions.
+\newblock \emph{Economic Theory}, 7\penalty0 (2):\penalty0 283--290, 1996.
+\newblock \doi{10.1007/BF01213906}.
+
+\bibitem[Hirshleifer(1991)]{Hirshleifer1991}
+Jack Hirshleifer.
+\newblock The technology of conflict as an economic activity.
+\newblock \emph{American Economic Review}, 81\penalty0 (2):\penalty0 130--134,
+  1991.
+
+\bibitem[Garfinkel and Skaperdas(2012)]{GarfinkelSkaperdas2012}
+Michelle~R. Garfinkel and Stergios Skaperdas, editors.
+\newblock \emph{The Oxford Handbook of the Economics of Peace and Conflict}.
+\newblock Oxford University Press, 2012.
+\newblock \doi{10.1093/oxfordhb/9780195392777.001.0001}.
+\newblock URL \url{https://sites.socsci.uci.edu/~mrgarfin/OUP/}.
+
+\bibitem[Konrad(2009)]{Konrad2009}
+Kai~A. Konrad.
+\newblock \emph{Strategy and Dynamics in Contests}.
+\newblock Oxford University Press, 2009.
+
+\bibitem[Schr{\"o}dinger(1944)]{Schrodinger1944}
+Erwin Schr{\"o}dinger.
+\newblock \emph{What Is Life? The Physical Aspect of the Living Cell}.
+\newblock Cambridge University Press, 1944.
+
+\bibitem[Prigogine(1978)]{Prigogine1978}
+Ilya Prigogine.
+\newblock Time, structure, and fluctuations.
+\newblock \emph{Science}, 201\penalty0 (4358):\penalty0 777--785, 1978.
+\newblock \doi{10.1126/science.201.4358.777}.
+
+\bibitem[England(2013)]{England2013}
+Jeremy~L. England.
+\newblock Statistical physics of self-replication.
+\newblock \emph{The Journal of Chemical Physics}, 139\penalty0 (12):\penalty0
+  121923, 2013.
+\newblock \doi{10.1063/1.4818538}.
+
+\bibitem[Friston(2013)]{Friston2013}
+Karl Friston.
+\newblock Life as we know it.
+\newblock \emph{Journal of the Royal Society Interface}, 10\penalty0
+  (86):\penalty0 20130475, 2013.
+\newblock \doi{10.1098/rsif.2013.0475}.
+
+\bibitem[Maturana and Varela(1980)]{Maturana1980}
+Humberto~R. Maturana and Francisco~J. Varela.
+\newblock \emph{Autopoiesis and Cognition: The Realization of the Living}.
+\newblock D. Reidel, 1980.
+\newblock Original work published 1972.
+
+\bibitem[Jackson(2008)]{Jackson2008}
+Matthew~O. Jackson.
+\newblock \emph{Social and Economic Networks}.
+\newblock Princeton University Press, 2008.
+\newblock ISBN 978-0-691-13440-6.
+
+\bibitem[Ostrom(1990)]{Ostrom1990}
+Elinor Ostrom.
+\newblock \emph{Governing the Commons: The Evolution of Institutions for
+  Collective Action}.
+\newblock Cambridge University Press, 1990.
+
+\bibitem[Lotka(1922)]{Lotka1922}
+Alfred~J. Lotka.
+\newblock Contribution to the energetics of evolution.
+\newblock \emph{Proceedings of the National Academy of Sciences}, 8\penalty0
+  (6):\penalty0 147--151, 1922.
+\newblock \doi{10.1073/pnas.8.6.147}.
+
+\bibitem[Georgescu-Roegen(1971)]{GeorgescuRoegen1971}
+Nicholas Georgescu-Roegen.
+\newblock \emph{The Entropy Law and the Economic Process}.
+\newblock Harvard University Press, 1971.
+
+\bibitem[Georgescu-Roegen(1979)]{GeorgescuRoegen1979}
+Nicholas Georgescu-Roegen.
+\newblock Comments on the papers by {Daly} and {Stiglitz}.
+\newblock In V.~Kerry Smith, editor, \emph{Scarcity and Growth Reconsidered},
+  pages 95--105. Johns Hopkins University Press, Baltimore, 1979.
+
+\bibitem[Reeds et~al.(1982)Reeds, Wahle, and Haggarty]{Reeds1982EnergyCosts}
+P.~J. Reeds, K.~W.~J. Wahle, and P.~Haggarty.
+\newblock Energy costs of protein and fatty acid synthesis.
+\newblock \emph{Proceedings of the Nutrition Society}, 41\penalty0
+  (2):\penalty0 155--159, 1982.
+\newblock \doi{10.1079/PNS19820025}.
+
+\bibitem[Demling(2009)]{Demling2009}
+Robert~H. Demling.
+\newblock Nutrition, anabolism, and the wound healing process: An overview.
+\newblock \emph{Eplasty}, 9:\penalty0 e9, 2009.
+\newblock PMID: 19274069; PMCID: PMC2642618.
+
+\bibitem[Baye et~al.(1994)Baye, Kovenock, and \{de
+  Vries\}]{BayeKovenock-deVries1994}
+\{MR (Michael)\} Baye, \{DJ (Dan)\} Kovenock, and Casper \{de Vries\}.
+\newblock The solution to the tullock rent-seeking game when r > 2:
+  mixed-strategy equilibria and mean dissipation rates.
+\newblock \emph{Public Choice}, pages 363--380, 1994.
+\newblock ISSN 0048-5829.
+\newblock \doi{10.1007/BF01053238}.
+
+\bibitem[Crosignani et~al.(2023)Crosignani, Macchiavelli, and
+  Silva]{Crosignani2023}
+Matteo Crosignani, Marco Macchiavelli, and Andr{\'e}~F. Silva.
+\newblock Pirates without borders: The propagation of cyberattacks through
+  firms' supply chains.
+\newblock \emph{Journal of Financial Economics}, 147\penalty0 (2):\penalty0
+  432--448, 2023.
+\newblock \doi{10.1016/j.jfineco.2022.12.002}.
+
+\bibitem[Lostracco(2026{\natexlab{c}})]{TC-III}
+Keith Lostracco.
+\newblock Thermodynamics of cooperation: Accumulated negentropy,
+  2026{\natexlab{c}}.
+\newblock URL \url{https://doi.org/10.5281/zenodo.19635836}.
+\newblock \doi{10.5281/zenodo.19635836}.
+
+\bibitem[Lostracco(2026{\natexlab{d}})]{TC-VI}
+Keith Lostracco.
+\newblock Thermodynamics of cooperation: Value dynamics, 2026{\natexlab{d}}.
+\newblock URL \url{https://doi.org/10.5281/zenodo.19635865}.
+\newblock \doi{10.5281/zenodo.19635865}.
+
+\bibitem[Stiglitz and Bilmes(2008)]{StiglitzBilmes2008}
+Joseph~E. Stiglitz and Linda~J. Bilmes.
+\newblock \emph{The Three Trillion Dollar War: The True Cost of the {Iraq}
+  Conflict}.
+\newblock W. W. Norton, 2008.
+
+\bibitem[{International Monetary Fund}(2024)]{IMF2024Iraq}
+{International Monetary Fund}.
+\newblock Iraq: 2024 {Article IV} consultation -- staff report.
+\newblock Technical Report Country Report No.\ 24/128, International Monetary
+  Fund, May 2024.
+\newblock URL
+  \url{https://www.elibrary.imf.org/view/journals/002/2024/128/article-A001-en.xml}.
+
+\bibitem[Hannaford-Agor and Waters(2013)]{HannafordAgor2013}
+Paula Hannaford-Agor and Nicole~L. Waters.
+\newblock Estimating the cost of civil litigation.
+\newblock \emph{Caseload Highlights}, 20\penalty0 (1):\penalty0 1--11, 2013.
+
+\bibitem[Hannaford-Agor et~al.(2015)Hannaford-Agor, Graves, and
+  Miller]{HannafordAgor2015}
+Paula Hannaford-Agor, Scott Graves, and Shelley~Spacek Miller.
+\newblock Civil justice initiative: The landscape of civil litigation in state
+  courts.
+\newblock 2015.
+\newblock URL \url{https://scholarship.law.wm.edu/facpubs/2390}.
+
+\bibitem[Cardinale et~al.(2007)Cardinale, Wright, Cadotte, Carroll, Hector,
+  Srivastava, Loreau, and Weis]{Cardinale2007}
+Bradley~J. Cardinale, Justin~P. Wright, Marc~W. Cadotte, Ian~T. Carroll, Andy
+  Hector, Diane~S. Srivastava, Michel Loreau, and Jerome~J. Weis.
+\newblock Impacts of plant diversity on biomass production increase through
+  time because of species complementarity.
+\newblock \emph{Proceedings of the National Academy of Sciences}, 104\penalty0
+  (46):\penalty0 18123--18128, 2007.
+\newblock \doi{10.1073/pnas.0709069104}.
+
+\end{thebibliography}

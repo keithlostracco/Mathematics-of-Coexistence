@@ -2,9 +2,8 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{hyperref}
 \usepackage{graphicx}
-\graphicspath{{../../shared/figures/}}
+\graphicspath{{./}}
 \usepackage{natbib}
-\bibliographystyle{unsrtnat}
 \usepackage{doi}
 % \setcitestyle{numbers,super} % Superscript citation numbers (e.g. ¹, ²⁻⁴) — does not support locator notes
 \setcitestyle{numbers,square} % Square brackets around citation numbers (e.g. [1], [2-4]) — math standard
@@ -20,24 +19,32 @@
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{dsfont} % double-struck numerals (\mathds{1} for indicator functions)
-\usepackage{thmtools}
-\declaretheorem[name=Theorem]{theorem}
-\declaretheorem[name=Proposition,sibling=theorem]{proposition}
-\declaretheorem[name=Lemma,sibling=theorem]{lemma}
-\declaretheorem[name=Corollary,sibling=theorem]{corollary}
-\declaretheorem[name=Conjecture,sibling=theorem]{conjecture}
+% thmtools is only needed for the optional \listoftheorems feature. Loading it
+% patches \newtheorem, and thmtools 0.76's patch is incompatible with recent
+% LaTeX kernels (>= 2025) for shared-counter theorems (every sibling raises
+% "Command \c@... already defined"). We therefore load it only when the
+% list-of-theorems feature is actually requested.
+% Theorem-like environments defined with amsthm's native shared-counter syntax
+% (\newtheorem{child}[parent]{Name}). Numbering is grouped by counter without
+% relying on thmtools' sibling mechanism.
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{conjecture}[theorem]{Conjecture}
 
 \theoremstyle{definition}
-\declaretheorem[name=Definition,style=definition]{definition}
-\declaretheorem[name=Axiom,style=definition,sibling=definition]{axiom}
-\declaretheorem[name=Assumption,style=definition,sibling=definition]{assumption}
-\declaretheorem[name=Criterion,style=definition,sibling=definition]{criterion}
-\declaretheorem[name=Example,style=definition,sibling=definition]{example}
+\newtheorem{definition}{Definition}
+\newtheorem{axiom}[definition]{Axiom}
+\newtheorem{assumption}[definition]{Assumption}
+\newtheorem{criterion}[definition]{Criterion}
+\newtheorem{example}[definition]{Example}
 
 \theoremstyle{remark}
-\declaretheorem[name=Remark,style=remark]{remark}
-\declaretheorem[name=Observation,style=remark,sibling=remark]{observation}
-\declaretheorem[name=Property,style=remark,sibling=remark]{property}
+\newtheorem{remark}{Remark}
+\newtheorem{observation}[remark]{Observation}
+\newtheorem{property}[remark]{Property}
 
 % Prevent theorem-like environments from starting near the page bottom.
 \usepackage{etoolbox}
@@ -56,6 +63,10 @@
 \usepackage{array}
 \usepackage{calc}
 \usepackage{caption}
+% General table note: small font, flush-left, below the table (used by some papers).
+\newenvironment{tablenote}
+  {\par\addvspace{2pt}\footnotesize\noindent}
+  {\par\addvspace{4pt}}
 % Pandoc 3.x wraps uncaptioned longtables in \def\LTcaptype{none};
 % this requires a 'none' counter to exist.
 \newcounter{none}
@@ -191,9 +202,6 @@ framework developed in the first paper of this series, unifying overt
 boundary violations and covert signal corruption under a single cost
 accounting.
 \end{abstract}
-\newpage
-\tableofcontents
-\newpage
 \section{Introduction}\label{introduction}
 
 \emph{Necessary Constraints} \citep{TC-I} proves that mutual boundary
@@ -349,9 +357,9 @@ Deception derives the quadratic utility loss from corrupted information,
 and The Metabolic Cost of Verification derives the energy expenditure
 required for defense. Cumulative Network Degradation proves the systemic
 deception theorem and extends it to serial multi-agent chains, where
-per-agent corruption compounds super-linearly with chain length and
-yields a sharp chain-collapse threshold
-(Proposition~\ref{prop-bsc-series-depth},
+per-agent corruption compounds along the chain---driving the
+verification burden up exponentially in chain length---and yields a
+sharp chain-collapse threshold (Proposition~\ref{prop-bsc-series-depth},
 Corollary~\ref{cor-pipeline-collapse-threshold}). The Worked Examples
 section illustrates the framework numerically, and The Complete
 Micro-Friction Model section formalizes the unified cost function.
@@ -652,8 +660,8 @@ independent of \(\Theta\)),
 \(\Delta U_B = \sigma_\alpha^2 / (2\beta)\), the full cost of
 uncertainty.
 
-\subsection{The Gaussian-Binary
-Illustration}\label{the-gaussian-binary-illustration}
+\subsection{The Binary-State
+Illustration}\label{the-binary-state-illustration}
 
 Let \(\alpha(\Theta) \in \{\alpha_L, \alpha_H\}\) with equal probability
 (\(\alpha_L < \alpha_H\)). The prior variance is:
@@ -715,8 +723,9 @@ Verification}\label{the-metabolic-cost-of-verification}
 Expenditure}\label{from-information-loss-to-energy-expenditure}
 
 Theorem~\ref{thm-decision-cost-quadratic} quantifies the
-\textbf{decision loss} from acting on corrupted information without
-knowing it is corrupted. In practice, agents often \textbf{suspect}
+\textbf{decision loss} that remains even when the receiver processes the
+corrupted signal optimally---a lower bound on the loss of a receiver
+unaware of the corruption. In practice, agents often \textbf{suspect}
 deception and invest energy in \textbf{verification}: cross-referencing
 signals, gathering redundant information, and testing claims.
 
@@ -734,7 +743,7 @@ observations \(Y_1, \ldots, Y_K\) of the state \(\Theta\), each through
 a BSC with error rate \(q\). By the channel coding theorem
 \citep{Shannon1948}, reliable inference of \(\Theta\) requires:
 
-\[K \geq \frac{H(\Theta)}{C(q)} = \frac{1}{1 - h(q)} \quad \text{observations per bit of state uncertainty}\]
+\[K \geq \frac{H(\Theta)}{C(q)} \quad \text{observations}, \qquad \text{equivalently } \frac{1}{1 - h(q)} \text{ observations per bit of state uncertainty}\]
 
 where \(C(q) = 1 - h(q)\) is the channel capacity.
 
@@ -763,7 +772,7 @@ This is the number of observations required per bit of state information to over
 \bottomrule\noalign{}
 \endlastfoot
 0.00 & 0.000 & 1.000 & 1.00 & 0\% overhead \\
-0.01 & 0.081 & 0.919 & 1.09 & 9\% overhead \\
+0.01 & 0.081 & 0.919 & 1.09 & 8.8\% overhead \\
 0.05 & 0.286 & 0.714 & 1.40 & 40\% overhead \\
 0.10 & 0.469 & 0.531 & 1.88 & 88\% overhead \\
 0.25 & 0.811 & 0.189 & 5.30 & 430\% overhead \\
@@ -775,7 +784,8 @@ This is the number of observations required per bit of state information to over
 \(q \to 0.5\). Near-total deception makes verification arbitrarily
 expensive, not linearly, but \textbf{explosively}. This nonlinearity is
 thermodynamically natural: as the channel approaches zero capacity, each
-marginal unit of reliability requires exponentially more observation.
+marginal reduction of the remaining channel margin \(1/2 - q\) inflates
+the required observations as \((1/2 - q)^{-2}\).
 
 \subsection{Landauer's Bound and the Energy Cost of
 Verification}\label{landauers-bound-and-the-energy-cost-of-verification}
@@ -904,7 +914,7 @@ A deceptive act injecting $\Delta H$ bits of entropy into the network increases 
 
 $$\Delta \phi = \eta_{\text{info}} \cdot \Delta H \cdot W_{\text{bit}}$$
 
-where $\eta_{\text{info}} > 0$ is the \textbf{information-friction sensitivity}, the proportionality constant mapping informational entropy (weighted by its energetic cost) to network friction. This generalizes the friction injection framework of \citep{TC-IV} with $v = \Delta H \cdot W_{\text{bit}}$ being the energetic equivalent of the injected information entropy.
+where $\eta_{\text{info}} > 0$ is the \textbf{deception-friction sensitivity}, the proportionality constant mapping informational entropy (weighted by its energetic cost) to network friction. This generalizes the friction injection framework of \citep{TC-IV} with $v = \Delta H \cdot W_{\text{bit}}$ being the energetic equivalent of the injected information entropy.
 \end{definition}
 
 \textbf{Interpretation:} The injected entropy \(\Delta H\) (bits) is
@@ -935,7 +945,12 @@ tax} is:
 
 This is energy spent \textbf{purely on checking whether information is
 true}, energy that, under honest communication, would be available for
-productive activity.
+productive activity. Because \(h(q)/(1 - h(q))\) is nonlinear, this
+closed form is exact when all channels share the common rate
+\(\bar{q}\); for heterogeneous rates the aggregate is the per-channel
+sum \(\sum_m W_{\text{honest},m} \cdot h(q_m)/(1 - h(q_m))\) of
+Definition~\ref{def-info-interaction-cost}, of which the displayed
+expression is the homogeneous case.
 
 \subsection{The Systemic Deception Cost
 Theorem}\label{the-systemic-deception-cost-theorem}
@@ -943,7 +958,7 @@ Theorem}\label{the-systemic-deception-cost-theorem}
 \begin{theorem}[Cumulative Micro-Friction: The Systemic Deception Theorem]
 \label{thm-systemic-deception}
 
-A network of $N$ agents with $M$ cooperative transactions per period and average deception rate $\bar{q} > 0$ suffers a total per-period efficiency loss of:
+A network of $N$ agents with $M$ cooperative transactions per period and deception rate $\bar{q} > 0$ common to all channels suffers a total per-period efficiency loss of:
 
 $$\mathcal{L}_{\text{deception}} = \underbrace{M \cdot \Delta U_{\text{avg}}(\bar{q})}_{\text{decision losses}} + \underbrace{M \cdot W_{\text{honest}} \cdot \frac{h(\bar{q})}{1 - h(\bar{q})}}_{\text{verification costs}}$$
 
@@ -963,9 +978,11 @@ Part (a): When $\bar{q} = 0$, $\Delta U_{\text{avg}}(0) = 0$ (Theorem~\ref{thm-d
 \begin{corollary}[The Honesty Efficiency Principle]
 \label{cor-honesty-efficiency}
 
-Honesty is defined as the communication regime that maximizes network efficiency. Any deviation from honest communication imposes a strictly positive, compounding cost on the network. In the notation of the thermodynamic friction derivation:
+Honest communication ($\bar{q} = 0$, per Definition~\ref{def-honest-communication}) is the unique efficiency-maximizing regime, and any deviation from it imposes a strictly positive, compounding cost on the network. By Theorem~\ref{thm-systemic-deception}(a) and Definition~\ref{def-deception-friction-mapping},
 
-$$\phi_{\text{honest}} = 0 \iff \bar{q} = 0 \iff \text{network operates at maximum cooperative efficiency}$$
+$$\mathcal{L}_{\text{deception}} = 0 \iff \bar{q} = 0 \iff \phi_{\text{info}} = 0,$$
+
+i.e., in the notation of the thermodynamic friction derivation, $\phi_{\text{honest}} = 0 \iff \bar{q} = 0 \iff$ the network operates at maximum cooperative efficiency.
 \end{corollary}
 
 \subsection{Serial Multi-Agent Chains: The Compounding
@@ -1013,14 +1030,20 @@ decays geometrically in chain length:
 
 so \(q_{\text{eff}} \to 1/2\) exponentially fast in \(d\) for every
 \(q \in (0, 1/2]\), and the composite channel approaches zero capacity
-in the limit of long chains. Second, in the small-\(q\) regime,
-\(q_{\text{eff}}(d, q) \approx d q + O(d^2 q^2)\), and the corresponding
-capacity loss \(h(q_{\text{eff}}) \sim -d q \log_2(d q)\) grows like
-\(d \log d\) in the chain length at fixed \(q\). The capacity cost of
-locally tolerated corruption therefore compounds super-linearly with
-chain length: modest per-agent rates that are inconsequential in a
-direct exchange produce severe channel-level corruption once the chain
-is long enough.
+in the limit of long chains. Second, in the small-\(q\) regime
+(\(dq \ll 1\)), \(q_{\text{eff}}(d, q) \approx d q + O(d^2 q^2)\), and
+the corresponding capacity loss
+\(h(q_{\text{eff}}) \approx d q \log_2\!\big(1/(d q)\big)\) accumulates
+with chain length. Because \(-x \log_2 x\) is concave, this growth is
+sub-linear in \(d\) at fixed \(q\)---the end-to-end capacity loss is
+strictly smaller than the sum of the \(d\) independent single-hop
+losses---and it saturates as \(q_{\text{eff}} \to 1/2\). What compounds
+without bound is the verification burden: the reciprocal capacity
+\(1/C_{\text{eff}}\) grows exponentially in \(d\), since
+\(C_{\text{eff}} \approx \tfrac{1}{2 \ln 2}(1 - 2q)^{2d}\) for long
+chains. Modest per-agent rates that are inconsequential in a direct
+exchange therefore produce severe channel-level corruption---and an
+exponentially growing verification cost---once the chain is long enough.
 
 \begin{corollary}[Chain Collapse Threshold]
 \label{cor-pipeline-collapse-threshold}
@@ -1042,7 +1065,8 @@ exceeds \(19\), so verification consumes more than 19 times the honest
 processing budget per channel use), one computes
 \(q_{\max} \approx 0.3691\) and \(q^*(10; 0.05) \approx 0.063\). A
 ten-agent communication chain collapses below 5\% effective capacity
-once any single agent exceeds approximately 6.3\% corruption.
+once the per-agent corruption rate, common to all ten agents, exceeds
+approximately 6.3\%.
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
@@ -1083,6 +1107,10 @@ deceptive act of magnitude \(\Delta H\) bits produces a total cascading
 cost of:
 
 \[C_{\text{cascade}}^{\text{info}} = \frac{\eta_{\text{info}} \cdot \Delta H \cdot W_{\text{bit}} \cdot M \cdot \bar{E}}{\epsilon}\]
+
+where \(\epsilon \in (0, 1)\) is the per-period friction decay rate and
+\(\bar{E}\) the average transaction value, both inherited from
+\citep{TC-IV} (\(M\) is the per-period transaction count, as above).
 
 For micro-deception (\(\Delta H \ll 1\)), each individual lie seems
 negligible. But the cascade amplification factor
@@ -1168,13 +1196,13 @@ Decision cost (Theorem~\ref{thm-decision-cost-quadratic}, binary case):
 
 \textbf{Verification cost (\(q = 0.1\)):}
 
-Redundancy factor: \(\rho(0.1) = 1/(1 - 0.469) = 1/0.531 = 1.884\).
+Redundancy factor: \(\rho(0.1) = 1/(1 - 0.469) = 1/0.531 = 1.883\).
 
-Verification overhead relative to honest processing: \(88.4\%\) extra
+Verification overhead relative to honest processing: \(88.3\%\) extra
 energy.
 
 If \(W_{\text{honest}} = 2\) energy units per transaction, then
-\(\Delta W = 2 \times 0.884 = 1.77\) energy units.
+\(\Delta W = 2 \times 0.883 = 1.77\) energy units.
 
 \textbf{The deception dilemma:} - Don't verify: lose 5.76 utility per
 period. - Verify: spend 1.77 energy but recover full decision quality.
@@ -1215,11 +1243,11 @@ As \% of gross value
 \endlastfoot
 0.00 (perfectly honest) & 0 & 0 & 0 & 0\% \\
 0.01 (rare lies) & 0.081 & 0.088 & 880 & 0.88\% \\
-0.05 (occasional lies) & 0.286 & 0.400 & 4,000 & 4.0\% \\
+0.05 (occasional lies) & 0.286 & 0.401 & 4,013 & 4.0\% \\
 0.10 (regular dishonesty) & 0.469 & 0.883 & 8,830 & 8.8\% \\
-0.20 (pervasive dishonesty) & 0.722 & 2.599 & 25,990 & 26.0\% \\
-0.30 (systemic dishonesty) & 0.881 & 7.403 & 74,030 & 74.0\% \\
-0.40 (near-total distrust) & 0.971 & 33.48 & 334,800 & \textbf{335\%} \\
+0.20 (pervasive dishonesty) & 0.722 & 2.596 & 25,960 & 26.0\% \\
+0.30 (systemic dishonesty) & 0.881 & 7.424 & 74,240 & 74.2\% \\
+0.40 (near-total distrust) & 0.971 & 33.42 & 334,240 & \textbf{334\%} \\
 \end{longtable}
 }
 
@@ -1277,8 +1305,9 @@ small deceptions for every major violation. The cumulative
 micro-friction from chronic low-level dishonesty can rival or exceed
 periodic macro-friction events:
 
-At violation rate \(\nu_{\text{macro}} = 0.1\) per period and
-micro-deception rate \(\nu_{\text{micro}} = 50\) per period:
+At macro-violation rate \(\nu_{\text{macro}} = 0.1\) per period and
+micro-deception rate \(\nu_{\text{micro}} = 50\) per period (where
+\(\nu\) denotes the per-period violation rate of \citep{TC-IV}):
 
 \begin{itemize}
 \tightlist
@@ -1380,7 +1409,8 @@ collapses cooperative network \\
 Proposition & Serial BSC Composition
 (Proposition~\ref{prop-bsc-series-depth}) &
 \(q_{\text{eff}}(d,q) = (1-(1-2q)^d)/2\) & Per-agent corruption
-compounds super-linearly with chain length \\
+accumulates along the chain; verification burden \(1/C_{\text{eff}}\)
+grows exponentially in \(d\) \\
 Corollary & Chain Collapse Threshold
 (Corollary~\ref{cor-pipeline-collapse-threshold}) &
 \(q^*(d; C_{\min}) = (1 - (1 - 2 q_{\max})^{1/d})/2\) & Maximum
@@ -1414,7 +1444,7 @@ Meaning
 \(\Theta\) & Environmental state (random variable) \\
 \(Y\) & Signal received by Agent \(B\) \\
 \(H(\Theta)\) & Entropy of the environmental state (bits) \\
-\(H(\Theta \| Y)\) & Conditional entropy, residual uncertainty after
+\(H(\Theta \mid Y)\) & Conditional entropy, residual uncertainty after
 signal \\
 \(I(\Theta; Y)\) & Mutual information, information transmitted \\
 \(q\) & Deception rate (BSC error probability) \\
@@ -1427,8 +1457,25 @@ signal \\
 \(\Delta W\) & Verification overhead energy \\
 \(W_{\text{bit}}\) & Energy cost per bit of information processing \\
 \(\xi\) & Processing inefficiency factor (vs.~Landauer bound) \\
-\(\eta_{\text{info}}\) & Information-friction sensitivity \\
-\(\bar{q}\) & Network-average deception rate \\
+\(\eta_{\text{info}}\) & Deception-friction sensitivity \\
+\(\bar{q}\) & Common per-channel deception rate; equals the network
+average in the homogeneous case \\
+\(d\) & Chain length (number of agents in series between source and
+receiver) \\
+\(q_{\text{eff}}(d, q)\) & Effective end-to-end error rate of \(d\) BSCs
+in series \\
+\(C_{\text{eff}}(d, q)\) & End-to-end capacity of the serial chain:
+\(1 - h(q_{\text{eff}}(d, q))\) \\
+\(q^*(d; C_{\min})\) & Maximum per-agent rate preserving end-to-end
+capacity \(\geq C_{\min}\) \\
+\(C_{\min}\) & Minimum acceptable end-to-end channel capacity \\
+\(q_{\max}\) & Maximum tolerable effective error rate:
+\(h^{-1}(1 - C_{\min})\) \\
+\(\bar{E}\) & Average transaction value (energy units), as in
+\citep{TC-IV} \\
+\(\epsilon\) & Per-period friction decay rate \(\in (0,1)\), as in
+\citep{TC-IV} \\
+\(\nu\) & Per-period violation rate, as in \citep{TC-IV} \\
 \(\mathcal{C}_{\text{info}}\) & Micro-friction cost function \\
 \(\alpha_H, \alpha_L\) & High and low marginal yields in binary state
 model \\
@@ -1465,9 +1512,10 @@ The key structural insight is the inevitability corollary
 corruption rate \(q > 0\), at least one of the decision cost
 \(\Delta U_B\) or the verification cost \(\Delta W\) is strictly
 positive. There is no regime in which deception is costless to the
-system. This result holds regardless of the specific utility functions,
-network topology, or agent capabilities; it follows from the
-information-theoretic structure alone.
+system. This result holds for any utility function under which the
+corrupted signal is payoff-relevant (strictly positive residual payoff
+variance), independent of network topology or agent capabilities; it
+follows from the information-theoretic structure alone.
 
 \subsection{Testable Predictions}\label{testable-predictions}
 
@@ -1492,16 +1540,18 @@ Falsified If\ldots{}
 \endlastfoot
 Chain collapse at \(q^*(10; 0.05) \approx 0.063\) per-agent deception
 for \(d = 10\) & Corollary~\ref{cor-pipeline-collapse-threshold} &
-Ten-agent communication chains tolerate \(>10\%\) per-agent deception
-without end-to-end capacity collapse \\
+Ten-agent communication chains tolerate per-agent deception rates
+materially above 6.3\% (e.g., 10\%) without end-to-end capacity
+collapse \\
 Verification cost divergence as \(q \to 0.5\) &
 Theorem~\ref{thm-metabolic-cost-verification} & Agents in low-trust
 environments maintain full decision quality without increasing
 verification expenditure \\
-Quadratic scaling of decision cost with \(q(1-q)\) &
-Theorem~\ref{thm-decision-cost-quadratic} & Systematic signal
-degradation in controlled settings produces sub-quadratic or constant
-utility loss \\
+Decision cost proportional to \(q(1-q)\) (linear onset in \(q\), maximum
+at \(q = 0.5\)) & Theorem~\ref{thm-decision-cost-quadratic} & Controlled
+signal degradation produces utility loss that deviates systematically
+from the \(q(1-q)\) profile (e.g., threshold onset or unbounded
+growth) \\
 Honest communication (\(q = 0\)) as the unique efficiency maximum &
 Corollary~\ref{cor-honesty-efficiency} & A network deception rate
 \(\bar{q} > 0\) produces higher aggregate surplus than \(\bar{q} = 0\)
@@ -1563,9 +1613,11 @@ of such a chain as \(q_{\text{eff}}(d, q) = (1 - (1 - 2q)^d)/2\). The
 bias of the composite channel decays geometrically as
 \(\tfrac{1}{2} - q_{\text{eff}} = \tfrac{1}{2}(1 - 2q)^d\), so for small
 per-agent rates \(q_{\text{eff}} \approx d q\) and the resulting
-capacity loss \(h(q_{\text{eff}})\) grows like \(d \log d\) in the chain
-length: a per-agent rate that is locally inconsequential compounds
-super-linearly across the chain. The verification overhead of
+capacity loss \(h(q_{\text{eff}}) \approx d q \log_2(1/(d q))\)
+accumulates sub-linearly in the chain length, while the verification
+burden \(1/C_{\text{eff}}\) grows exponentially in \(d\): a per-agent
+rate that is locally inconsequential compounds into severe end-to-end
+corruption once the chain is long enough. The verification overhead of
 Theorem~\ref{thm-metabolic-cost-verification} quantifies the energy that
 downstream agents must spend to recover usable information, energy that
 is unavailable for productive activity.
@@ -1649,9 +1701,10 @@ scale with network embeddedness rather than with chain length alone.
 
 We have formalized strategic signal corruption as entropy injection and
 proved that it imposes quantifiable, unavoidable costs on multi-agent
-systems. The decision cost scales quadratically with injected entropy
-(Theorem~\ref{thm-decision-cost-quadratic}), verification costs diverge
-at the channel capacity limit
+systems. The decision cost equals the residual payoff variance scaled by
+\(1/(2\beta)\) (Theorem~\ref{thm-decision-cost-quadratic}), reducing to
+\(\Delta U_B \propto q(1-q)\) in the binary channel model; verification
+costs diverge at the channel capacity limit
 (Theorem~\ref{thm-metabolic-cost-verification}), and pervasive deception
 collapses network cooperation at a critical threshold
 (Theorem~\ref{thm-systemic-deception}). Honest communication is the
@@ -1669,5 +1722,140 @@ quantifying the irreplaceability of the complex structures that
 cooperative networks produce and maintain.
 
 \addcontentsline{toc}{section}{References}
-\bibliography{../../shared/main}
+\begin{thebibliography}{18}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Lostracco(2026{\natexlab{a}})]{TC-I}
+Keith Lostracco.
+\newblock Thermodynamics of cooperation: Necessary constraints,
+  2026{\natexlab{a}}.
+\newblock URL \url{https://doi.org/10.5281/zenodo.19635523}.
+\newblock \doi{10.5281/zenodo.19635523}.
+
+\bibitem[Lostracco(2026{\natexlab{b}})]{TC-IV}
+Keith Lostracco.
+\newblock Thermodynamics of cooperation: Thermodynamic friction,
+  2026{\natexlab{b}}.
+\newblock URL \url{https://doi.org/10.5281/zenodo.19635850}.
+\newblock \doi{10.5281/zenodo.19635850}.
+
+\bibitem[Shannon(1948)]{Shannon1948}
+Claude~E. Shannon.
+\newblock A mathematical theory of communication.
+\newblock \emph{The Bell System Technical Journal}, 27\penalty0 (3):\penalty0
+  379--423, 1948.
+\newblock \doi{10.1002/j.1538-7305.1948.tb01338.x}.
+
+\bibitem[Landauer(1961)]{Landauer1961}
+Rolf Landauer.
+\newblock Irreversibility and heat generation in the computing process.
+\newblock \emph{IBM Journal of Research and Development}, 5\penalty0
+  (3):\penalty0 183--191, 1961.
+\newblock \doi{10.1147/rd.53.0183}.
+
+\bibitem[Szilard(1929)]{Szilard1929}
+Leo Szilard.
+\newblock {\"U}ber die {Entropieverminderung} in einem thermodynamischen
+  {System} bei {Eingriffen} intelligenter {Wesen}.
+\newblock \emph{Zeitschrift f{\"u}r Physik}, 53\penalty0 (11--12):\penalty0
+  840--856, 1929.
+\newblock \doi{10.1007/BF01341281}.
+
+\bibitem[Brillouin(1951)]{Brillouin1951}
+L{\'e}on Brillouin.
+\newblock {Maxwell}'s demon cannot operate: Information and entropy. {I}.
+\newblock \emph{Journal of Applied Physics}, 22\penalty0 (3):\penalty0
+  334--337, 1951.
+\newblock \doi{10.1063/1.1699951}.
+
+\bibitem[Brillouin(1962)]{Brillouin1962}
+L{\'e}on Brillouin.
+\newblock \emph{Science and Information Theory}.
+\newblock Academic Press, 2nd edition, 1962.
+
+\bibitem[B{\'e}rut et~al.(2012)B{\'e}rut, Arakelyan, Petrosyan, Ciliberto,
+  Dillenschneider, and Lutz]{Berut2012}
+Antoine B{\'e}rut, Artak Arakelyan, Artyom Petrosyan, Sergio Ciliberto, Raoul
+  Dillenschneider, and Eric Lutz.
+\newblock Experimental verification of {Landauer}'s principle linking
+  information and thermodynamics.
+\newblock \emph{Nature}, 483\penalty0 (7388):\penalty0 187--189, 2012.
+\newblock \doi{10.1038/nature10872}.
+
+\bibitem[Bennett(1973)]{Bennett1973}
+Charles~H. Bennett.
+\newblock Logical reversibility of computation.
+\newblock \emph{IBM Journal of Research and Development}, 17\penalty0
+  (6):\penalty0 525--532, 1973.
+\newblock \doi{10.1147/rd.176.0525}.
+
+\bibitem[Bennett(1982)]{Bennett1982}
+Charles~H. Bennett.
+\newblock The thermodynamics of computation---a review.
+\newblock \emph{International Journal of Theoretical Physics}, 21\penalty0
+  (12):\penalty0 905--940, 1982.
+\newblock \doi{10.1007/BF02084158}.
+
+\bibitem[Blackwell(1953)]{Blackwell1953}
+David Blackwell.
+\newblock Equivalent comparisons of experiments.
+\newblock \emph{The Annals of Mathematical Statistics}, 24\penalty0
+  (2):\penalty0 265--272, 1953.
+\newblock \doi{10.1214/aoms/1177729032}.
+
+\bibitem[Laughlin et~al.(1998)Laughlin, de~Ruyter~van Steveninck, and
+  Anderson]{Laughlin1998}
+Simon~B. Laughlin, Rob~R. de~Ruyter~van Steveninck, and John~C. Anderson.
+\newblock The metabolic cost of neural information.
+\newblock \emph{Nature Neuroscience}, 1\penalty0 (1):\penalty0 36--41, 1998.
+\newblock \doi{10.1038/236}.
+
+\bibitem[Frank(2002)]{Frank2002}
+Michael~P. Frank.
+\newblock The physical limits of computing.
+\newblock \emph{Computing in Science \& Engineering}, 4\penalty0 (3):\penalty0
+  16--26, 2002.
+\newblock \doi{10.1109/5992.998637}.
+
+\bibitem[Lostracco(2026{\natexlab{c}})]{TC-V}
+Keith Lostracco.
+\newblock Thermodynamics of cooperation: Cooperative equilibrium,
+  2026{\natexlab{c}}.
+\newblock URL \url{https://doi.org/10.5281/zenodo.19635856}.
+\newblock \doi{10.5281/zenodo.19635856}.
+
+\bibitem[Fudenberg et~al.(1994)Fudenberg, Levine, and Maskin]{Fudenberg1994}
+Drew Fudenberg, David Levine, and Eric Maskin.
+\newblock The folk theorem with imperfect public information.
+\newblock \emph{Econometrica}, 62\penalty0 (5):\penalty0 997--1039, 1994.
+\newblock ISSN 00129682, 14680262.
+\newblock URL \url{http://www.jstor.org/stable/2951505}.
+
+\bibitem[Green and Porter(1984)]{GreenPorter1984}
+Edward~J. Green and Robert~H. Porter.
+\newblock Noncooperative collusion under imperfect price information.
+\newblock \emph{Econometrica}, 52\penalty0 (1):\penalty0 87--100, 1984.
+\newblock ISSN 00129682, 14680262.
+\newblock URL \url{http://www.jstor.org/stable/1911462}.
+
+\bibitem[Hubinger et~al.(2019)Hubinger, van Merwijk, Mikulik, Skalse, and
+  Garrabrant]{Hubinger2019}
+Evan Hubinger, Chris van Merwijk, Vladimir Mikulik, Joar Skalse, and Scott
+  Garrabrant.
+\newblock Risks from learned optimization in advanced machine learning systems.
+\newblock \emph{arXiv preprint arXiv:1906.01820}, 2019.
+\newblock \doi{10.48550/arXiv.1906.01820}.
+
+\bibitem[Lostracco(2026{\natexlab{d}})]{TC-III}
+Keith Lostracco.
+\newblock Thermodynamics of cooperation: Accumulated negentropy,
+  2026{\natexlab{d}}.
+\newblock URL \url{https://doi.org/10.5281/zenodo.19635836}.
+\newblock \doi{10.5281/zenodo.19635836}.
+
+\end{thebibliography}
 \end{document}

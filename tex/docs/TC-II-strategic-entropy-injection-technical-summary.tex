@@ -1,0 +1,236 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{graphicx}
+
+% ── Paragraph spacing ────────────────────────────────────────────────────────
+\usepackage{parskip}
+
+% ── Page-break quality ───────────────────────────────────────────────────────
+\widowpenalty=10000
+\clubpenalty=10000
+\raggedbottom
+
+% ── Suppress automatic section numbering ─────────────────────────────────────
+\setcounter{secnumdepth}{-1}
+
+% ── Pandoc-generated table support ───────────────────────────────────────────
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{calc}
+\usepackage{caption}
+\newcounter{none}
+
+% ── Math support ─────────────────────────────────────────────────────────────
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% ── Make \paragraph and \subparagraph block-level ────────────────────────────
+\usepackage{titlesec}
+\titleformat{\paragraph}
+  {\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+  {0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+\titleformat{\subparagraph}
+  {\normalfont\normalsize\bfseries}{\thesubparagraph}{1em}{}
+\titlespacing*{\subparagraph}
+  {0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+% ── Pandoc-generated tightlist support ───────────────────────────────────────
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% ── Pandoc 3.x figure sizing ────────────────────────────────────────────────
+\newcommand{\pandocbounded}[1]{%
+  \sbox0{#1}%
+  \ifdim\wd0>\linewidth
+    \resizebox{\linewidth}{!}{#1}%
+  \else
+    #1%
+  \fi
+}
+
+% ── Unicode character fixes ──────────────────────────────────────────────────
+\usepackage{newunicodechar}
+\newunicodechar{✓}{$\checkmark$}
+\newunicodechar{≠}{$\neq$}
+\newunicodechar{≡}{$\equiv$}
+\newunicodechar{≈}{$\approx$}
+\newunicodechar{δ}{$\delta$}
+\newunicodechar{−}{$-$}
+\let\mystRightarrow\rightarrow
+\renewcommand{\rightarrow}{\ensuremath{\mystRightarrow}}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\hypersetup{colorlinks=true, allcolors=blue}
+
+\title{Technical Summary: Strategic Entropy Injection in Multi-Agent
+Networks}
+\author{Keith Lostracco}
+\date{}
+
+\begin{document}
+\maketitle
+
+\subsection{Model}\label{model}
+
+Agents communicate through channels modeled as binary symmetric channels
+(BSC) with deception rate \(q \in [0, 0.5]\), the probability that a
+given signal is strategically false. The environmental state \(\Theta\)
+has entropy \(H(\Theta) = -\sum_{\theta} p(\theta) \log_2 p(\theta)\)
+bits. Channel quality is measured by mutual information
+\(I(\Theta; Y) = H(\Theta) - H(\Theta | Y)\), and honest communication
+is defined as the regime where \(H(\Theta | Y) = 0\). Deception is the
+deliberate injection of entropy: \(\Delta H = H(\Theta | Y) > 0\) when
+honest transmission is achievable. The conditional entropy under BSC
+deception rate \(q\) for the binary equiprobable state model
+(\(\Theta \in \{0,1\}\) with equal probability) is the binary entropy
+function:
+
+\[H(\Theta | Y) = h(q) \triangleq -q \log_2 q - (1 - q) \log_2(1 - q)\]
+
+The effective channel capacity is \(C(q) = 1 - h(q)\), which drops from
+1 bit/use (honest) to 0 (total noise) as \(q\) increases from 0 to 0.5.
+
+Agent \(B\) selects resource allocation \(x_B\) to maximize a quadratic
+utility
+\(U_B(x_B, \theta) = \alpha(\theta) \cdot x_B - \frac{\beta}{2} x_B^2\),
+where \(\alpha(\theta) > 0\) is the state-dependent marginal yield.
+Under honest communication, \(B\) achieves
+\(\bar{U}_B^{\text{honest}} = \mathbb{E}[\alpha^2] / (2\beta)\).
+
+\subsection{Results}\label{results}
+
+\textbf{Theorem 8 (Decision Cost of Deception, Quadratic Model).} In the
+quadratic utility model, the decision cost of deception is:
+
+\[\Delta U_B = \frac{1}{2\beta}\mathbb{E}\left[\operatorname{Var}(\alpha | Y)\right] = \frac{\sigma_\alpha^2 - \sigma_{\hat{\alpha}}^2}{2\beta}\]
+
+where \(\sigma_\alpha^2 = \operatorname{Var}(\alpha(\Theta))\) is the
+prior variance and
+\(\sigma_{\hat{\alpha}}^2 = \operatorname{Var}(\mathbb{E}[\alpha | Y])\)
+is the explained variance. For the binary state model
+(\(\alpha(\Theta) \in \{\alpha_L, \alpha_H\}\) with equal probability)
+under BSC deception rate \(q\):
+
+\[\Delta U_B(q) = \frac{q(1 - q)(\alpha_H - \alpha_L)^2}{2\beta}\]
+
+\textbf{Theorem 9 (Metabolic Cost of Verification).} An agent receiving
+information through a deceptive channel (error rate \(q > 0\)) must
+expend at least:
+
+\[W_{\text{verify}}(q) = \frac{W_{\text{honest}}}{1 - h(q)}\]
+
+energy to achieve the same decision quality as under honest
+communication. The verification overhead is:
+
+\[\Delta W(q) = W_{\text{honest}} \cdot \frac{h(q)}{1 - h(q)}\]
+
+This overhead is zero when \(q = 0\), grows monotonically with \(q\),
+and diverges as \(q \to 0.5\).
+
+\textbf{Corollary 9.1 (Inevitability of Deception Cost).} The minimum
+cost to Agent \(B\) of deception at rate \(q > 0\) is
+\(\mathcal{D}_B(q) = \min\{\Delta U_B(q), \Delta W(q)\} > 0\). There is
+no costless deception.
+
+\textbf{Theorem 10 (Cumulative Micro-Friction: Systemic Deception).} A
+network of \(N\) agents with \(M\) cooperative transactions per period
+and deception rate \(\bar{q} > 0\) common to all channels suffers a
+total per-period efficiency loss of:
+
+\[\mathcal{L}_{\text{deception}} = M \cdot \Delta U_{\text{avg}}(\bar{q}) + M \cdot W_{\text{honest}} \cdot \frac{h(\bar{q})}{1 - h(\bar{q})}\]
+
+This cost: (a) is zero if and only if \(\bar{q} = 0\); (b) grows
+super-linearly with \(\bar{q}\) due to the
+\(h(\bar{q})/(1 - h(\bar{q}))\) divergence; (c) exceeds the network's
+cooperative surplus \(E_{\text{coop net}}\) at a critical deception rate
+\(\bar{q}^*\), beyond which cooperation becomes energetically
+unprofitable.
+
+\textbf{Corollary 10.1 (Honesty Efficiency Principle).} Honest
+communication (\(\bar{q} = 0\)) is the unique efficiency-maximizing
+regime; any deviation from it imposes a strictly positive, compounding
+cost on the network:
+
+\[\phi_{\text{honest}} = 0 \iff \bar{q} = 0 \iff \text{network operates at maximum cooperative efficiency}\]
+
+\textbf{Proposition (Serial BSC Composition).} Let information traverse
+a chain of \(d\) agents, each operating a binary symmetric channel with
+independent error probability \(q_l \in [0, 1/2]\). The composite
+channel from the source to the receiving agent is itself a binary
+symmetric channel with effective error probability:
+
+\[q_{\text{eff}}(d; q_1, \ldots, q_d) = \frac{1 - \prod_{l=1}^{d} (1 - 2 q_l)}{2}\]
+
+For a uniform per-agent rate \(q_l = q\),
+\(q_{\text{eff}}(d, q) = (1 - (1 - 2q)^d)/2\) and end-to-end capacity
+\(C_{\text{eff}}(d, q) = 1 - h(q_{\text{eff}}(d, q))\). The effective
+error rate is monotonically increasing in \(d\) with
+\(\lim_{d \to \infty} q_{\text{eff}}(d, q) = 1/2\) for every \(q > 0\),
+and concave in \(q\) for fixed \(d \geq 2\).
+
+\textbf{Corollary (Chain Collapse Threshold).} Fix a minimum acceptable
+end-to-end channel capacity \(C_{\min} \in (0, 1)\). The maximum
+tolerable per-agent corruption rate at chain length \(d\) is:
+
+\[q^*(d; C_{\min}) = \frac{1 - (1 - 2 q_{\max})^{1/d}}{2}, \qquad q_{\max} = h^{-1}(1 - C_{\min})\]
+
+where \(h^{-1}\) is the inverse of the binary entropy function on
+\([0, 1/2]\). The threshold \(q^*(d; C_{\min})\) is monotonically
+decreasing in \(d\). For \(C_{\min} = 0.05\), representative values are
+\(q^*(1) \approx 0.369\), \(q^*(5) \approx 0.118\),
+\(q^*(10) \approx 0.063\), \(q^*(50) \approx 0.013\).
+
+\subsection{Notation}\label{notation}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Symbol
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Meaning
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\(\Theta\) & Environmental state (random variable) \\
+\(Y\) & Signal received by Agent \(B\) \\
+\(H(\Theta)\) & Entropy of the environmental state (bits) \\
+\(H(\Theta \mid Y)\) & Conditional entropy (residual uncertainty after
+signal) \\
+\(I(\Theta; Y)\) & Mutual information (information transmitted) \\
+\(q\) & Deception rate (BSC error probability) \\
+\(h(q)\) & Binary entropy function:
+\(-q \log_2 q - (1-q) \log_2(1-q)\) \\
+\(C(q)\) & Channel capacity: \(1 - h(q)\) (BSC) \\
+\(\Delta H\) & Injected entropy (bits of false information) \\
+\(\Delta U_B\) & Decision cost of deception (utility loss) \\
+\(\rho(q)\) & Redundancy factor: \(1/(1 - h(q))\) \\
+\(\Delta W\) & Verification overhead energy \\
+\(W_{\text{bit}}\) & Energy cost per bit of information processing \\
+\(\eta_{\text{info}}\) & Deception-friction sensitivity \\
+\(\bar{q}\) & Common per-channel deception rate; equals the network
+average in the homogeneous case \\
+\(d\) & Chain length (number of agents in series between source and
+receiver) \\
+\(q_{\text{eff}}(d, q)\) & Effective end-to-end error rate of \(d\) BSCs
+in series \\
+\(C_{\text{eff}}(d, q)\) & End-to-end capacity of the serial chain:
+\(1 - h(q_{\text{eff}}(d, q))\) \\
+\(q^*(d; C_{\min})\) & Maximum per-agent rate preserving end-to-end
+capacity \(\geq C_{\min}\) \\
+\(C_{\min}\) & Minimum acceptable end-to-end channel capacity \\
+\(q_{\max}\) & Maximum tolerable effective error rate:
+\(h^{-1}(1 - C_{\min})\) \\
+\(\alpha_H, \alpha_L\) & High and low marginal yields in binary state
+model \\
+\end{longtable}
+}
+
+\end{document}

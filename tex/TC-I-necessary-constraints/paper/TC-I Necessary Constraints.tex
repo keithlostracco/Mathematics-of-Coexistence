@@ -2,9 +2,8 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{hyperref}
 \usepackage{graphicx}
-\graphicspath{{../../shared/figures/}}
+\graphicspath{{./}}
 \usepackage{natbib}
-\bibliographystyle{unsrtnat}
 \usepackage{doi}
 % \setcitestyle{numbers,super} % Superscript citation numbers (e.g. ¹, ²⁻⁴) — does not support locator notes
 \setcitestyle{numbers,square} % Square brackets around citation numbers (e.g. [1], [2-4]) — math standard
@@ -20,24 +19,32 @@
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{dsfont} % double-struck numerals (\mathds{1} for indicator functions)
-\usepackage{thmtools}
-\declaretheorem[name=Theorem]{theorem}
-\declaretheorem[name=Proposition,sibling=theorem]{proposition}
-\declaretheorem[name=Lemma,sibling=theorem]{lemma}
-\declaretheorem[name=Corollary,sibling=theorem]{corollary}
-\declaretheorem[name=Conjecture,sibling=theorem]{conjecture}
+% thmtools is only needed for the optional \listoftheorems feature. Loading it
+% patches \newtheorem, and thmtools 0.76's patch is incompatible with recent
+% LaTeX kernels (>= 2025) for shared-counter theorems (every sibling raises
+% "Command \c@... already defined"). We therefore load it only when the
+% list-of-theorems feature is actually requested.
+% Theorem-like environments defined with amsthm's native shared-counter syntax
+% (\newtheorem{child}[parent]{Name}). Numbering is grouped by counter without
+% relying on thmtools' sibling mechanism.
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{conjecture}[theorem]{Conjecture}
 
 \theoremstyle{definition}
-\declaretheorem[name=Definition,style=definition]{definition}
-\declaretheorem[name=Axiom,style=definition,sibling=definition]{axiom}
-\declaretheorem[name=Assumption,style=definition,sibling=definition]{assumption}
-\declaretheorem[name=Criterion,style=definition,sibling=definition]{criterion}
-\declaretheorem[name=Example,style=definition,sibling=definition]{example}
+\newtheorem{definition}{Definition}
+\newtheorem{axiom}[definition]{Axiom}
+\newtheorem{assumption}[definition]{Assumption}
+\newtheorem{criterion}[definition]{Criterion}
+\newtheorem{example}[definition]{Example}
 
 \theoremstyle{remark}
-\declaretheorem[name=Remark,style=remark]{remark}
-\declaretheorem[name=Observation,style=remark,sibling=remark]{observation}
-\declaretheorem[name=Property,style=remark,sibling=remark]{property}
+\newtheorem{remark}{Remark}
+\newtheorem{observation}[remark]{Observation}
+\newtheorem{property}[remark]{Property}
 
 % Prevent theorem-like environments from starting near the page bottom.
 \usepackage{etoolbox}
@@ -56,6 +63,10 @@
 \usepackage{array}
 \usepackage{calc}
 \usepackage{caption}
+% General table note: small font, flush-left, below the table (used by some papers).
+\newenvironment{tablenote}
+  {\par\addvspace{2pt}\footnotesize\noindent}
+  {\par\addvspace{4pt}}
 % Pandoc 3.x wraps uncaptioned longtables in \def\LTcaptype{none};
 % this requires a 'none' counter to exist.
 \newcounter{none}
@@ -190,9 +201,6 @@ demonstrate that the variational equilibrium outperforms both greedy and
 equal-split allocations, with welfare gains scaling with agent
 heterogeneity and resource scarcity.
 \end{abstract}
-\newpage
-\tableofcontents
-\newpage
 \section{Introduction}\label{introduction}
 
 Consider \(N \geq 2\) open thermodynamic systems, each actively
@@ -211,8 +219,9 @@ energetic cost (Theorem~\ref{thm-shadow-price}), that the constrained
 system admits a variational equilibrium with uniform shadow prices
 (Theorem~\ref{thm-variational-equilibrium}), that this equilibrium
 uniquely maximizes total social welfare over the feasible set
-(Theorem~\ref{thm-welfare-optimality}), and that constraint value scales
-monotonically with scarcity
+(Theorem~\ref{thm-welfare-optimality}), and that, in the symmetric
+quadratic model, constraint value scales monotonically with scarcity
+over the range \(\alpha/\beta \leq R < 2\alpha/\beta\)
 (Corollary~\ref{cor-constraint-scarcity-scaling}).
 
 The derivation rests on standard physics and standard optimization
@@ -245,9 +254,10 @@ The specific contributions of this work are:
   necessary for multi-agent coexistence, not optional design choices.
 \item
   \textbf{Computable shadow prices} (Theorem~\ref{thm-shadow-price}).
-  Each boundary constraint carries a Lagrange multiplier measuring, in
-  energy units, its marginal cost to the constrained agent. This
-  provides a real-time, auditable signal of constraint tension.
+  Each boundary constraint carries a Lagrange multiplier measuring its
+  marginal cost to the constrained agent as an energy rate: the energy
+  forfeited per unit of constraint relaxation. This provides a
+  real-time, auditable signal of constraint tension.
 \item
   \textbf{Variational equilibrium with uniform prices}
   (Theorem~\ref{thm-variational-equilibrium}). The GNEP admits a
@@ -258,14 +268,18 @@ The specific contributions of this work are:
 \item
   \textbf{Welfare optimality} (Theorem~\ref{thm-welfare-optimality}).
   The variational equilibrium uniquely maximizes total social welfare
-  over the feasible set. Every other feasible allocation, including
-  greedy and equal-split, is strictly dominated.
+  over the feasible set, strictly dominating every other allocation in
+  it; any feasible greedy or equal-split allocation that differs from
+  the VE is strictly dominated.
 \item
   \textbf{Scarcity scaling}
-  (Corollary~\ref{cor-constraint-scarcity-scaling}). The welfare value
-  of the constraint system is monotonically increasing in scarcity:
-  under abundance, constraints are costless; under scarcity, they become
-  the dominant determinant of system welfare.
+  (Corollary~\ref{cor-constraint-scarcity-scaling}). In the symmetric
+  quadratic model the welfare value of the constraint system is
+  monotonically increasing in scarcity over the range
+  \(\alpha/\beta \leq R < 2\alpha/\beta\) (in which the defector's own
+  optimum remains feasible): under abundance, constraints are costless;
+  under scarcity, they become the dominant determinant of system
+  welfare. The general case is conjectured but not proved here.
 \end{enumerate}
 
 All formal results are stated as numbered theorems with full proofs.
@@ -329,9 +343,11 @@ imposes fundamental constraints on economic activity, and that
 neoclassical production functions written ``without regard to dimensions
 or to other physical constraints'' \citep{GeorgescuRoegen1979} are
 physically meaningless. Our framework inherits this insistence on
-physical units: all utility functions, shadow prices, and welfare
-comparisons are denominated in energy (Joules), making the results
-interpersonally comparable and physically measurable.
+physical units: all utility functions and welfare comparisons are
+denominated in energy (Joules), and the shadow prices are the
+corresponding marginal energy rates (energy per unit of constraint
+relaxation), making the results interpersonally comparable and
+physically measurable.
 
 \textbf{Thermodynamic self-maintenance.} The physical model of agents as
 open thermodynamic systems maintaining low-entropy internal states draws
@@ -501,15 +517,15 @@ $$\sum_{i=1}^{N} x_{ij}^{\circ} > R_j$$
 \begin{lemma}[Inevitability of Collision]
 \label{lem-inevitability-collision}
 
-Given a finite resource endowment $\mathbf{R}$ shared by $N \geq 2$ agents with overlapping resource needs, collision is guaranteed whenever $N$ is sufficiently large. Specifically, for any resource $j$ essential to all agents, collision occurs whenever $N \geq N_j^* := \lfloor R_j / \min_i x_{ij}^{\circ} \rfloor + 1$.
+Given a finite resource endowment $\mathbf{R}$ shared by $N \geq 2$ agents with overlapping resource needs, collision is guaranteed whenever $N$ is sufficiently large. Specifically, for any resource $j$ \emph{essential} to all agents (a resource for which $\partial U_i / \partial x_{ij} |_{\mathbf{x}_i = \mathbf{0}} > 0$ for every agent $i$, so that every agent's unconstrained optimum satisfies $x_{ij}^{\circ} > 0$), collision occurs whenever $N \geq N_j^* := \lfloor R_j / \min_i x_{ij}^{\circ} \rfloor + 1$.
 \end{lemma}
 
 \begin{proof}
-By Assumption~\ref{asm-regularity}(b)–(d), each agent $i$ has a unique finite unconstrained optimum with $x_{ij}^{\circ} > 0$ for every essential resource $j$. Let $\delta_j := \min_{i} x_{ij}^{\circ} > 0$. Then for any $N$ agents sharing resource $j$:
+By Assumption~\ref{asm-regularity}(b) and (d), each agent $i$ has a unique finite unconstrained optimum $\mathbf{x}_i^{\circ}$. For utilities separable across resources (as in the quadratic model), the origin-gradient condition Assumption~\ref{asm-regularity}(c) guarantees $x_{ij}^{\circ} > 0$ at every essential resource $j$; for non-separable utilities, the positivity $x_{ij}^{\circ} > 0$ is carried by the essentiality hypothesis in the lemma statement. Let $\delta_j := \min_{i} x_{ij}^{\circ} > 0$. Then for any $N$ agents sharing resource $j$:
 
 $$\sum_{i=1}^{N} x_{ij}^{\circ} \geq N \cdot \delta_j$$
 
-Setting $N \cdot \delta_j > R_j$ gives $N > R_j / \delta_j$, so $N \geq \lfloor R_j / \delta_j \rfloor + 1 =: N_j^*$ suffices. For $N \geq N_j^*$, the aggregate unconstrained demand exceeds supply and resource $j$ is in collision by Definition~\ref{def-resource-collision}. In any biologically realistic scenario, where per-capita endowment $R_j / N$ is small relative to individual metabolic requirements $x_{ij}^{\circ}$, this bound is satisfied for many or all resource dimensions.
+Setting $N \cdot \delta_j > R_j$ gives $N > R_j / \delta_j$, so $N \geq \lfloor R_j / \delta_j \rfloor + 1 =: N_j^*$ suffices. For $N \geq N_j^*$, the aggregate unconstrained demand exceeds supply and resource $j$ is in collision by Definition~\ref{def-resource-collision}.
 \end{proof}
 
 \subsection{The Unconstrained Regime}\label{the-unconstrained-regime}
@@ -596,19 +612,19 @@ B's total resource intake cannot be reduced below threshold \(\tau_B\) &
 where \(|\mathbf{R}| = \sum_j R_j\) & A's total consumption is
 bounded \\
 B's spatial boundary \(\Omega_B\) is inviolable &
-\(g_{Bk}(\mathbf{x}_A) = \mathds{1}[\mathbf{x}_A \cap \Omega_B \neq \emptyset]\)
-& A's action vector cannot penetrate B's physical/informational
-boundary \\
+\(g_{Bk}(\mathbf{x}_A) = \mathds{1}[\mathbf{x}_A \in \Omega_B]\) & A's
+action vector cannot penetrate B's physical/informational boundary \\
 \end{longtable}
 }
 
 \begin{quote}
 \textbf{Note.} The spatial boundary example uses an indicator function
 for conceptual clarity. Since \(\mathds{1}[\cdot]\) is neither
-continuously differentiable nor convex, in practice it is replaced by a
-smooth convex approximation (e.g., a distance-based penalty for convex
-\(\Omega_B\)) satisfying Definition~\ref{def-boundary-constraint}'s
-regularity requirements.
+continuously differentiable nor convex (and vanishes, rather than being
+strictly negative, at \(\mathbf{x}_A = \mathbf{0}\)), in practice it is
+replaced by a smooth convex approximation (e.g., a distance-based
+penalty for convex \(\Omega_B\)) satisfying
+Definition~\ref{def-boundary-constraint}'s regularity requirements.
 \end{quote}
 
 The framework is deliberately general: \textbf{any} restriction on one
@@ -638,10 +654,13 @@ Lagrange multipliers.
 
 Assembling the Lagrangian for agent \(A\):
 
-\[\mathcal{L}_A(\mathbf{x}_A, \boldsymbol{\lambda}, \boldsymbol{\mu}) = U_A(\mathbf{x}_A) - \sum_{j=1}^{n} \lambda_j \left( x_{Aj} + \hat{x}_{-Aj} - R_j \right) - \sum_{B \neq A} \sum_{k=1}^{m_B} \mu_{Bk} \, g_{Bk}(\mathbf{x}_A)\]
+\[\mathcal{L}_A(\mathbf{x}_A, \boldsymbol{\lambda}, \boldsymbol{\mu}, \boldsymbol{\nu}) = U_A(\mathbf{x}_A) - \sum_{j=1}^{n} \lambda_j \left( x_{Aj} + \hat{x}_{-Aj} - R_j \right) - \sum_{B \neq A} \sum_{k=1}^{m_B} \mu_{Bk} \, g_{Bk}(\mathbf{x}_A) + \sum_{j=1}^{n} \nu_{Aj} \, x_{Aj}\]
 
-where \(\boldsymbol{\lambda} = (\lambda_1, \ldots, \lambda_n)\) and
-\(\boldsymbol{\mu} = \{\mu_{Bk}\}_{B \neq A, \, k}\).
+where \(\boldsymbol{\lambda} = (\lambda_1, \ldots, \lambda_n)\),
+\(\boldsymbol{\mu} = \{\mu_{Bk}\}_{B \neq A, \, k}\), and
+\(\boldsymbol{\nu} = (\nu_{A1}, \ldots, \nu_{An}) \geq \mathbf{0}\) are
+the multipliers associated with the nonnegativity constraints
+\(x_{Aj} \geq 0\).
 
 \section{The Karush-Kuhn-Tucker (KKT)
 Conditions}\label{the-karush-kuhn-tucker-kkt-conditions}
@@ -653,17 +672,20 @@ Under Assumption~\ref{asm-regularity} and standard constraint
 qualification, the KKT conditions are both necessary and sufficient for
 optimality (concave objective, convex constraints; see
 \citep[§5.5.3]{Boyd2004}). Slater's condition holds for agent \(A\)'s
-subproblem at any feasible joint profile: \(g_{Bk}(\mathbf{0}) < 0\) for
-all \(B, k\) by Definition~\ref{def-boundary-constraint}, and continuity
-then gives \(g_{Bk}(\epsilon\mathbf{1}/n) < 0\) for sufficiently small
+subproblem whenever the other agents leave some slack in each shared
+resource: \(g_{Bk}(\mathbf{0}) < 0\) for all \(B, k\) by
+Definition~\ref{def-boundary-constraint}, and continuity then gives
+\(g_{Bk}(\epsilon\mathbf{1}/n) < 0\) for sufficiently small
 \(\epsilon > 0\); the shared resource constraint
 \(x_{Aj} + \hat{x}_{-Aj} \leq R_j\) admits a strictly feasible interior
-point whenever \(\hat{x}_{-Aj} < R_j\), which holds at any feasible
-profile of the GNEP. At the optimum \(\mathbf{x}_A^*\):
+point whenever the other agents do not exhaust resource \(j\)
+(\(\hat{x}_{-Aj} < R_j\)); in particular it holds at the variational
+equilibrium whenever \(x_{Aj}^* > 0\). At the optimum
+\(\mathbf{x}_A^*\):
 
 \textbf{(i) Stationarity:}
 
-\[\frac{\partial U_A}{\partial x_{Aj}}\bigg|_{\mathbf{x}_A^*} = \lambda_j + \sum_{B \neq A} \sum_{k=1}^{m_B} \mu_{Bk} \frac{\partial g_{Bk}}{\partial x_{Aj}}\bigg|_{\mathbf{x}_A^*} \qquad \forall j\]
+\[\frac{\partial U_A}{\partial x_{Aj}}\bigg|_{\mathbf{x}_A^*} = \lambda_j + \sum_{B \neq A} \sum_{k=1}^{m_B} \mu_{Bk} \frac{\partial g_{Bk}}{\partial x_{Aj}}\bigg|_{\mathbf{x}_A^*} - \nu_{Aj} \qquad \forall j\]
 
 \textbf{(ii) Primal feasibility:}
 
@@ -672,12 +694,24 @@ profile of the GNEP. At the optimum \(\mathbf{x}_A^*\):
 
 \textbf{(iii) Dual feasibility:}
 
-\[\lambda_j \geq 0 \quad \forall j, \qquad \mu_{Bk} \geq 0 \quad \forall B, k\]
+\[\lambda_j \geq 0 \quad \forall j, \qquad \mu_{Bk} \geq 0 \quad \forall B, k, \qquad \nu_{Aj} \geq 0 \quad \forall j\]
 
 \textbf{(iv) Complementary slackness:}
 
 \[\lambda_j \left( x_{Aj}^* + \hat{x}_{-Aj} - R_j \right) = 0 \qquad \forall j\]
 \[\mu_{Bk} \, g_{Bk}(\mathbf{x}_A^*) = 0 \qquad \forall B, k\]
+\[\nu_{Aj} \, x_{Aj}^* = 0 \qquad \forall j\]
+
+At any resource \(j\) that agent \(A\) consumes in positive quantity
+(\(x_{Aj}^* > 0\)), complementary slackness forces \(\nu_{Aj} = 0\) and
+condition (i) holds as the equality of marginal benefit and marginal
+cost stated below. At a corner where \(x_{Aj}^* = 0\), the nonnegativity
+multiplier \(\nu_{Aj} \geq 0\) may be positive and (i) reads
+\(\partial U_A / \partial x_{Aj} \leq \lambda_j + \sum_{B,k} \mu_{Bk}\, \partial g_{Bk}/\partial x_{Aj}\).
+The worked examples in this paper are all interior (\(x_{ij}^* > 0\)),
+so \(\nu_{ij}^* = 0\) throughout and the stationarity conditions reduce
+to the equalities displayed; the interior form is used in the theorem
+statements below with this understanding.
 
 \subsection{Interpretation of the Stationarity
 Condition}\label{interpretation-of-the-stationarity-condition}
@@ -712,7 +746,7 @@ where $\mu_{Bk}^*$ is the optimal Lagrange multiplier associated with agent $B$'
 \end{theorem}
 
 \begin{proof}
-This is a direct application of the shadow price interpretation of Lagrange multipliers \citep[see][§5.6.3]{Boyd2004}. Under Assumption~\ref{asm-regularity} and constraint qualification, the optimal value function is differentiable in the constraint parameters, and the derivative equals the associated multiplier.
+This is a direct application of the shadow price interpretation of Lagrange multipliers \citep[see][§5.6.3]{Boyd2004}. Under Assumption~\ref{asm-regularity} and constraint qualification, the optimal value function $U_A^*(\boldsymbol{c})$ is concave in $\boldsymbol{c}$, with the set of optimal multipliers as its superdifferential; it is differentiable wherever the optimal multiplier is unique (in particular under strict complementarity), and there the derivative equals the associated multiplier. The identity in the theorem statement is understood at such points; in the quadratic model the value function is $C^1$ throughout.
 \end{proof}
 
 \subsection{Physical Interpretation}\label{physical-interpretation}
@@ -720,7 +754,7 @@ This is a direct application of the shadow price interpretation of Lagrange mult
 \begin{corollary}[Active vs. Inactive Boundary Constraints]
 \label{cor-active-inactive-constraints}
 
-Every boundary constraint has a non-negative cost. A boundary constraint that is not active (not binding at the optimum) has zero cost. A boundary constraint that is active (binding) has strictly positive cost.
+Every boundary constraint has a non-negative cost. A boundary constraint that is not active (not binding at the optimum) has zero cost. A boundary constraint that is active (binding) has non-negative cost, strictly positive except in the degenerate case where agent $A$'s unconstrained optimum lies exactly on $B$'s boundary.
 \end{corollary}
 
 This follows directly from complementary slackness and dual feasibility:
@@ -734,15 +768,22 @@ This follows directly from complementary slackness and dual feasibility:
   because \(A\)'s unconstrained optimum already respects it.
 \item
   If \(g_{Bk}(\mathbf{x}_A^*) = 0\) (the constraint is active, i.e.,
-  \(A\) is at \(B\)'s boundary), then \(\mu_{Bk}^* > 0\). The boundary
-  constraint actively restricts \(A\)'s strategy and has a quantifiable
-  energetic cost.
+  \(A\) is at \(B\)'s boundary), then \(\mu_{Bk}^* \geq 0\), and
+  \(\mu_{Bk}^* > 0\) unless \(A\)'s unconstrained optimum happens to lie
+  exactly on the boundary. Complementary slackness gives
+  \(\mu_{Bk}^* > 0 \Rightarrow g_{Bk}(\mathbf{x}_A^*) = 0\); the
+  converse requires strict complementarity, which fails precisely in the
+  degenerate case \(\mu_{Bk}^* = 0\) with \(g_{Bk}(\mathbf{x}_A^*) = 0\)
+  (in the quadratic model below, the boundary
+  \(\alpha_A / \beta_A = R - \bar{x}_B\)). Away from that boundary the
+  constraint actively restricts \(A\)'s strategy and carries a strictly
+  positive energetic cost.
 \end{itemize}
 
 \begin{corollary}[Coupled Cost of Active Constraints]
 \label{cor-newtons-third-law}
 
-Every active boundary constraint has a strictly positive shadow price $\mu_{Bk}^* > 0$. The same constraint that protects agent $B$'s domain restricts agent $A$'s feasible set, and this restriction is quantified by $\mu_{Bk}^*$ in energy units.
+A boundary constraint with a strictly positive shadow price $\mu_{Bk}^* > 0$ is active, and every active constraint carries $\mu_{Bk}^* > 0$ outside the degenerate case of Corollary~\ref{cor-active-inactive-constraints}. The same constraint that protects agent $B$'s domain restricts agent $A$'s feasible set, and this restriction is quantified by $\mu_{Bk}^*$ as a marginal energy rate: the energy $A$ forfeits per unit relaxation of the constraint.
 \end{corollary}
 
 \subsection{The ``Price'' of a Boundary Constraint in the Quadratic
@@ -806,31 +847,27 @@ Coexistence}\label{the-impossibility-of-unconstrained-coexistence}
 
 Let $N \geq 2$ agents share a finite resource endowment $\mathbf{R}$. Suppose each agent has at least one essential resource (a resource $j$ for which $\partial U_i / \partial x_{ij} |_{\mathbf{x}_i = \mathbf{0}} > 0$) in common with at least one other agent, and that aggregate unconstrained demand exceeds supply for at least one resource ($\sum_i x_{ij}^{\circ} > R_j$ for some $j$). Then no feasible strategy profile $(\mathbf{x}_1, \ldots, \mathbf{x}_N)$ can simultaneously be unconstrained-optimal for all agents. Formally:
 
-$$\nexists \; (\mathbf{x}_1, \ldots, \mathbf{x}_N) \in \mathcal{F} \; \text{ such that } \; \mathbf{x}_i = \mathbf{x}_i^{\circ} \;\; \forall i$$
+$$\nexists \; (\mathbf{x}_1, \ldots, \mathbf{x}_N) \in \mathcal{F}_R \; \text{ such that } \; \mathbf{x}_i = \mathbf{x}_i^{\circ} \;\; \forall i$$
 
-where $\mathcal{F} = \{(\mathbf{x}_1, \ldots, \mathbf{x}_N) : \sum_i x_{ij} \leq R_j \; \forall j, \; \mathbf{x}_i \geq \mathbf{0} \; \forall i\}$ is the feasible set and $\mathbf{x}_i^{\circ}$ is agent $i$'s unconstrained optimum.
+where $\mathcal{F}_R = \{(\mathbf{x}_1, \ldots, \mathbf{x}_N) : \sum_i x_{ij} \leq R_j \; \forall j, \; \mathbf{x}_i \geq \mathbf{0} \; \forall i\}$ is the resource-feasible set (resource-conservation and nonnegativity constraints only) and $\mathbf{x}_i^{\circ}$ is agent $i$'s unconstrained optimum.
 \end{theorem}
 
 \begin{proof}
-Let $j^*$ be a resource dimension that is essential for agents $A$ and $B$ (at minimum). By Assumption~\ref{asm-regularity}(c) and strict concavity, both agents have strictly positive unconstrained optima: $x_{Aj^*}^{\circ} > 0$ and $x_{Bj^*}^{\circ} > 0$.
-
-Consider the aggregate unconstrained demand:
-
-$$\sum_{i=1}^{N} x_{ij^*}^{\circ} \geq x_{Aj^*}^{\circ} + x_{Bj^*}^{\circ}$$
-
-For the claim to fail, i.e., for all agents to achieve their unconstrained optima simultaneously, we would need:
-
-$$\sum_{i=1}^{N} x_{ij^*}^{\circ} \leq R_{j^*}$$
-
-But as $N$ grows or as agents' capacities increase relative to $R_{j^*}$, this inequality is violated. More precisely, for any fixed $R_{j^*}$ and any collection of agents each requiring $x_{ij^*}^{\circ} > 0$, there exists a finite $N^*$ such that $\sum_{i=1}^{N^*} x_{ij^*}^{\circ} > R_{j^*}$.
-
-In any biologically relevant system (multiple organisms sharing finite local resources), the collision condition $\sum_i x_{ij}^{\circ} > R_j$ is satisfied for at least one $j$, making the simultaneous unconstrained-optimal profile infeasible.
+By hypothesis there is a resource $j^*$ in collision: $\sum_{i=1}^{N} x_{ij^*}^{\circ} > R_{j^*}$. The candidate profile $(\mathbf{x}_1^{\circ}, \ldots, \mathbf{x}_N^{\circ})$ therefore violates the resource-conservation constraint $\sum_i x_{ij^*} \leq R_{j^*}$ and lies outside $\mathcal{F}_R$. No feasible profile can thus be unconstrained-optimal for every agent simultaneously.
 \end{proof}
+
+\textbf{Remark.} The collision hypothesis is not an edge case. By
+Lemma~\ref{lem-inevitability-collision}, for any resource \(j\)
+essential to a set of agents with strictly positive unconstrained
+optima, collision holds once the number of such agents reaches the
+finite threshold \(N_j^*\); in any biologically relevant system, where
+per-capita endowment \(R_j / N\) is small relative to individual demand,
+this is satisfied for many or all resource dimensions.
 
 \begin{corollary}[Necessity of Active Constraints]
 \label{cor-necessity-active-constraints}
 
-In any multi-agent system with resource collision, at least one boundary constraint must be active ($\mu_{Bk}^* > 0$ for some $B, k$) at any feasible solution. Boundary constraints are not optional; they are necessary for coexistence.
+In any multi-agent system with resource collision, at least one constraint restricting some agent must be active at the variational equilibrium; moreover, at every feasible profile at least one agent's allocation of the collided resource lies strictly below its unconstrained optimum. In particular, in the resource-only GNEP over $\mathcal{F}_R$ with utilities separable across resources (as in the quadratic model), the shared scarcity multiplier satisfies $\lambda_j^* > 0$ for every collided resource $j$: were $\lambda_j^* = 0$, stationarity would give $\partial U_i / \partial x_{ij} \leq 0$ and hence $x_{ij}^* \geq x_{ij}^{\circ}$ for every agent $i$, so that $\sum_i x_{ij}^* \geq \sum_i x_{ij}^{\circ} > R_j$, contradicting feasibility. This clause does not extend to the full GNEP with boundary constraints: a binding boundary constraint can hold aggregate consumption of a collided resource strictly below $R_j$, in which case complementary slackness forces $\lambda_j^* = 0$ and the necessary constraint activity resides in the boundary multipliers $\mu_{Bk}^{(i)}$ instead. Some agent is therefore always constrained; and without a boundary-constraint system to allocate the scarce resource, the collision is resolved not by mutual recognition but by conflict (Proposition~\ref{prop-unconstrained-conflict}). In this sense boundary constraints are not optional but necessary for coexistence.
 \end{corollary}
 
 \textbf{Interpretation:} Unconstrained coexistence is impossible in any
@@ -879,9 +916,11 @@ Under Assumption~\ref{asm-regularity}, the GNEP possesses a Variational Equilibr
 
 (a) The shared shadow prices $\lambda_j^*$ are identical for all agents: every agent faces the same "price" for each scarce resource.
 
-(b) The stationarity condition for each agent $i$ reads:
+(b) The stationarity condition for each agent $i$ reads, at every resource $j$ with $x_{ij}^* > 0$:
 
-$$\frac{\partial U_i}{\partial x_{ij}}\bigg|_{\mathbf{x}_i^*} = \lambda_j^* + \sum_{B \neq i, k} \mu_{Bk}^{(i)} \frac{\partial g_{Bk}}{\partial x_{ij}}\bigg|_{\mathbf{x}_i^*} \qquad \forall j$$
+$$\frac{\partial U_i}{\partial x_{ij}}\bigg|_{\mathbf{x}_i^*} = \lambda_j^* + \sum_{B \neq i, k} \mu_{Bk}^{(i)} \frac{\partial g_{Bk}}{\partial x_{ij}}\bigg|_{\mathbf{x}_i^*}$$
+
+where $\mu_{Bk}^{(i)}$ denotes agent $i$'s multiplier on agent $B$'s $k$-th boundary constraint (with the corresponding "$\leq$" at any corner $x_{ij}^* = 0$, where the nonnegativity multiplier $\nu_{ij}^* \geq 0$ enters as in the KKT conditions above).
 
 (c) No agent can improve its utility by unilaterally deviating from $\mathbf{x}_i^*$, given the constraints.
 \end{theorem}
@@ -915,7 +954,11 @@ Under Assumption~\ref{asm-regularity}, the variational equilibrium $(\mathbf{x}_
 
 $$\sum_{i=1}^{N} U_i(\mathbf{x}_i^*) > \sum_{i=1}^{N} U_i(\mathbf{x}_i) \qquad \forall \; (\mathbf{x}_1, \ldots, \mathbf{x}_N) \in \mathcal{F} \setminus \{\mathbf{x}^*\}$$
 
-That is, the VE uniquely maximizes $W(\mathbf{x}) = \sum_{i=1}^{N} U_i(\mathbf{x}_i)$ subject to the shared resource and boundary constraints.
+That is, the VE uniquely maximizes $W(\mathbf{x}) = \sum_{i=1}^{N} U_i(\mathbf{x}_i)$ subject to the shared resource and boundary constraints, where
+
+$$\mathcal{F} = \{\mathbf{x} \in \mathcal{F}_R : g_{Bk}(\mathbf{x}_i) \leq 0 \;\; \forall i, \; \forall B \neq i, \; \forall k\}$$
+
+is the feasible set under both the resource constraints (the set $\mathcal{F}_R$ of Theorem~\ref{thm-impossibility-infinite-freedom}) and the boundary constraints.
 \end{theorem}
 
 \begin{proof}
@@ -923,11 +966,11 @@ The argument is by direct KKT equivalence. Because each $U_i$ depends only on ag
 
 $$\frac{\partial W}{\partial x_{ij}} = \frac{\partial U_i}{\partial x_{ij}} \qquad \forall i, j.$$
 
-Writing the KKT conditions for the welfare problem $\max_{\mathbf{x} \in \mathcal{F}} \sum_i U_i(\mathbf{x}_i)$ with multipliers $\lambda_j$ on the shared resource constraints and $\mu_{Bk}^{(i)}$ on the boundary constraints that restrict agent $i$'s action yields, for every $i, j$:
+Writing the KKT conditions for the welfare problem $\max_{\mathbf{x} \in \mathcal{F}} \sum_i U_i(\mathbf{x}_i)$ with multipliers $\lambda_j$ on the shared resource constraints, $\mu_{Bk}^{(i)}$ on the boundary constraints that restrict agent $i$'s action, and $\nu_{ij}$ on the nonnegativity constraints yields, for every $i$ and every $j$ with $x_{ij}^* > 0$:
 
 $$\frac{\partial U_i}{\partial x_{ij}} = \lambda_j + \sum_{B \neq i, k} \mu_{Bk}^{(i)} \frac{\partial g_{Bk}}{\partial x_{ij}},$$
 
-together with primal/dual feasibility and complementary slackness. These are \emph{identical} to the VE stationarity conditions of Theorem Theorem~\ref{thm-variational-equilibrium}(b), with the shared resource multipliers $\lambda_j$ playing the role of the common shadow prices $\lambda_j^*$ that defines the variational (normalized) equilibrium.
+together with primal/dual feasibility and complementary slackness (the nonnegativity multipliers $\nu_{ij}$ supplying the "$\leq$" form at any corner $x_{ij}^* = 0$, exactly as in the agent subproblem). These are \emph{identical} to the VE stationarity conditions of Theorem Theorem~\ref{thm-variational-equilibrium}(b), with the shared resource multipliers $\lambda_j$ playing the role of the common shadow prices $\lambda_j^*$ that define the variational (normalized) equilibrium.
 
 Under Assumption~\ref{asm-regularity} and Slater's condition (established in the KKT discussion above), these conditions are both necessary and sufficient for optimality of the welfare problem \citep[§5.5.3]{Boyd2004}. Hence the VE allocation satisfies the welfare-maximization KKT system, and conversely any welfare maximizer is a VE.
 
@@ -937,7 +980,7 @@ Uniqueness follows from strict concavity: each $U_i$ is strictly concave by Assu
 \begin{corollary}[Welfare Dominance]
 \label{cor-welfare-dominance}
 
-The variational equilibrium is welfare-superior to every other feasible allocation, including equal-split, greedy (unconstrained-optimal for a single agent), and any arbitrary feasible partition of resources.
+The variational equilibrium is welfare-superior to every other allocation in the feasible set $\mathcal{F}$. In particular, whenever the equal-split or greedy allocation (the latter unconstrained-optimal for a single agent) is feasible and differs from the VE, it is strictly dominated. Two qualifications follow from the theorem's feasible set. When a boundary constraint binds, the greedy allocation violates it and lies outside $\mathcal{F}$, so dominance over greedy is not automatic; it holds whenever the boundary constraints replicate the welfare optimum of the resource-only problem (as in the worked examples below), and can fail for boundary constraints chosen to over-protect an agent beyond that optimum. And when the agents are symmetric, the VE \emph{is} the equal split (see the symmetric example below), so equal-split is not a dominated alternative but coincides with the optimum.
 \end{corollary}
 
 \subsection{The ``Mutual Constraint''
@@ -946,11 +989,13 @@ Structure}\label{the-mutual-constraint-structure}
 At the variational equilibrium, the full system of KKT conditions across
 all agents forms a coupled system:
 
-\[\frac{\partial U_i}{\partial x_{ij}} = \lambda_j^* + \sum_{B \neq i, k} \mu_{Bk}^{(i)} \frac{\partial g_{Bk}}{\partial x_{ij}} \qquad \forall i, j\]
+\[\frac{\partial U_i}{\partial x_{ij}} = \lambda_j^* + \sum_{B \neq i, k} \mu_{Bk}^{(i)} \frac{\partial g_{Bk}}{\partial x_{ij}} - \nu_{ij}^* \qquad \forall i, j\]
 
 \[\sum_{i=1}^{N} x_{ij}^* \leq R_j, \quad \lambda_j^* \geq 0, \quad \lambda_j^*\left(\sum_i x_{ij}^* - R_j\right) = 0 \qquad \forall j\]
 
 \[g_{Bk}(\mathbf{x}_i^*) \leq 0, \quad \mu_{Bk}^{(i)} \geq 0, \quad \mu_{Bk}^{(i)} g_{Bk}(\mathbf{x}_i^*) = 0 \qquad \forall i, B \neq i, k\]
+
+\[x_{ij}^* \geq 0, \quad \nu_{ij}^* \geq 0, \quad \nu_{ij}^* x_{ij}^* = 0 \qquad \forall i, j\]
 
 This coupled system is a self-consistent set of mutual constraints that
 no agent can improve upon unilaterally, a fixed point of the multi-agent
@@ -1019,9 +1064,9 @@ Let \(\alpha_A = 10\), \(\beta_A = 1\), \(\alpha_B = 8\),
   Since \(x_A^{\circ} = 10 > 7\), the constraint binds: \(x_A^* = 7\),
   \(\mu^* = 10 - 1 \cdot 7 = 3\).
 \item
-  \textbf{The cost of \(B\)'s boundary constraint to \(A\):} Agent \(A\)
-  loses \(\mu^* = 3\) units of marginal energy due to \(B\)'s guaranteed
-  share.
+  \textbf{The cost of \(B\)'s boundary constraint to \(A\):} at the
+  margin agent \(A\) forfeits energy at rate \(\mu^* = 3\) (Joules per
+  unit of \(B\)'s guaranteed share) due to \(B\)'s boundary constraint.
 \item
   For these parameters the choice \(\bar{x}_B = 5\) recovers the
   variational equilibrium (\(\lambda^* = (10+8-12)/(1+1) = 3\), giving
@@ -1062,7 +1107,8 @@ equal split \(x_A = x_B = 6\)):}
   \textbf{Total system utility:} \(42 + 30 = 72.0\).
 \end{itemize}
 
-\textbf{Without boundary constraints (A takes all, unconstrained):}
+\textbf{Without boundary constraints (\(A\) takes its unconstrained
+optimum \(x_A^{\circ} = 10\), leaving \(2\) for \(B\)):}
 
 \begin{itemize}
 \tightlist
@@ -1154,10 +1200,13 @@ Allocation
 The VE now outperforms equal split by \textbf{21.6\%} and the greedy
 allocation by \textbf{8.6\%}. The equal-split regime is particularly
 wasteful: it forces 6 units onto Agent \(B\), whose fast-saturating
-metabolism means each unit beyond \textasciitilde2.4 costs more to
-process than it yields. Biologically, this is analogous to force-feeding
-an organism past its metabolic optimum: raw resource input does not
-equate to usable energy output.
+metabolism means each unit beyond \(x_B^* = 2.4\) yields less to \(B\)
+than it would yield to \(A\) (its marginal value falls below the shadow
+price \(\lambda^* = 5.2\)), and each unit beyond the metabolic optimum
+\(x_B^{\circ} = 5\) costs more to process than it yields outright.
+Biologically, this is analogous to force-feeding an organism past its
+metabolic optimum: raw resource input does not equate to usable energy
+output.
 
 \textbf{Key insight:} The framework does not merely prove that
 \emph{some} constraint system beats anarchy. It proves that the
@@ -1257,23 +1306,44 @@ Three results emerge from this table:
 \item
   \textbf{Under severe scarcity (\(R = 10\)), defection eliminates the
   other agent entirely} (\(x_B = 0 \implies U_B = 0\)). The defector
-  captures \(U_A = 50\) (a gain of 12.5 over the VE), but agent \(B\)
-  loses its entire share of 37.5, yielding a net welfare destruction of
-  25 units. This is the signature of Thermodynamic Friction
-  \citep{TC-IV}: unrestricted competition in scarce environments does
-  not redistribute value, it \emph{dissipates} it.
+  gains 12.5 over the VE while agent \(B\) loses its entire share of
+  37.5: the transfer is strictly lossy, destroying 25 units through
+  misallocation alone (concavity makes \(B\)'s forgone units, near
+  \(x_B = 0\), the most valuable in the system). This destruction is
+  incurred \emph{before} any conflict costs are counted; when the
+  collision is actually contested, the direct energy expenditure of
+  Thermodynamic Friction \citep{TC-IV} adds a further, distinct loss on
+  top of the allocative one quantified here.
 \end{enumerate}
 
-\begin{corollary}[Boundary Constraint Value Scales with Scarcity]
+\begin{corollary}[Boundary Constraint Value Scales with Scarcity (Symmetric Quadratic Model)]
 \label{cor-constraint-scarcity-scaling}
 
-The value of a boundary constraint system is monotonically increasing in scarcity. Under abundance, boundary constraints are costless and unnecessary. Under scarcity, boundary constraints become the dominant determinant of system welfare.
+For two symmetric quadratic agents ($\alpha_A = \alpha_B = \alpha$, $\beta_A = \beta_B = \beta$) sharing a single resource $R$, define the value of the boundary-constraint system as the welfare gap between the variational equilibrium and unilateral defection, $V(R) := W_{\text{VE}}(R) - W_{\text{defect}}(R)$. In the portion of the collision regime in which the defector's unconstrained optimum remains feasible ($\alpha/\beta \leq R < 2\alpha/\beta$),
+
+$$V(R) = \frac{\beta}{4}\left(\frac{2\alpha}{\beta} - R\right)^2 > 0,$$
+
+which is strictly decreasing in $R$, i.e., strictly increasing in scarcity; under abundance ($R \geq 2\alpha/\beta$) the constraint system is slack and $V(R) = 0$. Under extreme scarcity ($R < \alpha/\beta$) the defector absorbs the entire endowment ($x_A = R$, $x_B = 0$) and $V(R) = \frac{\beta}{4} R^2 > 0$, which is strictly \emph{increasing} in $R$; the monotone-scaling claim is therefore confined to the stated window $\alpha/\beta \leq R < 2\alpha/\beta$.
 \end{corollary}
+
+\begin{proof}
+At the variational equilibrium each agent receives $R/2$, so $W_{\text{VE}}(R) = 2\,U(R/2) = \alpha R - \tfrac{\beta}{4} R^2$. Under defection one agent seizes its unconstrained optimum $\alpha/\beta$ and the other is left with $R - \alpha/\beta$ (nonnegative, hence feasible, precisely when $R \geq \alpha/\beta$), so $W_{\text{defect}}(R) = U(\alpha/\beta) + U(R - \alpha/\beta)$, with $U(\alpha/\beta) = \alpha^2/(2\beta)$. Subtracting and simplifying,
+
+$$V(R) = W_{\text{VE}}(R) - W_{\text{defect}}(R) = \frac{\beta}{4}\left(\frac{2\alpha}{\beta} - R\right)^2.$$
+
+Differentiating, $dV/dR = -\tfrac{\beta}{2}\left(2\alpha/\beta - R\right) < 0$ throughout the window $\alpha/\beta \leq R < 2\alpha/\beta$; hence $V$ increases strictly as $R$ falls within that window. For $R < \alpha/\beta$ the stated defection profile is infeasible; the defector is instead capped at $x_A = R$, the victim receives $x_B = 0$, and $V(R) = W_{\text{VE}}(R) - U(R) = \frac{\beta}{4} R^2$, which is strictly increasing in $R$. The two expressions agree at $R = \alpha/\beta$, where both equal $\alpha^2/(4\beta)$.
+\end{proof}
 
 The scarcity-monotonicity result provides a mathematical basis for the
 prediction that multi-agent systems will intensify coordination under
-resource pressure: the welfare cost of failed coordination grows with
-scarcity.
+resource pressure: within this model the welfare cost of failed
+coordination grows quadratically as the resource contracts toward the
+defector's own capacity \(\alpha/\beta\), so under acute scarcity the
+boundary-constraint system becomes the dominant determinant of realized
+welfare. Whether the same monotonicity holds for general utilities
+satisfying Assumption~\ref{asm-regularity}, general \(N\), and general
+defection strategies is left open; the corollary establishes it for the
+symmetric quadratic case that the table above instantiates.
 
 \section{The Transition to Conflict: Removing the Boundary
 Constraints}\label{the-transition-to-conflict-removing-the-boundary-constraints}
@@ -1295,7 +1365,9 @@ If all boundary constraints are removed ($g_{Bk}$ dropped for all $B, k$), and t
 \begin{proof}
 \emph{Proof of (a).} Without constraints, each agent $i$ attempts $\mathbf{x}_i^{\circ}$. The aggregate $\sum_i \mathbf{x}_i^{\circ} > \mathbf{R}$ is physically infeasible. Since no constraint directs agents to reduce consumption, and each agent's unilateral best response is $\mathbf{x}_i^{\circ}$ regardless of the others' (by strict concavity, the optimal response function without constraints is constant), there is no self-correcting mechanism. The unconstrained Nash equilibrium is infeasible: it requires $\sum_i \mathbf{x}_i^{\circ} > \mathbf{R}$. Any feasible allocation requires at least one agent to accept less than its optimum, which it has no incentive to do without a constraint. $\square$
 
-\emph{Proof of (b).} When $A$ claims $x_{Aj}^{\circ}$, the remaining resource for all other agents is $R_j - x_{Aj}^{\circ}$. In the collision regime, $R_j - x_{Aj}^{\circ} < \sum_{i \neq A} x_{ij}^{\circ}$, meaning $A$'s strategy forces at least one other agent below its optimum. This is the definition of a negative externality.
+\emph{Proof of (b).} When $A$ claims $x_{Aj}^{\circ}$, the remaining resource for all other agents is $R_j - x_{Aj}^{\circ}$. In the collision regime, $R_j - x_{Aj}^{\circ} < \sum_{i \neq A} x_{ij}^{\circ}$, meaning $A$'s strategy forces at least one other agent below its optimum. This is the definition of a negative externality. $\square$
+
+\emph{Proof of (c).} By the physical exclusivity of resource units, two agents cannot consume the same unit of energy; with no constraint system to adjudicate the incompatible claims established in (a) and (b), the collision can be resolved only by direct expenditure of stored energy to exclude competitors. The quantification of this cost is deferred to the thermodynamic friction derivation (see the Remark below).
 \end{proof}
 
 \textbf{Remark.} Part (c) connects directly to the thermodynamic
@@ -1332,12 +1404,13 @@ Significance
 \(\partial U_A^* / \partial c_{Bk} = \mu_{Bk}^* \geq 0\) & Every
 boundary constraint has a quantifiable energetic cost to the constrained
 agent \\
-\textbf{C1.1} & Active vs.~Inactive boundary constraints & Binding
-constraints have \(\mu > 0\); slack constraints have \(\mu = 0\) &
-Boundary constraints cost nothing when not contested; cost emerges only
-at points of conflict \\
-\textbf{C1.2} & Coupled Cost of Active Constraints & Every active
-boundary constraint has \(\mu_{Bk}^* > 0\), simultaneously protecting
+\textbf{C1.1} & Active vs.~Inactive boundary constraints & Slack
+constraints have \(\mu = 0\); binding constraints have \(\mu > 0\)
+except in the degenerate case where the unconstrained optimum lies on
+the boundary (\(\mu = 0\), \(g = 0\)) & Boundary constraints cost
+nothing when not contested; cost emerges only at points of conflict \\
+\textbf{C1.2} & Coupled Cost of Active Constraints & A strictly positive
+\(\mu_{Bk}^* > 0\) marks an active constraint, simultaneously protecting
 \(B\) and restricting \(A\) & The same multiplier measures protection
 and restriction \\
 \textbf{L1} & Inevitability of Collision & Collision guaranteed for
@@ -1346,9 +1419,12 @@ constraint necessity quantitative, not merely qualitative \\
 \textbf{T2} & Impossibility of Infinite Freedom & No feasible profile
 achieves all agents' unconstrained optima simultaneously & Boundary
 constraints are necessary, not optional \\
-\textbf{C2.1} & Necessity of Active Constraints & At least one
-\(\mu_{Bk}^* > 0\) at any feasible solution & Some agent is always
-constrained \\
+\textbf{C2.1} & Necessity of Active Constraints & At the VE at least one
+constraint binds; in the resource-only GNEP over \(\mathcal{F}_R\)
+(separable utilities), \(\lambda_j^* > 0\) for every collided resource
+(with binding boundary constraints, the activity may reside in
+\(\mu_{Bk}^{(i)}\) with \(\lambda_j^* = 0\)) & Some agent is always
+constrained; unconstrained coexistence is impossible under collision \\
 \textbf{T3} & Variational Equilibrium & GNEP has a solution with shared
 shadow prices & Uniform shadow-price structure emerges from the shared
 constraint structure \\
@@ -1359,11 +1435,17 @@ differences arise only through \(U_i\) and \(g_{Bk}\) \\
 welfare over the feasible set & The VE is the best feasible allocation,
 not merely a stable one \\
 \textbf{C4.1} & Welfare Dominance & VE is welfare-superior to every
-other feasible allocation & Greedy, equal-split, and all other
-alternatives are strictly dominated \\
-\textbf{C4.2} & Boundary Constraint Value Scales with Scarcity & Value
-of boundary constraints monotonically increasing in scarcity &
-Coordination intensifies during crises as a consequence of the model \\
+other allocation in \(\mathcal{F}\); feasible greedy/equal-split
+allocations differing from the VE are strictly dominated & The VE
+dominates all feasible alternatives (greedy only when it is feasible;
+equal-split coincides with the VE for symmetric agents) \\
+\textbf{C4.2} & Boundary Constraint Value Scales with Scarcity & In the
+symmetric quadratic model with \(\alpha/\beta \leq R < 2\alpha/\beta\),
+the VE-vs-defection welfare gap
+\(\tfrac{\beta}{4}(2\alpha/\beta - R)^2\) is monotone in scarcity (for
+\(R < \alpha/\beta\) the gap is \(\tfrac{\beta}{4}R^2\), increasing in
+\(R\)) & Coordination intensifies during crises as a consequence of the
+model \\
 \textbf{P1} & Unconstrained → Conflict & Removing constraints in
 collision regime produces no stable allocation & The unconstrained
 regime is unstable; links to thermodynamic friction \\
@@ -1401,12 +1483,17 @@ parameters (quadratic model) \\
 \(\lambda_j\) & Lagrange multiplier for resource \(j\) scarcity \\
 \(\mu_{Bk}\) & Lagrange multiplier (shadow price) for agent \(B\)'s
 \(k\)-th boundary constraint \\
+\(\nu_{ij}\) & Lagrange multiplier for agent \(i\)'s nonnegativity
+constraint \(x_{ij} \geq 0\) (zero at interior optima) \\
 \(\hat{x}_{-Aj}\) & Aggregate consumption of resource \(j\) by all
 agents other than \(A\) \\
 \(\mathcal{L}_A\) & Lagrangian for agent \(A\)'s constrained
 optimization \\
-\(\mathcal{F}\) & Feasible strategy set under resource and boundary
-constraints \\
+\(\mathcal{F}_R\) & Resource-feasible set: resource-conservation and
+nonnegativity constraints only (used in
+Theorem~\ref{thm-impossibility-infinite-freedom}) \\
+\(\mathcal{F}\) & Feasible strategy set under resource \emph{and}
+boundary constraints (used in Theorem~\ref{thm-welfare-optimality}) \\
 \end{longtable}
 }
 
@@ -1426,8 +1513,9 @@ The results form a complete logical chain. Scarcity creates collision
 (Lemma~\ref{lem-inevitability-collision}); collision requires boundary
 constraints (Theorem~\ref{thm-impossibility-infinite-freedom}); the
 constrained system admits a variational equilibrium with uniform shadow
-prices (Theorem~\ref{thm-variational-equilibrium}); and constraint value
-scales monotonically with scarcity
+prices (Theorem~\ref{thm-variational-equilibrium}); and, in the
+symmetric quadratic model, constraint value scales monotonically with
+scarcity over the range \(\alpha/\beta \leq R < 2\alpha/\beta\)
 (Corollary~\ref{cor-constraint-scarcity-scaling}).
 
 Each result is denominated in energy units and computationally verified.
@@ -1437,8 +1525,10 @@ of how costly a given constraint is to the constrained agent.
 
 The central contribution is the demonstration that boundary constraints
 in multi-agent dissipative systems are not design choices or social
-conventions but necessities: the GNEP has no feasible solution without
-them.
+conventions but necessities: under resource collision, no feasible joint
+allocation realizes all agents' unconstrained optima
+(Theorem~\ref{thm-impossibility-infinite-freedom}), so some system of
+mutual restrictions must bind at any realizable profile.
 
 \subsection{Testable Predictions}\label{testable-predictions}
 
@@ -1467,7 +1557,9 @@ Theorem~\ref{thm-variational-equilibrium} & Resource markets with
 physical delivery constraints consistently exhibit agent-specific
 (non-uniform) shadow prices under conditions satisfying
 Assumption~\ref{asm-regularity} \\
-Welfare gain from constraints is monotonically increasing in scarcity &
+Welfare gain from constraints is monotonically increasing in scarcity
+(derived in the symmetric quadratic model for
+\(\alpha/\beta \leq R < 2\alpha/\beta\); conjectured more generally) &
 Corollary~\ref{cor-constraint-scarcity-scaling} & Cooperation rates or
 welfare measures decrease as resource scarcity increases, controlling
 for other variables \\
@@ -1614,11 +1706,13 @@ constrained system admits a variational equilibrium in which all agents
 face the same shadow price for each shared resource
 (Theorem~\ref{thm-variational-equilibrium}). This equilibrium is not
 merely stable; it uniquely maximizes total social welfare over the
-feasible set (Theorem~\ref{thm-welfare-optimality}). The welfare value
-of the constraint system scales monotonically with scarcity
-(Corollary~\ref{cor-constraint-scarcity-scaling}): under abundance,
-constraints are costless; under scarcity, they become the dominant
-determinant of system welfare. All results are denominated in energy
+feasible set (Theorem~\ref{thm-welfare-optimality}). In the symmetric
+quadratic model, over the range \(\alpha/\beta \leq R < 2\alpha/\beta\),
+the welfare value of the constraint system scales monotonically with
+scarcity (Corollary~\ref{cor-constraint-scarcity-scaling}): under
+abundance, constraints are costless; under scarcity, they become the
+dominant determinant of system welfare within that model class, with the
+general case left as a conjecture. All results are denominated in energy
 units, obtained entirely within the framework of constrained
 optimization (KKT conditions, GNEP, and variational equilibrium theory),
 and computationally verified.
@@ -1638,5 +1732,183 @@ provide the structural foundation on which all subsequent results
 depend.
 
 \addcontentsline{toc}{section}{References}
-\bibliography{../../shared/main}
+\begin{thebibliography}{27}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Lostracco(2026{\natexlab{a}})]{TC-IV}
+Keith Lostracco.
+\newblock Thermodynamics of cooperation: Thermodynamic friction,
+  2026{\natexlab{a}}.
+\newblock URL \url{https://doi.org/10.5281/zenodo.19635850}.
+\newblock \doi{10.5281/zenodo.19635850}.
+
+\bibitem[Lostracco(2026{\natexlab{b}})]{TC-II}
+Keith Lostracco.
+\newblock Thermodynamics of cooperation: Strategic entropy injection,
+  2026{\natexlab{b}}.
+\newblock URL \url{https://doi.org/10.5281/zenodo.19635814}.
+\newblock \doi{10.5281/zenodo.19635814}.
+
+\bibitem[Lostracco(2026{\natexlab{c}})]{TC-III}
+Keith Lostracco.
+\newblock Thermodynamics of cooperation: Accumulated negentropy,
+  2026{\natexlab{c}}.
+\newblock URL \url{https://doi.org/10.5281/zenodo.19635836}.
+\newblock \doi{10.5281/zenodo.19635836}.
+
+\bibitem[Lostracco(2026{\natexlab{d}})]{TC-V}
+Keith Lostracco.
+\newblock Thermodynamics of cooperation: Cooperative equilibrium,
+  2026{\natexlab{d}}.
+\newblock URL \url{https://doi.org/10.5281/zenodo.19635856}.
+\newblock \doi{10.5281/zenodo.19635856}.
+
+\bibitem[Von~Neumann and Morgenstern(1944)]{VonNeumann1944}
+John Von~Neumann and Oskar Morgenstern.
+\newblock \emph{Theory of Games and Economic Behavior}.
+\newblock Princeton University Press, 1944.
+
+\bibitem[Nash(1950)]{Nash1950}
+John~F. Nash.
+\newblock Equilibrium points in {N}-person games.
+\newblock \emph{Proceedings of the National Academy of Sciences}, 36\penalty0
+  (1):\penalty0 48--49, 1950.
+\newblock \doi{10.1073/pnas.36.1.48}.
+
+\bibitem[Nash(1951)]{Nash1951}
+John~F. Nash.
+\newblock Non-cooperative games.
+\newblock \emph{Annals of Mathematics}, 54\penalty0 (2):\penalty0 286--295,
+  1951.
+\newblock \doi{10.2307/1969529}.
+
+\bibitem[Rosen(1965)]{Rosen1965}
+J.~Ben Rosen.
+\newblock Existence and uniqueness of equilibrium points for concave {N}-person
+  games.
+\newblock \emph{Econometrica}, 33\penalty0 (3):\penalty0 520--534, 1965.
+\newblock \doi{10.2307/1911749}.
+
+\bibitem[Facchinei and Kanzow(2010)]{Facchinei2010}
+Francisco Facchinei and Christian Kanzow.
+\newblock Generalized {Nash} equilibrium problems.
+\newblock \emph{Annals of Operations Research}, 175\penalty0 (1):\penalty0
+  177--211, 2010.
+\newblock \doi{10.1007/s10479-009-0653-x}.
+
+\bibitem[Hardin(1968)]{Hardin1968}
+Garrett Hardin.
+\newblock The tragedy of the commons.
+\newblock \emph{Science}, 162\penalty0 (3859):\penalty0 1243--1248, 1968.
+\newblock \doi{10.1126/science.162.3859.1243}.
+
+\bibitem[Ostrom(1990)]{Ostrom1990}
+Elinor Ostrom.
+\newblock \emph{Governing the Commons: The Evolution of Institutions for
+  Collective Action}.
+\newblock Cambridge University Press, 1990.
+
+\bibitem[Lotka(1922)]{Lotka1922}
+Alfred~J. Lotka.
+\newblock Contribution to the energetics of evolution.
+\newblock \emph{Proceedings of the National Academy of Sciences}, 8\penalty0
+  (6):\penalty0 147--151, 1922.
+\newblock \doi{10.1073/pnas.8.6.147}.
+
+\bibitem[Georgescu-Roegen(1971)]{GeorgescuRoegen1971}
+Nicholas Georgescu-Roegen.
+\newblock \emph{The Entropy Law and the Economic Process}.
+\newblock Harvard University Press, 1971.
+
+\bibitem[Georgescu-Roegen(1979)]{GeorgescuRoegen1979}
+Nicholas Georgescu-Roegen.
+\newblock Comments on the papers by {Daly} and {Stiglitz}.
+\newblock In V.~Kerry Smith, editor, \emph{Scarcity and Growth Reconsidered},
+  pages 95--105. Johns Hopkins University Press, Baltimore, 1979.
+
+\bibitem[Schr{\"o}dinger(1944)]{Schrodinger1944}
+Erwin Schr{\"o}dinger.
+\newblock \emph{What Is Life? The Physical Aspect of the Living Cell}.
+\newblock Cambridge University Press, 1944.
+
+\bibitem[Prigogine(1978)]{Prigogine1978}
+Ilya Prigogine.
+\newblock Time, structure, and fluctuations.
+\newblock \emph{Science}, 201\penalty0 (4358):\penalty0 777--785, 1978.
+\newblock \doi{10.1126/science.201.4358.777}.
+
+\bibitem[Friston(2013)]{Friston2013}
+Karl Friston.
+\newblock Life as we know it.
+\newblock \emph{Journal of the Royal Society Interface}, 10\penalty0
+  (86):\penalty0 20130475, 2013.
+\newblock \doi{10.1098/rsif.2013.0475}.
+
+\bibitem[England(2013)]{England2013}
+Jeremy~L. England.
+\newblock Statistical physics of self-replication.
+\newblock \emph{The Journal of Chemical Physics}, 139\penalty0 (12):\penalty0
+  121923, 2013.
+\newblock \doi{10.1063/1.4818538}.
+
+\bibitem[Maturana and Varela(1980)]{Maturana1980}
+Humberto~R. Maturana and Francisco~J. Varela.
+\newblock \emph{Autopoiesis and Cognition: The Realization of the Living}.
+\newblock D. Reidel, 1980.
+\newblock Original work published 1972.
+
+\bibitem[Clausius(1865)]{Clausius1865}
+Rudolf Clausius.
+\newblock Ueber verschiedene f{\"u}r die {Anwendung} bequeme {Formen} der
+  {Hauptgleichungen} der mechanischen {W{\"a}rmetheorie}.
+\newblock \emph{Annalen der Physik und Chemie}, 201\penalty0 (7):\penalty0
+  353--400, 1865.
+\newblock \doi{10.1002/andp.18652010702}.
+
+\bibitem[Boltzmann(1877)]{Boltzmann1877}
+Ludwig Boltzmann.
+\newblock {\"U}ber die {Beziehung} zwischen dem zweiten {Hauptsatze} der
+  mechanischen {W{\"a}rmetheorie} und der {Wahrscheinlichkeitsrechnung}
+  respektive den {S{\"a}tzen} {\"u}ber das {W{\"a}rmegleichgewicht}.
+\newblock \emph{Wiener Berichte}, 76:\penalty0 373--435, 1877.
+
+\bibitem[Planck(1897)]{Planck1897}
+Max Planck.
+\newblock \emph{Vorlesungen {\"u}ber Thermodynamik}.
+\newblock De Gruyter, Berlin, 1897.
+\newblock \doi{10.1515/9783112341964}.
+\newblock URL \url{https://doi.org/10.1515/9783112341964}.
+
+\bibitem[Pearl(2000)]{Pearl2000}
+Judea Pearl.
+\newblock \emph{Causality: Models, Reasoning, and Inference}.
+\newblock Cambridge University Press, 2000.
+
+\bibitem[Penrose(2005)]{Penrose2005}
+Roger Penrose.
+\newblock \emph{The Road to Reality: A Complete Guide to the Laws of the
+  Universe}.
+\newblock Alfred A. Knopf, 2005.
+
+\bibitem[Boyd and Vandenberghe(2004)]{Boyd2004}
+Stephen Boyd and Lieven Vandenberghe.
+\newblock \emph{Convex Optimization}.
+\newblock Cambridge University Press, 2004.
+
+\bibitem[Lostracco(2026{\natexlab{e}})]{TC-VI}
+Keith Lostracco.
+\newblock Thermodynamics of cooperation: Value dynamics, 2026{\natexlab{e}}.
+\newblock URL \url{https://doi.org/10.5281/zenodo.19635865}.
+\newblock \doi{10.5281/zenodo.19635865}.
+
+\bibitem[Osborne and Rubinstein(1994)]{OsborneRubinstein1994}
+Martin~J. Osborne and Ariel Rubinstein.
+\newblock \emph{A Course in Game Theory}.
+\newblock MIT Press, 1994.
+
+\end{thebibliography}
 \end{document}

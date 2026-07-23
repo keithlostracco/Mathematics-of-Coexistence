@@ -50,7 +50,7 @@ jobs:
               main_tex=$(grep -rl '\\begin{document}' "$paperdir" | head -1)
               if [ -n "$main_tex" ]; then
                 echo "::group::Building $paper"
-                (cd "$paperdir" && latexmk -pdf -interaction=nonstopmode \
+                (cd "$paperdir" && latexmk -f -pdf -interaction=nonstopmode \
                   "$(basename "$main_tex")")
                 cp "$paperdir"*.pdf pdf/ 2>/dev/null || true
                 echo "::endgroup::"

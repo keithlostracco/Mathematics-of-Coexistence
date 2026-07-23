@@ -146,12 +146,17 @@ def asymmetric_contest_ne_2(V_A: float, V_B: float) -> ContestResult:
 # Friction Multiplier and System Loss
 # ---------------------------------------------------------------------------
 
-def friction_multiplier(delta_off: float, delta_def: float, kappa: float) -> float:
+def friction_multiplier(psi_off: float, psi_def: float, kappa: float) -> float:
     """Compute the total friction multiplier Phi.
 
-    Phi = 1 + (1 + kappa) * (delta_off + delta_def)
+    Phi = 1 + kappa * (psi_off + psi_def)
+
+    The ledger is contest effort plus repair: the repair term kappa*Delta_B
+    already re-supplies the destroyed embodied energy Delta_B, so charging a
+    standalone Delta_B alongside it would over-count by exactly psi*e_i per
+    agent (TC-IV, def-repair-multiplier).
     """
-    return 1.0 + (1.0 + kappa) * (delta_off + delta_def)
+    return 1.0 + kappa * (psi_off + psi_def)
 
 
 def system_loss(E_j: float, N: int, Phi: float, r: float = 1.0) -> float:

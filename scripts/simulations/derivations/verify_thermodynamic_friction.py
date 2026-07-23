@@ -266,10 +266,10 @@ def verify_friction_multiplier() -> None:
     section("5. Friction Multiplier & Net-Negative Theorem (Sections 4-5)")
 
     # Verify Phi formula
-    delta_off, delta_def, kappa = 0.15, 0.25, 2.0
-    Phi = 1 + (1 + kappa) * (delta_off + delta_def)
-    check("Phi = 1 + (1+kappa)(delta_off+delta_def)",
-          np.isclose(Phi, 2.2),
+    psi_off, psi_def, kappa = 0.15, 0.25, 2.0
+    Phi = 1 + kappa * (psi_off + psi_def)
+    check("Phi = 1 + kappa(psi_off+psi_def)",
+          np.isclose(Phi, 1.8),
           f"Phi = {Phi}")
 
     # Verify complete ledger for 2-agent case (Example 9.1)
@@ -277,55 +277,65 @@ def verify_friction_multiplier() -> None:
     N = 2
     e_star = E_j / 4  # = 25
     D_2 = E_j / 2  # = 50
-    delta_sum = delta_off + delta_def  # = 0.4
+    psi_sum = psi_off + psi_def  # = 0.4
 
-    boundary_damage_per_agent = delta_sum * e_star  # = 10
+    boundary_damage_per_agent = psi_sum * e_star  # = 10
     repair_per_agent = kappa * boundary_damage_per_agent  # = 20
-    total_per_agent = e_star + boundary_damage_per_agent + repair_per_agent  # 25+10+20 = 55
+    # The repair term kappa*Delta_B already re-supplies the destroyed embodied
+    # energy Delta_B; charging a standalone Delta_B alongside it would
+    # double-count by exactly psi*e_i per agent.
+    total_per_agent = e_star + repair_per_agent  # 25+20 = 45
 
     check("Boundary damage per agent = 10",
           np.isclose(boundary_damage_per_agent, 10.0))
     check("Repair per agent = 20",
           np.isclose(repair_per_agent, 20.0))
-    check("Total per agent = 55",
-          np.isclose(total_per_agent, 55.0))
+    check("Total per agent = 45",
+          np.isclose(total_per_agent, 45.0))
 
-    L_system = N * total_per_agent  # 110
-    check("L_system = 110", np.isclose(L_system, 110.0))
+    L_system = N * total_per_agent  # 90
+    check("L_system = 90", np.isclose(L_system, 90.0))
     check("L_system = Phi * D_2",
           np.isclose(L_system, Phi * D_2),
           f"Phi*D_2 = {Phi * D_2}")
 
     V_net = E_j - L_system
-    check("V_net = -10 (net-negative)", np.isclose(V_net, -10.0))
+    check("V_net = +10 (net-positive, but wasteful)", np.isclose(V_net, 10.0))
 
-    # Verify net-negative condition: Phi > N/(N-1)
+    # Verify net-negative condition: Phi > N/(N-1). The baseline Phi=1.8 sits
+    # BELOW the N=2 threshold, so a two-agent baseline contest is net-positive.
     threshold_2 = N / (N - 1)  # = 2
-    check("Threshold for N=2: Phi > 2",
-          np.isclose(threshold_2, 2.0) and Phi > threshold_2,
-          f"Phi={Phi} > {threshold_2}")
+    check("Threshold for N=2 is Phi > 2; baseline Phi=1.8 is below it",
+          np.isclose(threshold_2, 2.0) and Phi < threshold_2,
+          f"Phi={Phi} < {threshold_2}")
 
     # Verify the table in Section 5.3
     table_data = [
-        # (delta_sum, kappa, Phi, N=2 pct, N=5 pct, N=10 pct, N=100 pct)
+        # (psi_sum, kappa, Phi, N=2 pct, N=5 pct, N=10 pct, N=100 pct)
         (0.0, 0.0, 1.0, 50.0, 80.0, 90.0, 99.0),
-        (0.2, 1.5, 1.5, 75.0, 120.0, 135.0, 148.5),
-        (0.4, 2.0, 2.2, 110.0, 176.0, 198.0, 217.8),
-        (0.6, 2.0, 2.8, 140.0, 224.0, 252.0, 277.2),
-        (0.8, 3.0, 4.2, 210.0, 336.0, 378.0, 415.8),
+        (0.2, 1.5, 1.3, 65.0, 104.0, 117.0, 128.7),
+        (0.4, 2.0, 1.8, 90.0, 144.0, 162.0, 178.2),
+        (0.6, 2.0, 2.2, 110.0, 176.0, 198.0, 217.8),
+        (0.8, 3.0, 3.4, 170.0, 272.0, 306.0, 336.6),
     ]
 
-    for delta_s, kap, phi_exp, n2, n5, n10, n100 in table_data:
-        phi_calc = 1 + (1 + kap) * delta_s if delta_s > 0 else 1.0
-        check(f"Phi({delta_s},{kap}) = {phi_exp}",
+    for psi_s, kap, phi_exp, n2, n5, n10, n100 in table_data:
+        phi_calc = 1 + kap * psi_s if psi_s > 0 else 1.0
+        check(f"Phi({psi_s},{kap}) = {phi_exp}",
               np.isclose(phi_calc, phi_exp),
               f"calc={phi_calc}")
 
         for N_val, expected_pct in [(2, n2), (5, n5), (10, n10), (100, n100)]:
             loss_pct = phi_exp * (N_val - 1) / N_val * 100
-            check(f"  L/E (d={delta_s},N={N_val}) = {expected_pct}%",
+            check(f"  L/E (psi={psi_s},N={N_val}) = {expected_pct}%",
                   np.isclose(loss_pct, expected_pct, atol=0.05),
                   f"calc={loss_pct:.1f}%")
+
+    # Prose claim: modest parameters (psi=0.2, kappa=1.5) now give a NET-POSITIVE
+    # two-agent contest (65% loss), where the old ledger made them net-neutral (75%).
+    check("Modest params (psi=0.2, kappa=1.5) give a net-positive two-agent contest",
+          np.isclose(1 + 1.5 * 0.2, 1.3) and (1.3 * (2 - 1) / 2 * 100) < 100.0,
+          f"L/E = {1.3 * 0.5 * 100:.0f}% < 100%")
 
 
 # ---------------------------------------------------------------------------
@@ -335,21 +345,44 @@ def verify_friction_multiplier() -> None:
 def verify_net_negative_threshold() -> None:
     section("6. Net-Negative Threshold — Corollaries 5.1, 5.2")
 
-    # Corollary 5.2: Two-agent threshold
-    # (1 + kappa)(delta_off + delta_def) > 1
-    kappa, delta_off, delta_def = 2.0, 0.2, 0.2
-    lhs = (1 + kappa) * (delta_off + delta_def)
+    # Corollary 5.2: Two-agent threshold — net-negative for N=2 iff Phi > 2,
+    # i.e. iff kappa*(psi_off + psi_def) > 1. At kappa=2 this is psi > 1/2.
+    kappa = 2.0
+
+    # Mild regime: psi = 0.4 < 1/kappa → Phi = 1.8 < 2 → NOT net-negative
+    psi_off, psi_def = 0.2, 0.2
+    lhs_mild = kappa * (psi_off + psi_def)
+    Phi_mild = 1 + lhs_mild
+    check("Corollary 5.2: kappa*psi = 0.8 < 1 (mild regime)",
+          lhs_mild < 1,
+          f"lhs = {lhs_mild}")
+    check("Phi = 1.8 < 2 (two-agent contest is net-positive)",
+          np.isclose(Phi_mild, 1.8) and Phi_mild < 2.0,
+          f"Phi = {Phi_mild}")
+
+    # Destructive regime: psi = 0.6 > 1/kappa → Phi = 2.2 > 2 → net-negative
+    psi_off, psi_def = 0.3, 0.3
+    lhs = kappa * (psi_off + psi_def)
     Phi = 1 + lhs
-    check("Corollary 5.2: (1+kappa)(d_off+d_def) > 1",
+    check("Corollary 5.2: kappa*psi > 1 (destructive regime)",
           lhs > 1,
           f"lhs = {lhs}")
     check("Phi = 2.2 > 2",
           Phi > 2.0,
           f"Phi = {Phi}")
 
+    # Crossover: P < 0 iff Phi > 2 iff kappa*psi > 1 iff psi > 1/kappa.
+    # At kappa=2 the crossover sits at one half (NOT 1/(1+kappa) = one third).
+    check("Crossover psi* = 1/kappa = 0.5 at kappa=2",
+          np.isclose(1.0 / kappa, 0.5),
+          f"1/kappa = {1.0 / kappa}")
+    check("Break-even: psi = 1/kappa gives exactly Phi = 2 (zero net value)",
+          np.isclose(1 + kappa * (1.0 / kappa), 2.0),
+          "psi=0.5, kappa=2 → Phi=2.0")
+
     # Critical N formula: N > Phi/(Phi-1) strictly, so N* accounts for boundary
     # When Phi/(Phi-1) is (near) integer k, N* = k+1; otherwise N* = ceil(val).
-    for Phi_val in [1.1, 1.5, 2.0, 2.2, 3.0, 5.0]:
+    for Phi_val in [1.1, 1.5, 1.8, 2.0, 2.2, 3.0, 5.0]:
         val = Phi_val / (Phi_val - 1)
         n_round = round(val)
         if abs(n_round - val) < 1e-9:
@@ -370,6 +403,20 @@ def verify_net_negative_threshold() -> None:
         check(f"  Not net-neg at N*-1",
               not_neg_below or N_star <= 2,
               f"N*-1={N_star - 1}")
+
+    # Theorem 5(c): net-negative iff Phi > N/(N-1). Since N/(N-1) <= 3/2 for every
+    # N >= 3, the condition Phi > 3/2 is SUFFICIENT for all N >= 3 — it is the
+    # exact threshold only at N=3, and is strictly conservative for N >= 4.
+    Phi_base = 1.8
+    check("Phi > 3/2 SUFFICES for net-negativity at every N >= 3",
+          Phi_base > 1.5 and all(Phi_base > N / (N - 1) for N in [3, 5, 10, 100, 1000]),
+          f"Phi = {Phi_base} exceeds N/(N-1) for all N >= 3")
+    check("Phi > 3/2 is EXACT only at N=3 (conservative for N >= 4)",
+          np.isclose(3 / (3 - 1), 1.5) and all(N / (N - 1) < 1.5 for N in [4, 5, 10, 100]),
+          "N/(N-1) = 3/2 at N=3, strictly < 3/2 for N >= 4")
+    check("Phi > 3/2 is NOT sufficient at N=2 (threshold there is Phi > 2)",
+          Phi_base > 1.5 and Phi_base < 2.0,
+          f"Phi = {Phi_base} > 3/2 yet net-positive at N=2")
 
     # Edge: Phi = 1 → never net-negative
     check("Phi=1 (pure contest, no damage): N* = inf",
@@ -394,18 +441,29 @@ def verify_cooperation_dominance() -> None:
     SW_coop = 2 * U(x_coop)
     check("SW_coop = 84", np.isclose(SW_coop, 84.0))
 
-    # Conflict: with Phi=2.2, contested amount = 20-12 = 8
-    Phi = 2.2
+    # Conflict: with Phi=1.8, contested amount = 20-12 = 8
+    # (This example splits the damage evenly, psi_off = psi_def = 0.2; the
+    #  baseline splits it 0.15/0.25. Different split, same sum psi = 0.4 → Phi = 1.8.)
+    psi_off, psi_def, kappa = 0.2, 0.2, 2.0
+    Phi = 1 + kappa * (psi_off + psi_def)  # = 1.8
     E_contested = 2 * (alpha / beta) - R  # = 8
     D_2 = E_contested / 2  # = 4
-    L_system = Phi * D_2  # = 8.8
+    boundary_repair = kappa * (psi_off + psi_def) * D_2  # 2 * 0.4 * 4 = 3.2
+    L_system = Phi * D_2  # = 7.2
 
+    check("Phi = 1.8", np.isclose(Phi, 1.8))
     check("Contested amount = 8", np.isclose(E_contested, 8.0))
     check("Contest dissipation D_2 = 4", np.isclose(D_2, 4.0))
-    check("Total system loss = 8.8", np.isclose(L_system, 8.8))
-    check("Loss > contested amount",
-          L_system > E_contested,
-          f"L={L_system} > E_contested={E_contested}")
+    check("Boundary repair = kappa*psi*D_2 = 3.2", np.isclose(boundary_repair, 3.2))
+    check("Total system loss = 7.2", np.isclose(L_system, 7.2))
+    check("L_system = D_2 + boundary repair",
+          np.isclose(L_system, D_2 + boundary_repair),
+          f"{D_2} + {boundary_repair} = {D_2 + boundary_repair}")
+    # 7.2 < 8: the loss consumes nearly the whole contested portion (exactly 90% of
+    # it), but no longer exceeds it the way the old ledger's 8.8 did.
+    check("Loss consumes nearly the whole contested amount (90%), but not more",
+          np.isclose(L_system / E_contested, 0.9) and L_system < E_contested,
+          f"L={L_system} = {100 * L_system / E_contested:.0f}% of E_contested={E_contested}")
 
     # Cooperation premium is strictly positive
     premium = L_system  # minimum premium = system loss from conflict
@@ -536,22 +594,25 @@ def verify_worked_examples() -> None:
 
     # Example 9.1: Two-agent baseline
     E_j = 100.0
-    delta_off, delta_def, kappa = 0.15, 0.25, 2.0
-    Phi = 1 + (1 + kappa) * (delta_off + delta_def)
+    psi_off, psi_def, kappa = 0.15, 0.25, 2.0
+    Phi = 1 + kappa * (psi_off + psi_def)
 
     e_star = E_j / 4  # 25
     D_2 = E_j / 2  # 50
-    bd_per = (delta_off + delta_def) * e_star  # 10
+    bd_per = (psi_off + psi_def) * e_star  # 10
     repair_per = kappa * bd_per  # 20
-    L_total = 2 * (e_star + bd_per + repair_per)  # 110
+    # Ledger per agent is contest effort + repair; the repair term already
+    # re-supplies the destroyed Delta_B, so bd_per is not charged separately.
+    L_total = 2 * (e_star + repair_per)  # 90
 
-    check("Ex 9.1: Phi = 2.2", np.isclose(Phi, 2.2))
+    check("Ex 9.1: Phi = 1.8", np.isclose(Phi, 1.8))
     check("Ex 9.1: e* = 25", np.isclose(e_star, 25.0))
     check("Ex 9.1: D_2 = 50", np.isclose(D_2, 50.0))
     check("Ex 9.1: boundary damage/agent = 10", np.isclose(bd_per, 10.0))
     check("Ex 9.1: repair/agent = 20", np.isclose(repair_per, 20.0))
-    check("Ex 9.1: L_system = 110", np.isclose(L_total, 110.0))
-    check("Ex 9.1: V_net = -10", np.isclose(E_j - L_total, -10.0))
+    check("Ex 9.1: L_system = 90", np.isclose(L_total, 90.0))
+    check("Ex 9.1: V_net = +10 (net-positive, but wasteful)",
+          np.isclose(E_j - L_total, 10.0))
     check("Ex 9.1: L = Phi * D_2",
           np.isclose(L_total, Phi * D_2))
 
@@ -559,12 +620,12 @@ def verify_worked_examples() -> None:
     N = 5
     e_i_5 = (N - 1) / N ** 2 * E_j  # 4*100/25 = 16
     D_5 = N * e_i_5  # 80
-    L_5 = Phi * D_5  # 176
+    L_5 = Phi * D_5  # 144
 
     check("Ex 9.2: e_i = 16", np.isclose(e_i_5, 16.0))
     check("Ex 9.2: D_5 = 80", np.isclose(D_5, 80.0))
-    check("Ex 9.2: L_system = 176", np.isclose(L_5, 176.0))
-    check("Ex 9.2: V_net = -76", np.isclose(E_j - L_5, -76.0))
+    check("Ex 9.2: L_system = 144", np.isclose(L_5, 144.0))
+    check("Ex 9.2: V_net = -44 (net-negative)", np.isclose(E_j - L_5, -44.0))
 
     # Example 9.3: Profitable bully (sigma_A=3, sigma_B=1)
     sigma_A, sigma_B = 3.0, 1.0
@@ -578,13 +639,13 @@ def verify_worked_examples() -> None:
     check("Ex 9.3: p_A = 0.75", np.isclose(p_A, 0.75))
 
     D_bully = 2 * e_bully  # 37.5
-    L_bully = Phi * D_bully  # 82.5
-    V_net_bully = E_j - L_bully  # 17.5
+    L_bully = Phi * D_bully  # 67.5
+    V_net_bully = E_j - L_bully  # 32.5
 
     check("Ex 9.3: D = 37.5", np.isclose(D_bully, 37.5))
-    check("Ex 9.3: L_system = 82.5", np.isclose(L_bully, 82.5))
-    check("Ex 9.3: V_net = 17.5 (barely positive)",
-          np.isclose(V_net_bully, 17.5))
+    check("Ex 9.3: L_system = 67.5", np.isclose(L_bully, 67.5))
+    check("Ex 9.3: V_net = 32.5 (net-positive)",
+          np.isclose(V_net_bully, 32.5))
 
 
 # ---------------------------------------------------------------------------
@@ -671,7 +732,11 @@ def verify_decisive_contests() -> None:
 
     # ---- Net-negativity under budget constraints ----
     # In decisive regime: system loss = Phi * N * e_bar > E_j iff e_bar > E_j/(Phi*N)
-    Phi = 2.2
+    Phi = 1.8
+    # At the baseline Phi=1.8 with N=2 the escalation cap threshold is E_j/3.6.
+    check("Escalation cap: baseline Phi=1.8, N=2 gives threshold e_bar > E_j/3.6",
+          np.isclose(Phi * 2, 3.6) and np.isclose(E_j / (Phi * 2), E_j / 3.6),
+          f"E_j/(Phi*N) = {E_j / (Phi * 2):.4f}")
     for N in [2, 5]:
         e_bar_critical = E_j / (Phi * N)
         # Just above critical: net-negative
@@ -749,23 +814,30 @@ def verify_module() -> None:
     check("Module: asymmetric (150,50) D = 37.5",
           np.isclose(res_asym2.total_dissipation, 37.5))
 
-    # Friction multiplier
+    # Friction multiplier (psi_off, psi_def, kappa)
     Phi = friction_multiplier(0.15, 0.25, 2.0)
-    check("Module: Phi = 2.2", np.isclose(Phi, 2.2))
+    check("Module: Phi = 1.8", np.isclose(Phi, 1.8))
 
-    # System loss
-    L = system_loss(100.0, 2, 2.2)
-    check("Module: L(N=2, Phi=2.2) = 110", np.isclose(L, 110.0))
+    # System loss (Phi-parameterized; fed the corrected baseline Phi = 1.8)
+    L = system_loss(100.0, 2, Phi)
+    check("Module: L(N=2, Phi=1.8) = 90", np.isclose(L, 90.0))
 
     # Net value
-    V = net_system_value(100.0, 2, 2.2)
-    check("Module: V_net = -10", np.isclose(V, -10.0))
+    V = net_system_value(100.0, 2, Phi)
+    check("Module: V_net = +10 (baseline is net-positive at N=2)",
+          np.isclose(V, 10.0))
 
     # Is net-negative
-    check("Module: is_net_negative(2, 2.2) = True", is_net_negative(2, 2.2))
+    check("Module: is_net_negative(2, 1.8) = False (mild regime)",
+          not is_net_negative(2, Phi))
+    check("Module: is_net_negative(3, 1.8) = True (Phi > 3/2 suffices for N>=3)",
+          is_net_negative(3, Phi))
+    check("Module: is_net_negative(2, 2.2) = True (destructive regime)",
+          is_net_negative(2, 2.2))
     check("Module: is_net_negative(2, 1.5) = False", not is_net_negative(2, 1.5))
 
     # Critical N
+    check("Module: N*(1.8) = 3", critical_N(Phi) == 3)
     check("Module: N*(2.2) = 2", critical_N(2.2) == 2)
     check("Module: N*(1.5) = 4", critical_N(1.5) == 4)
     check("Module: N*(1.1) = 12", critical_N(1.1) == 12)
@@ -822,8 +894,8 @@ def verify_interaction_cost_function() -> None:
 
     E_j = 100.0
     N = 5
-    delta_off, delta_def, kappa = 0.15, 0.25, 2.0
-    Phi = 1 + (1 + kappa) * (delta_off + delta_def)
+    psi_off, psi_def, kappa = 0.15, 0.25, 2.0
+    Phi = 1 + kappa * (psi_off + psi_def)  # = 1.8
     phi = 0.5  # some ambient friction
     M = 1000
     E_bar = 10.0
@@ -834,22 +906,29 @@ def verify_interaction_cost_function() -> None:
 
     # Interaction cost components
     contest_diss = e_total  # 80
-    boundary_repair = (1 + kappa) * (delta_off + delta_def) * e_total  # 1.2 * 0.4 * 80 = ... wait
-    # (1 + kappa) = 3, (delta_off + delta_def) = 0.4
-    boundary_repair = (1 + kappa) * (delta_off + delta_def) * e_total  # 3 * 0.4 * 80 = 96
+    # Boundary repair (re-embodiment + surcharge) = kappa * sum_i psi * e_i.
+    # kappa = 2, (psi_off + psi_def) = 0.4  ->  2 * 0.4 * 80 = 64
+    boundary_repair = kappa * (psi_off + psi_def) * e_total  # 64
     friction_tax = phi * M * E_bar  # 0.5 * 1000 * 10 = 5000
 
-    C_total = contest_diss + boundary_repair + friction_tax
-    C_star = Phi * (N - 1) / N * E_j + phi * M * E_bar
+    C_total = contest_diss + boundary_repair + friction_tax  # 80 + 64 + 5000 = 5144
+    C_star = Phi * (N - 1) / N * E_j + phi * M * E_bar  # 144 + 5000 = 5144
 
-    check("C components sum correctly",
-          np.isclose(C_total, contest_diss + boundary_repair + friction_tax))
-    check("C* = Phi*(N-1)/N*E + phi*M*E_bar",
-          np.isclose(C_star, Phi * (N - 1) / N * E_j + phi * M * E_bar),
+    check("C components: 80 contest + 64 repair + 5000 friction",
+          np.isclose(contest_diss, 80.0) and np.isclose(boundary_repair, 64.0)
+          and np.isclose(friction_tax, 5000.0),
+          f"contest={contest_diss}, repair={boundary_repair}, tax={friction_tax}")
+    check("C* = Phi*(N-1)/N*E + phi*M*E_bar = 5144",
+          np.isclose(C_star, 5144.0),
           f"C* = {C_star:.1f}")
-    check("C_total = C*",
-          np.isclose(C_total, C_star),
+    check("C_total = C* = 5144",
+          np.isclose(C_total, C_star) and np.isclose(C_total, 5144.0),
           f"C_total={C_total:.1f}, C*={C_star:.1f}")
+    # The identity holds because contest + repair = e_total*(1 + kappa*psi) = Phi*(N-1)/N*E_j
+    check("contest + repair = Phi*(N-1)/N*E_j = 144",
+          np.isclose(contest_diss + boundary_repair, Phi * (N - 1) / N * E_j)
+          and np.isclose(contest_diss + boundary_repair, 144.0),
+          f"{contest_diss} + {boundary_repair} = {contest_diss + boundary_repair}")
 
 
 # ---------------------------------------------------------------------------

@@ -2,9 +2,8 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{hyperref}
 \usepackage{graphicx}
-\graphicspath{{../../shared/figures/}}
+\graphicspath{{./}}
 \usepackage{natbib}
-\bibliographystyle{unsrtnat}
 \usepackage{doi}
 % \setcitestyle{numbers,super} % Superscript citation numbers (e.g. ¹, ²⁻⁴) — does not support locator notes
 \setcitestyle{numbers,square} % Square brackets around citation numbers (e.g. [1], [2-4]) — math standard
@@ -20,24 +19,32 @@
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{dsfont} % double-struck numerals (\mathds{1} for indicator functions)
-\usepackage{thmtools}
-\declaretheorem[name=Theorem]{theorem}
-\declaretheorem[name=Proposition,sibling=theorem]{proposition}
-\declaretheorem[name=Lemma,sibling=theorem]{lemma}
-\declaretheorem[name=Corollary,sibling=theorem]{corollary}
-\declaretheorem[name=Conjecture,sibling=theorem]{conjecture}
+% thmtools is only needed for the optional \listoftheorems feature. Loading it
+% patches \newtheorem, and thmtools 0.76's patch is incompatible with recent
+% LaTeX kernels (>= 2025) for shared-counter theorems (every sibling raises
+% "Command \c@... already defined"). We therefore load it only when the
+% list-of-theorems feature is actually requested.
+% Theorem-like environments defined with amsthm's native shared-counter syntax
+% (\newtheorem{child}[parent]{Name}). Numbering is grouped by counter without
+% relying on thmtools' sibling mechanism.
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{conjecture}[theorem]{Conjecture}
 
 \theoremstyle{definition}
-\declaretheorem[name=Definition,style=definition]{definition}
-\declaretheorem[name=Axiom,style=definition,sibling=definition]{axiom}
-\declaretheorem[name=Assumption,style=definition,sibling=definition]{assumption}
-\declaretheorem[name=Criterion,style=definition,sibling=definition]{criterion}
-\declaretheorem[name=Example,style=definition,sibling=definition]{example}
+\newtheorem{definition}{Definition}
+\newtheorem{axiom}[definition]{Axiom}
+\newtheorem{assumption}[definition]{Assumption}
+\newtheorem{criterion}[definition]{Criterion}
+\newtheorem{example}[definition]{Example}
 
 \theoremstyle{remark}
-\declaretheorem[name=Remark,style=remark]{remark}
-\declaretheorem[name=Observation,style=remark,sibling=remark]{observation}
-\declaretheorem[name=Property,style=remark,sibling=remark]{property}
+\newtheorem{remark}{Remark}
+\newtheorem{observation}[remark]{Observation}
+\newtheorem{property}[remark]{Property}
 
 % Prevent theorem-like environments from starting near the page bottom.
 \usepackage{etoolbox}
@@ -56,6 +63,10 @@
 \usepackage{array}
 \usepackage{calc}
 \usepackage{caption}
+% General table note: small font, flush-left, below the table (used by some papers).
+\newenvironment{tablenote}
+  {\par\addvspace{2pt}\footnotesize\noindent}
+  {\par\addvspace{4pt}}
 % Pandoc 3.x wraps uncaptioned longtables in \def\LTcaptype{none};
 % this requires a 'none' counter to exist.
 \newcounter{none}
@@ -194,9 +205,6 @@ as partial captures of a single formal structure, derives the social
 contract as a consequence, and reframes rights as the result of
 constraint boundaries rather than entitlements.
 \end{abstract}
-\newpage
-\tableofcontents
-\newpage
 \section{Introduction}\label{introduction}
 
 \subsection{The Open Problem}\label{the-open-problem}
@@ -405,7 +413,7 @@ deriving the payoff matrix from energy budgets
 Theorem's equilibrium selection problem: cooperation emerges as the
 unique efficient Nash Equilibrium (Corollary~\ref{ethics-cor-unique-ne})
 with a numerically computable cooperation threshold
-(\(\delta^* = 0.363\), Theorem~\ref{ethics-thm-cooperation}). The
+(\(\delta^* = 0.431\), Theorem~\ref{ethics-thm-cooperation}). The
 \(N\)-player generalization \citep{TC-V} provides the formal result that
 Ostrom's fieldwork documented empirically.
 
@@ -428,7 +436,7 @@ theory's unconstrained-conflict result \citep{TC-I} establishes that no
 stable allocation for the resource dimension exists under unconstrained
 optimization; where Hobbes required an external sovereign,
 Theorem~\ref{ethics-thm-cooperation} shows cooperation is self-enforcing
-for \(\delta \geq 0.363\). Structural analogues exist in Locke's
+for \(\delta \geq 0.431\). Structural analogues exist in Locke's
 rights-emergence \citep{Locke1689}, Rousseau's welfare-maximizing
 general will \citep{Rousseau1762}, and Rawls's veil of ignorance
 \citep{Rawls1971}, which corresponds here to the Variational Equilibrium
@@ -760,9 +768,9 @@ agents contest a resource (in the broad sense of the scarcity framework,
 §\ref{scarcity-and-collision}) of energy value \(E_R > 0\), each
 choosing to Cooperate (\(C\): accept the constrained allocation) or
 Defect (\(D\): violate the constraint, triggering friction and deception
-costs). Under baseline parameters (\(E_R = 100\), \(\Phi = 2.2\), and
-standard exploitation parameters from \citep{TC-V}), the payoffs (in
-Joules) are:
+costs). Under the destructive-regime parameters (\(\kappa\psi > 1\)) of
+\citep{TC-V} (\(E_R = 100\), \(\Phi = 2.2\)), the payoffs (in Joules)
+are:
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}lll@{}}
@@ -772,22 +780,27 @@ Joules) are:
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-\(A: C\) & \textbf{(48, 48)} & (\(-11.25\), \(78.25\)) \\
-\(A: D\) & (\(78.25\), \(-11.25\)) & \textbf{(\(-5\), \(-5\))} \\
+\(A: C\) & \textbf{(48, 48)} & (\(-10.5\), \(77.5\)) \\
+\(A: D\) & (\(77.5\), \(-10.5\)) & \textbf{(\(-5\), \(-5\))} \\
 \end{longtable}
 }
 
 Mutual defection is net-negative (\(P = -5 < 0\)). Both agents
 \emph{lose} energy; the conflict destroys more value than the resource
-provides. In the abstract Prisoner's Dilemma, \(P > 0\) and mutual
-defection is merely suboptimal. Under physical constraints, mutual
-defection is value-destroying, a thermodynamic form of the condition
-Hobbes \citep{Hobbes1651} described on different grounds.
+provides. Net-negativity is a property of the regime rather than of the
+game form: it holds in the destructive regime (\(\kappa\psi > 1\)), and
+it holds for multi-agent conflict quite generally, since for
+\(N \geq 3\) contestants the net-negativity threshold falls to
+\(\Phi > N/(N-1)\), i.e.~\(\kappa\psi > 1/(N-1)\). In the abstract
+Prisoner's Dilemma, \(P > 0\) and mutual defection is merely suboptimal.
+In the destructive regime, mutual defection is value-destroying, a
+thermodynamic form of the condition Hobbes \citep{Hobbes1651} described
+on different grounds.
 
 \begin{proposition}[Physical Prisoner's Dilemma]
 \label{ethics-prop-physical-pd}
 
-Under the energy-based payoff model with physical constraints, the single-round game satisfies $T > R > P > S$ with $P < 0$, where $T$ is the temptation to defect, $R$ the reward for mutual cooperation, $P$ the penalty for mutual defection, and $S$ the (suckers) payoff for cooperating against a defector. Defection is the unique Nash Equilibrium of the one-shot game, even though mutual cooperation is Pareto-superior. \citep{TC-V}
+Under the energy-based payoff model with physical constraints, the single-round game satisfies $T > R > P > S$, where $T$ is the temptation to defect, $R$ the reward for mutual cooperation, $P$ the penalty for mutual defection, and $S$ the (suckers) payoff for cooperating against a defector; in the destructive regime ($\kappa\psi > 1$), additionally $P < 0$. Defection is the unique Nash Equilibrium of the one-shot game, even though mutual cooperation is Pareto-superior. \citep{TC-V}
 \end{proposition}
 
 The one-shot result is a trap. Each agent's best-response calculation
@@ -796,7 +809,7 @@ other cooperates; \(P > S\) if the other defects). Both agents follow
 this logic, and both arrive at \((D, D)\) with payoff \(P = -5\): every
 participant loses energy in absolute terms. Neither agent can
 unilaterally escape, since switching to \(C\) while the opponent defects
-yields the sucker's payoff \(S = -11.25\). Resolution requires the
+yields the sucker's payoff \(S = -10.5\). Resolution requires the
 repeated interaction structure that follows.
 
 In the repeated game, agents interact over indefinite horizons. The
@@ -809,19 +822,20 @@ observable quantities: survival probability and time-preference rate
 \begin{theorem}[Cooperation as Nash Equilibrium]
 \label{ethics-thm-cooperation}
 
-In the infinitely repeated energy-based game, cooperation is sustainable as a Nash Equilibrium if and only if the discount factor exceeds a critical threshold: $\delta \geq \delta^* = 0.363$. \citep{TC-V}
+In the infinitely repeated energy-based game, cooperation is sustainable as a Nash Equilibrium if and only if the discount factor exceeds a critical threshold: $\delta \geq \delta^*$, where $\delta^*$ is the energy-denominated cooperation threshold derived in \citep{TC-V}.
 \end{theorem}
 
-A discount factor above 0.363 is sufficient to sustain cooperation. The
-threshold is low because mutual defection is self-destructive
-(\(P < 0\)), making the cost of short-horizon behavior large relative to
-any single-round gain. No assumption of altruism or far-sightedness is
-required; any agent whose time-horizon satisfies
-\(\delta \geq \delta^*\) cooperates at equilibrium. Moreover, 0.363 is
-the baseline under idealized pairwise conditions. Incorporating network
-friction effects, multi-agent dynamics, and stochastic environmental
-costs each introduces additional penalties for defection, lowering the
-threshold further \citep{TC-V}.
+This threshold sits well below the canonical value of the abstract
+Prisoner's Dilemma. It is low because energy-denominated payoffs make
+the punishment for defection physically costly --- contest dissipation
+and boundary damage erode the mutual-defection payoff --- so the cost of
+short-horizon behavior is large relative to any single-round gain. No
+assumption of altruism or far-sightedness is required; any agent whose
+time-horizon satisfies \(\delta \geq \delta^*\) cooperates at
+equilibrium. The threshold is computed under idealized pairwise
+conditions; incorporating network friction, multi-agent dynamics, and
+stochastic environmental costs each introduces additional penalties for
+defection, lowering the threshold further \citep{TC-V}.
 
 \begin{corollary}[Cooperation as the Unique Efficient Nash Equilibrium]
 \label{ethics-cor-unique-ne}
@@ -833,14 +847,18 @@ This resolves the Folk Theorem's indeterminacy \citep{Fudenberg1986}.
 When payoffs are denominated in energy with thermodynamic friction,
 cooperation is not merely one equilibrium among many; it is the only
 stable, efficient one. Physics selects the equilibrium that abstract
-game theory cannot. The result scales: in the \(N\)-player public goods
-formulation, cooperation remains a Nash Equilibrium as the number of
-agents grows without bound, with the critical threshold converging to
-\(\delta_N^* \to 0.4\) as \(N \to \infty\) under the baseline parameters
-of \citep{TC-V}. Ostrom \citep{Ostrom1990} documented empirically that
-large-group cooperation persists without central authority; the
-\(N\)-player theorem provides the formal proof that this observation is
-not anomalous but expected.
+game theory cannot. The general result of \citep{TC-V} is the
+\(N\)-player public-goods formulation, of which the pairwise matrix
+above is the calibration illustration: there the cooperation threshold
+\(\delta_N^* = c(N-\alpha)/[\alpha(N-1)c + N\phi_0\bar{E}]\) and the
+cooperative welfare \(SW^{CC} = N(\alpha-1)c\) are independent of the
+friction parameters \(\Phi\), \(\kappa\), and \(\psi\), cooperation
+remains a Nash Equilibrium as the number of agents grows without bound,
+and the critical threshold converges to \(\delta_N^* \to 0.4\) as
+\(N \to \infty\) under the baseline parameters of \citep{TC-V}. Ostrom
+\citep{Ostrom1990} documented empirically that large-group cooperation
+persists without central authority; the \(N\)-player theorem provides
+the formal proof that this observation is not anomalous but expected.
 
 Additional results reinforce the stability of the cooperative
 equilibrium:
@@ -858,13 +876,13 @@ At sufficient network friction, even a single defection's short-term profit is c
 \end{theorem}
 
 Defection in the physical game is not merely suboptimal but strictly
-loss-making at every scale: mutual defection yields negative absolute
-returns for both agents (\(P = -5 < 0\)), a single defector in a
-cooperative population earns less than cooperators, and even a one-time
-defection followed by return to cooperation is net-negative over the
-agent's lifetime. Unlike the abstract Prisoner's Dilemma, where
-defection at least yields a positive payoff, defection here has no
-sustainable form.
+loss-making at every scale: in the destructive regime mutual defection
+yields negative absolute returns for both agents (\(P = -5 < 0\)), a
+single defector in a cooperative population earns less than cooperators,
+and even a one-time defection followed by return to cooperation is
+net-negative over the agent's lifetime. Whereas milder-regime Prisoner's
+Dilemmas retain a positive mutual-defection payoff (\(P > 0\)), in the
+destructive regime defection has no sustainable form.
 
 \subsection{The Irreplaceability of Accumulated
 Negentropy}\label{the-irreplaceability-of-accumulated-negentropy}
@@ -943,7 +961,7 @@ energy is maximized.
 \begin{theorem}[Stability of the Coexistence Attractor]
 \label{ethics-thm-coexistence}
 
-The coexistence attractor is globally stable. Agents displaced in either direction experience restoring forces that return them to the equilibrium. \citep{TC-VI}
+For agents above the critical integrity $B_c$, the coexistence attractor is stable: agents displaced in either direction experience restoring forces that return them to the equilibrium. In the coupled system with health-dependent mobility, the healthy equilibrium is locally stable; below $B_c$, no restoring force exists. \citep{TC-VI}
 \end{theorem}
 
 \begin{theorem}[Freedom Bandwidth]
@@ -961,19 +979,24 @@ to friction costs that erode its boundaries.
 \begin{theorem}[Irreversibility of Dissolution]
 \label{ethics-thm-dissolution}
 
-An agent pushed below the boundary dissolution threshold experiences strictly declining boundary integrity, reaching zero in finite time. Crossing the dissolution threshold is irreversible. \citep{TC-VI}
+Below a critical integrity $B_c$ (the basin of no return, `thm-basin-of-no-return` in \citep{TC-VI}), collapse is unconditional along every trajectory, regardless of the path: boundary integrity declines to the collapse floor $B_{\min} > 0$, which is absorbing; reaching it is dissolution, and the agent ceases to exist. Crossing the dissolution radius $r_d$ drives the agent into this basin under the stated conditions: unconditionally if $r_d \geq r^*$, and otherwise once penetration is sufficiently deep or prolonged. \citep{TC-VI}
 \end{theorem}
 
 Dissolution is the formal analogue of the poverty trap, the failed
-state, and ecological collapse in human and biological systems: a point
-beyond which recovery requires external intervention. The
-irreversibility is what gives the cooperative equilibrium its structural
-significance; the consequences of crossing this threshold are permanent.
+state, and ecological collapse in human and biological systems. Below
+the critical integrity \(B_c\), no restoring force exists: mobility
+itself dies with health (\(\mu(B_i) = \mu_0 \zeta(B_i) \to 0\)), so the
+agent cannot generate the movement that recovery would require, and
+collapse to \(B_{\min}\) follows along every trajectory
+(\texttt{thm-basin-of-no-return} in \citep{TC-VI}). Recovery is possible
+only above \(B_c\). This irreversibility is what gives the cooperative
+equilibrium its structural significance; the consequences of entering
+the basin of no return are permanent.
 
 \begin{corollary}[Cascade Collapse]
 \label{ethics-cor-cascade}
 
-If a high-energy center is destroyed, all agents within its Coexistence Band simultaneously lose viability. \citep{TC-VI}
+If a high-energy center is destroyed, all agents within its Coexistence Band simultaneously lose viability with respect to that center. \citep{TC-VI}
 \end{corollary}
 
 Excessive concentration in a single center therefore makes the entire
@@ -1682,9 +1705,12 @@ integrity) and no entitlements to any resource; its access depends
 entirely on the structure of the surrounding population. Without mutual
 constraints, there is no stable allocation
 (§\ref{constraints-and-rights}); the unconstrained state is Hobbes's
-war, and it is net-negative for everyone (\(P < 0\),
-§\ref{cooperation-as-the-unique-efficient-equilibrium}). Constraints are
-not impositions on pre-existing freedoms; they are the structural
+war, and whenever friction exceeds the net-negativity threshold
+\(\Phi > N/(N-1)\) (satisfied for \(N \geq 3\) conflict even at mild
+damage, and for two agents in the destructive regime \(\kappa\psi > 1\))
+it is net-negative for everyone
+(§\ref{cooperation-as-the-unique-efficient-equilibrium}). Constraints
+are not impositions on pre-existing freedoms; they are the structural
 features that \emph{create} the feasible region. For agents in a shared
 finite-resource environment, freedom is not an inherent property but an
 emergent consequence of the mutual constraints that all agents impose on
@@ -1893,10 +1919,10 @@ Falsified If\ldots{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-Cooperation is sustainable for agents with \(\delta \geq 0.363\) in
+Cooperation is sustainable for agents with \(\delta \geq \delta^*\) in
 energy-denominated games & Theorem~\ref{ethics-thm-cooperation} &
 Cooperation in physically costly repeated interactions consistently
-requires discount factors above 0.5 \\
+requires discount factors well above 0.6 \\
 A single defection's net gain is erased by accumulated friction within
 $\sim$20 periods & Theorem~\ref{ethics-thm-profit-erasure} & Defectors
 in cost-coupled groups sustain net-positive long-run payoffs despite
@@ -2341,10 +2367,11 @@ scalar \(G \in (-\infty, 1]\) with the following properties:
   \(G < 1\) for all \(\mathbf{x} \neq \mathbf{x}^*\): every departure
   from the equilibrium reduces goodness.
 \item
-  \(G\) can be negative: configurations involving mutual defection
-  destroy more value than they produce (\(P < 0\),
-  Proposition~\ref{ethics-prop-physical-pd}), yielding \(W < 0\) and
-  therefore \(G < 0\).
+  \(G\) can be negative: in the destructive regime (\(\kappa\psi > 1\)),
+  and in \(N \geq 3\) conflict (\(\Phi > N/(N-1)\)), configurations
+  involving mutual defection destroy more value than they produce
+  (\(P < 0\), Proposition~\ref{ethics-prop-physical-pd}), yielding
+  \(W < 0\) and therefore \(G < 0\).
 \end{enumerate}
 
 Good is therefore a gradable, measurable, context-dependent scalar. The
@@ -2479,5 +2506,628 @@ active boundary constraints, and both are computable in principle from
 the physical quantities the framework tracks.
 
 \addcontentsline{toc}{section}{References}
-\bibliography{../../shared/main}
+\begin{thebibliography}{94}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Hume(2000)]{Hume1739}
+David Hume.
+\newblock \emph{A Treatise of Human Nature}.
+\newblock Oxford University Press, 2000.
+\newblock Original work published 1739.
+
+\bibitem[Millikan(1984)]{Millikan1984}
+Ruth~Garrett Millikan.
+\newblock \emph{Language, Thought, and Other Biological Categories: New
+  Foundations for Realism}.
+\newblock MIT Press, 1984.
+
+\bibitem[Dennett(1987)]{Dennett1987}
+Daniel~C. Dennett.
+\newblock \emph{The Intentional Stance}.
+\newblock MIT Press, 1987.
+
+\bibitem[Lostracco(2026{\natexlab{a}})]{TC-I}
+Keith Lostracco.
+\newblock Thermodynamics of cooperation: Necessary constraints,
+  2026{\natexlab{a}}.
+\newblock URL \url{https://doi.org/10.5281/zenodo.19635523}.
+\newblock \doi{10.5281/zenodo.19635523}.
+
+\bibitem[Lostracco(2026{\natexlab{b}})]{TC-II}
+Keith Lostracco.
+\newblock Thermodynamics of cooperation: Strategic entropy injection,
+  2026{\natexlab{b}}.
+\newblock URL \url{https://doi.org/10.5281/zenodo.19635814}.
+\newblock \doi{10.5281/zenodo.19635814}.
+
+\bibitem[Lostracco(2026{\natexlab{c}})]{TC-III}
+Keith Lostracco.
+\newblock Thermodynamics of cooperation: Accumulated negentropy,
+  2026{\natexlab{c}}.
+\newblock URL \url{https://doi.org/10.5281/zenodo.19635836}.
+\newblock \doi{10.5281/zenodo.19635836}.
+
+\bibitem[Lostracco(2026{\natexlab{d}})]{TC-IV}
+Keith Lostracco.
+\newblock Thermodynamics of cooperation: Thermodynamic friction,
+  2026{\natexlab{d}}.
+\newblock URL \url{https://doi.org/10.5281/zenodo.19635850}.
+\newblock \doi{10.5281/zenodo.19635850}.
+
+\bibitem[Lostracco(2026{\natexlab{e}})]{TC-V}
+Keith Lostracco.
+\newblock Thermodynamics of cooperation: Cooperative equilibrium,
+  2026{\natexlab{e}}.
+\newblock URL \url{https://doi.org/10.5281/zenodo.19635856}.
+\newblock \doi{10.5281/zenodo.19635856}.
+
+\bibitem[Lostracco(2026{\natexlab{f}})]{TC-VI}
+Keith Lostracco.
+\newblock Thermodynamics of cooperation: Value dynamics, 2026{\natexlab{f}}.
+\newblock URL \url{https://doi.org/10.5281/zenodo.19635865}.
+\newblock \doi{10.5281/zenodo.19635865}.
+
+\bibitem[Schr{\"o}dinger(1944)]{Schrodinger1944}
+Erwin Schr{\"o}dinger.
+\newblock \emph{What Is Life? The Physical Aspect of the Living Cell}.
+\newblock Cambridge University Press, 1944.
+
+\bibitem[Prigogine(1978)]{Prigogine1978}
+Ilya Prigogine.
+\newblock Time, structure, and fluctuations.
+\newblock \emph{Science}, 201\penalty0 (4358):\penalty0 777--785, 1978.
+\newblock \doi{10.1126/science.201.4358.777}.
+
+\bibitem[Nicolis and Prigogine(1977)]{Nicolis1977}
+Gr{\'e}goire Nicolis and Ilya Prigogine.
+\newblock \emph{Self-Organization in Nonequilibrium Systems: From Dissipative
+  Structures to Order Through Fluctuations}.
+\newblock Wiley, 1977.
+
+\bibitem[England(2013)]{England2013}
+Jeremy~L. England.
+\newblock Statistical physics of self-replication.
+\newblock \emph{The Journal of Chemical Physics}, 139\penalty0 (12):\penalty0
+  121923, 2013.
+\newblock \doi{10.1063/1.4818538}.
+
+\bibitem[Friston(2006)]{Friston2006}
+Karl Friston.
+\newblock A free energy principle for the brain.
+\newblock \emph{Journal of Physiology-Paris}, 100\penalty0 (1--3):\penalty0
+  70--87, 2006.
+\newblock \doi{10.1016/j.jphysparis.2006.10.001}.
+
+\bibitem[Friston(2010)]{Friston2010}
+Karl Friston.
+\newblock The free-energy principle: A unified brain theory?
+\newblock \emph{Nature Reviews Neuroscience}, 11\penalty0 (2):\penalty0
+  127--138, 2010.
+\newblock \doi{10.1038/nrn2787}.
+
+\bibitem[Maturana and Varela(1980)]{Maturana1980}
+Humberto~R. Maturana and Francisco~J. Varela.
+\newblock \emph{Autopoiesis and Cognition: The Realization of the Living}.
+\newblock D. Reidel, 1980.
+\newblock Original work published 1972.
+
+\bibitem[Shannon(1948)]{Shannon1948}
+Claude~E. Shannon.
+\newblock A mathematical theory of communication.
+\newblock \emph{The Bell System Technical Journal}, 27\penalty0 (3):\penalty0
+  379--423, 1948.
+\newblock \doi{10.1002/j.1538-7305.1948.tb01338.x}.
+
+\bibitem[Szilard(1929)]{Szilard1929}
+Leo Szilard.
+\newblock {\"U}ber die {Entropieverminderung} in einem thermodynamischen
+  {System} bei {Eingriffen} intelligenter {Wesen}.
+\newblock \emph{Zeitschrift f{\"u}r Physik}, 53\penalty0 (11--12):\penalty0
+  840--856, 1929.
+\newblock \doi{10.1007/BF01341281}.
+
+\bibitem[Landauer(1961)]{Landauer1961}
+Rolf Landauer.
+\newblock Irreversibility and heat generation in the computing process.
+\newblock \emph{IBM Journal of Research and Development}, 5\penalty0
+  (3):\penalty0 183--191, 1961.
+\newblock \doi{10.1147/rd.53.0183}.
+
+\bibitem[Bennett(1973)]{Bennett1973}
+Charles~H. Bennett.
+\newblock Logical reversibility of computation.
+\newblock \emph{IBM Journal of Research and Development}, 17\penalty0
+  (6):\penalty0 525--532, 1973.
+\newblock \doi{10.1147/rd.176.0525}.
+
+\bibitem[Bennett(1982)]{Bennett1982}
+Charles~H. Bennett.
+\newblock The thermodynamics of computation---a review.
+\newblock \emph{International Journal of Theoretical Physics}, 21\penalty0
+  (12):\penalty0 905--940, 1982.
+\newblock \doi{10.1007/BF02084158}.
+
+\bibitem[Adami(2004)]{Adami2004}
+Christoph Adami.
+\newblock Information theory in molecular biology.
+\newblock \emph{Physics of Life Reviews}, 1\penalty0 (1):\penalty0 3--22, 2004.
+\newblock \doi{10.1016/j.plrev.2004.01.002}.
+
+\bibitem[Von~Neumann and Morgenstern(1944)]{VonNeumann1944}
+John Von~Neumann and Oskar Morgenstern.
+\newblock \emph{Theory of Games and Economic Behavior}.
+\newblock Princeton University Press, 1944.
+
+\bibitem[Nash(1950)]{Nash1950}
+John~F. Nash.
+\newblock Equilibrium points in {N}-person games.
+\newblock \emph{Proceedings of the National Academy of Sciences}, 36\penalty0
+  (1):\penalty0 48--49, 1950.
+\newblock \doi{10.1073/pnas.36.1.48}.
+
+\bibitem[Nash(1951)]{Nash1951}
+John~F. Nash.
+\newblock Non-cooperative games.
+\newblock \emph{Annals of Mathematics}, 54\penalty0 (2):\penalty0 286--295,
+  1951.
+\newblock \doi{10.2307/1969529}.
+
+\bibitem[Fudenberg and Maskin(1986)]{Fudenberg1986}
+Drew Fudenberg and Eric Maskin.
+\newblock The folk theorem in repeated games with discounting or with
+  incomplete information.
+\newblock \emph{Econometrica}, 54\penalty0 (3):\penalty0 533--554, 1986.
+\newblock \doi{10.2307/1911307}.
+
+\bibitem[Maynard~Smith and Price(1973)]{MaynardSmith1973}
+John Maynard~Smith and George~R. Price.
+\newblock The logic of animal conflict.
+\newblock \emph{Nature}, 246\penalty0 (5427):\penalty0 15--18, 1973.
+\newblock \doi{10.1038/246015a0}.
+
+\bibitem[Hamilton(1964)]{Hamilton1964a}
+William~D. Hamilton.
+\newblock The genetical evolution of social behaviour. {I}.
+\newblock \emph{Journal of Theoretical Biology}, 7\penalty0 (1):\penalty0
+  1--16, 1964.
+\newblock \doi{10.1016/0022-5193(64)90038-4}.
+
+\bibitem[Axelrod(1984)]{Axelrod1984}
+Robert Axelrod.
+\newblock \emph{The Evolution of Cooperation}.
+\newblock Basic Books, 1984.
+
+\bibitem[Weibull(1995)]{Weibull1995}
+J{\"o}rgen~W. Weibull.
+\newblock \emph{Evolutionary Game Theory}.
+\newblock MIT Press, 1995.
+
+\bibitem[Georgescu-Roegen(1971)]{GeorgescuRoegen1971}
+Nicholas Georgescu-Roegen.
+\newblock \emph{The Entropy Law and the Economic Process}.
+\newblock Harvard University Press, 1971.
+
+\bibitem[Odum(1971)]{Odum1971}
+Howard~T. Odum.
+\newblock \emph{Environment, Power, and Society}.
+\newblock Wiley-Interscience, 1971.
+
+\bibitem[Ostrom(1990)]{Ostrom1990}
+Elinor Ostrom.
+\newblock \emph{Governing the Commons: The Evolution of Institutions for
+  Collective Action}.
+\newblock Cambridge University Press, 1990.
+
+\bibitem[Ostrom(2005)]{Ostrom2005}
+Elinor Ostrom.
+\newblock \emph{Understanding Institutional Diversity}.
+\newblock Princeton University Press, 2005.
+
+\bibitem[Hardin(1968)]{Hardin1968}
+Garrett Hardin.
+\newblock The tragedy of the commons.
+\newblock \emph{Science}, 162\penalty0 (3859):\penalty0 1243--1248, 1968.
+\newblock \doi{10.1126/science.162.3859.1243}.
+
+\bibitem[Spinoza(1677)]{Spinoza1677}
+Baruch Spinoza.
+\newblock \emph{Ethica ordine geometrico demonstrata}.
+\newblock Jan Rieuwertsz, Amsterdam, 1677.
+\newblock Published posthumously in \emph{Opera Posthuma}.
+
+\bibitem[Hobbes(1651)]{Hobbes1651}
+Thomas Hobbes.
+\newblock \emph{Leviathan, or The Matter, Forme, \& Power of a Common-Wealth
+  Ecclesiasticall and Civill}.
+\newblock Andrew Crooke, 1651.
+
+\bibitem[Locke(1689)]{Locke1689}
+John Locke.
+\newblock \emph{Two Treatises of Government}.
+\newblock Awnsham Churchill, 1689.
+
+\bibitem[Rousseau(1762)]{Rousseau1762}
+Jean-Jacques Rousseau.
+\newblock \emph{Du contrat social; ou, principes du droit politique}.
+\newblock Marc Michel Rey, 1762.
+
+\bibitem[Rawls(1971)]{Rawls1971}
+John Rawls.
+\newblock \emph{A Theory of Justice}.
+\newblock Harvard University Press, 1971.
+
+\bibitem[Moore(1903)]{Moore1903}
+George~Edward Moore.
+\newblock \emph{Principia Ethica}.
+\newblock Cambridge University Press, 1903.
+
+\bibitem[Helv{\'e}tius(1758)]{Helvetius1758}
+Claude-Adrien Helv{\'e}tius.
+\newblock \emph{De l'esprit}.
+\newblock Durand, 1758.
+
+\bibitem[Bazargan(1956)]{Bazargan1956}
+Mehdi Bazargan.
+\newblock \emph{Eshq va Parastesh ya Thermodynamic-e Ensan [Love and Worship,
+  or The Thermodynamics of Man]}.
+\newblock 1956.
+\newblock In Persian. Discussed in \cite{Kurzman1998}.
+
+\bibitem[Kurzman(1998)]{Kurzman1998}
+Charles Kurzman.
+\newblock Liberal islam, 1998.
+\newblock URL \url{https://api.semanticscholar.org/CorpusID:211128980}.
+
+\bibitem[Haidt(2003)]{Haidt2003}
+Jonathan Haidt.
+\newblock The moral emotions.
+\newblock In Scherer K.~R. Davidson R.~J. and Goldsmith~H. H., editors,
+  \emph{Handbook of Affective Sciences}, pages 852--870. Oxford University
+  Press, 2003.
+
+\bibitem[Haidt and Kesebir(2010)]{Haidt2010}
+Jonathan Haidt and Selin Kesebir.
+\newblock Morality.
+\newblock In Susan~T. Fiske, Daniel~T. Gilbert, and Gardner Lindzey, editors,
+  \emph{Handbook of Social Psychology}, pages 797--832. Wiley, 5th edition,
+  2010.
+\newblock \doi{10.1002/9780470561119.socpsy002022}.
+
+\bibitem[Curry et~al.(2019)Curry, Mullins, and Whitehouse]{Curry2019}
+Oliver~Scott Curry, Daniel~Austin Mullins, and Harvey Whitehouse.
+\newblock Is it good to cooperate?: Testing the theory of
+  morality-as-cooperation in 60 societies.
+\newblock \emph{Current Anthropology}, 60\penalty0 (1):\penalty0 47--69, 2019.
+\newblock \doi{10.1086/701478}.
+\newblock URL \url{https://doi.org/10.1086/701478}.
+
+\bibitem[Clausius(1865)]{Clausius1865}
+Rudolf Clausius.
+\newblock Ueber verschiedene f{\"u}r die {Anwendung} bequeme {Formen} der
+  {Hauptgleichungen} der mechanischen {W{\"a}rmetheorie}.
+\newblock \emph{Annalen der Physik und Chemie}, 201\penalty0 (7):\penalty0
+  353--400, 1865.
+\newblock \doi{10.1002/andp.18652010702}.
+
+\bibitem[Boltzmann(1877)]{Boltzmann1877}
+Ludwig Boltzmann.
+\newblock {\"U}ber die {Beziehung} zwischen dem zweiten {Hauptsatze} der
+  mechanischen {W{\"a}rmetheorie} und der {Wahrscheinlichkeitsrechnung}
+  respektive den {S{\"a}tzen} {\"u}ber das {W{\"a}rmegleichgewicht}.
+\newblock \emph{Wiener Berichte}, 76:\penalty0 373--435, 1877.
+
+\bibitem[Planck(1900)]{Planck1900}
+Max Planck.
+\newblock Zur {Theorie} des {Gesetzes} der {Energieverteilung} im
+  {Normalspectrum}.
+\newblock \emph{Verhandlungen der Deutschen Physikalischen Gesellschaft},
+  2:\penalty0 237--245, 1900.
+
+\bibitem[Pearl(2000)]{Pearl2000}
+Judea Pearl.
+\newblock \emph{Causality: Models, Reasoning, and Inference}.
+\newblock Cambridge University Press, 2000.
+
+\bibitem[Friston(2013)]{Friston2013}
+Karl Friston.
+\newblock Life as we know it.
+\newblock \emph{Journal of the Royal Society Interface}, 10\penalty0
+  (86):\penalty0 20130475, 2013.
+\newblock \doi{10.1098/rsif.2013.0475}.
+
+\bibitem[Gigerenzer et~al.(1999)Gigerenzer, Todd, and {ABC Research
+  Group}]{Gigerenzer1999}
+Gerd Gigerenzer, Peter~M. Todd, and {ABC Research Group}.
+\newblock \emph{Simple Heuristics That Make Us Smart}.
+\newblock Oxford University Press, 1999.
+
+\bibitem[Gigerenzer and Gaissmaier(2011)]{GigerenzerGaissmaier2011}
+Gerd Gigerenzer and Wolfgang Gaissmaier.
+\newblock Heuristic decision making.
+\newblock \emph{Annual Review of Psychology}, 62:\penalty0 451--482, 2011.
+\newblock \doi{10.1146/annurev-psych-120709-145346}.
+
+\bibitem[Frank(1988)]{Frank1988}
+Robert~H. Frank.
+\newblock \emph{Passions Within Reason: The Strategic Role of the Emotions}.
+\newblock W. W. Norton \& Co., 1988.
+
+\bibitem[Gigerenzer(2010)]{Gigerenzer2010}
+Gerd Gigerenzer.
+\newblock Moral satisficing: Rethinking moral behavior as bounded rationality.
+\newblock \emph{Topics in Cognitive Science}, 2\penalty0 (3):\penalty0
+  528--554, 2010.
+\newblock \doi{10.1111/j.1756-8765.2010.01094.x}.
+
+\bibitem[Damasio(1994)]{Damasio1994}
+Antonio~R. Damasio.
+\newblock \emph{Descartes' Error: Emotion, Reason, and the Human Brain}.
+\newblock G. P. Putnam's Sons, 1994.
+
+\bibitem[Bechara et~al.(1997)Bechara, Damasio, Tranel, and
+  Damasio]{Bechara1997}
+Antoine Bechara, Hanna Damasio, Daniel Tranel, and Antonio~R. Damasio.
+\newblock Deciding advantageously before knowing the advantageous strategy.
+\newblock \emph{Science}, 275\penalty0 (5304):\penalty0 1293--1295, 1997.
+\newblock \doi{10.1126/science.275.5304.1293}.
+
+\bibitem[Bechara and Damasio(2005)]{BechaDamasio2005}
+Antoine Bechara and Antonio~R. Damasio.
+\newblock The somatic marker hypothesis: A neural theory of economic decision.
+\newblock \emph{Games and Economic Behavior}, 52\penalty0 (2):\penalty0
+  336--372, 2005.
+\newblock \doi{10.1016/j.geb.2004.06.010}.
+
+\bibitem[Boyd and Richerson(1985)]{BoydRicherson1985}
+Robert Boyd and Peter~J. Richerson.
+\newblock \emph{Culture and the Evolutionary Process}.
+\newblock University of Chicago Press, 1985.
+
+\bibitem[Henrich(2015)]{Henrich2015SOS}
+Joseph Henrich.
+\newblock \emph{The Secret of Our Success: How Culture Is Driving Human
+  Evolution, Domesticating Our Species, and Making Us Smarter}.
+\newblock Princeton University Press, Princeton, NJ, 2015.
+\newblock ISBN 9780691166858.
+
+\bibitem[Haidt(2012)]{Haidt2012}
+Jonathan Haidt.
+\newblock \emph{The Righteous Mind: Why Good People Are Divided by Politics and
+  Religion}.
+\newblock Knopf Doubleday Publishing Group, 2012.
+
+\bibitem[Dennett(1995)]{Dennett1995}
+Daniel~C. Dennett.
+\newblock \emph{Darwin's Dangerous Idea: Evolution and the Meanings of Life}.
+\newblock Simon \& Schuster, 1995.
+
+\bibitem[Foot(2001)]{Foot2001}
+Philippa Foot.
+\newblock \emph{Natural Goodness}.
+\newblock Oxford University Press, 2001.
+
+\bibitem[Hursthouse(1999)]{Hursthouse1999}
+Rosalind Hursthouse.
+\newblock \emph{On Virtue Ethics}.
+\newblock Oxford University Press, 1999.
+
+\bibitem[Lutz and Lenman(2024)]{Lutz2024}
+Matthew Lutz and James Lenman.
+\newblock Moral naturalism.
+\newblock In Edward~N. Zalta and Uri Nodelman, editors, \emph{The {Stanford}
+  Encyclopedia of Philosophy}. Stanford University, summer 2024 edition, 2024.
+\newblock URL
+  \url{https://plato.stanford.edu/archives/sum2024/entries/naturalism-moral/}.
+
+\bibitem[Searle(1964)]{Searle1964}
+John~R. Searle.
+\newblock How to derive ``ought'' from ``is''.
+\newblock \emph{The Philosophical Review}, 73\penalty0 (1):\penalty0 43--58,
+  1964.
+\newblock \doi{10.2307/2183201}.
+
+\bibitem[Daskalakis et~al.(2009)Daskalakis, Goldberg, and
+  Papadimitriou]{Daskalakis2009}
+Constantinos Daskalakis, Paul~W. Goldberg, and Christos~H. Papadimitriou.
+\newblock The complexity of computing a nash equilibrium.
+\newblock \emph{Communications of the ACM}, 52\penalty0 (2):\penalty0 89--97,
+  2009.
+\newblock \doi{10.1145/1461928.1461951}.
+
+\bibitem[Faisal et~al.(2008)Faisal, Selen, and Wolpert]{FaiSelWol2008}
+A.~Aldo Faisal, Luc P.~J. Selen, and Daniel~M. Wolpert.
+\newblock Noise in the nervous system.
+\newblock \emph{Nature Reviews Neuroscience}, 9\penalty0 (4):\penalty0
+  292--303, 2008.
+\newblock \doi{10.1038/nrn2258}.
+
+\bibitem[Tooby and Cosmides(1992)]{CosmidesTooby1992}
+John Tooby and Leda Cosmides.
+\newblock The psychological foundations of culture.
+\newblock In Jerome~H. Barkow, Leda Cosmides, and John Tooby, editors,
+  \emph{The Adapted Mind: Evolutionary Psychology and the Generation of
+  Culture}, pages 19--136. Oxford University Press, 1992.
+
+\bibitem[Cosmides and Tooby(2013)]{CosmidesTooby2013}
+Leda Cosmides and John Tooby.
+\newblock Evolutionary psychology: New perspectives on cognition and
+  motivation.
+\newblock \emph{Annual Review of Psychology}, 64:\penalty0 201--229, 2013.
+\newblock \doi{10.1146/annurev.psych.121208.131628}.
+
+\bibitem[Kirchhoff et~al.(2018)Kirchhoff, Parr, Palacios, Friston, and
+  Kiverstein]{KirchhoffFriston2018}
+Michael Kirchhoff, Thomas Parr, Ensor Palacios, Karl Friston, and Julian
+  Kiverstein.
+\newblock The {Markov} blankets of life: autonomy, active inference and the
+  free energy principle.
+\newblock \emph{Journal of the Royal Society Interface}, 15\penalty0
+  (138):\penalty0 20170792, 2018.
+\newblock \doi{10.1098/rsif.2017.0792}.
+
+\bibitem[Elmore(2007)]{Elmore2007}
+Susan Elmore.
+\newblock Apoptosis: A review of programmed cell death.
+\newblock \emph{Toxicologic Pathology}, 35\penalty0 (4):\penalty0 495--516,
+  2007.
+\newblock \doi{10.1080/01926230701320337}.
+
+\bibitem[Rizzolatti and Craighero(2004)]{Rizzolatti2004}
+Giacomo Rizzolatti and Laila Craighero.
+\newblock The mirror-neuron system.
+\newblock \emph{Annual Review of Neuroscience}, 27:\penalty0 169--192, 2004.
+\newblock \doi{10.1146/annurev.neuro.27.070203.144230}.
+
+\bibitem[de~Waal(2008)]{deWaal2008}
+Frans B.~M. de~Waal.
+\newblock Putting the altruism back into altruism: The evolution of empathy.
+\newblock \emph{Annual Review of Psychology}, 59:\penalty0 279--300, 2008.
+\newblock \doi{10.1146/annurev.psych.59.103006.093625}.
+
+\bibitem[Brosnan and de~Waal(2003)]{BrosnanDeWaal2003}
+Sarah~F. Brosnan and Frans B.~M. de~Waal.
+\newblock Monkeys reject unequal pay.
+\newblock \emph{Nature}, 425\penalty0 (6955):\penalty0 297--299, 2003.
+\newblock \doi{10.1038/nature01963}.
+
+\bibitem[Proctor et~al.(2013)Proctor, Williamson, de~Waal, and
+  Brosnan]{ProctorEtAl2013}
+Darby Proctor, Rebecca~A. Williamson, Frans B.~M. de~Waal, and Sarah~F.
+  Brosnan.
+\newblock Chimpanzees play the ultimatum game.
+\newblock \emph{Proceedings of the National Academy of Sciences}, 110\penalty0
+  (6):\penalty0 2070--2075, 2013.
+\newblock \doi{10.1073/pnas.1220806110}.
+
+\bibitem[de~Waal(2006)]{deWaal2006}
+Frans B.~M. de~Waal.
+\newblock \emph{Primates and Philosophers: How Morality Evolved}.
+\newblock Princeton University Press, 2006.
+
+\bibitem[Wilson and Wilson(2007)]{WilsonWilson2007}
+David~Sloan Wilson and Edward~O. Wilson.
+\newblock Rethinking the theoretical foundation of sociobiology.
+\newblock \emph{The Quarterly Review of Biology}, 82\penalty0 (4):\penalty0
+  327--348, 2007.
+\newblock \doi{10.1086/522809}.
+
+\bibitem[Sober and Wilson(1998)]{SoberWilson1998}
+Elliott Sober and David~Sloan Wilson.
+\newblock \emph{Unto Others: The Evolution and Psychology of Unselfish
+  Behavior}.
+\newblock Harvard University Press, 1998.
+
+\bibitem[Spencer(1864)]{Spencer1864}
+Herbert Spencer.
+\newblock \emph{The Principles of Biology}, volume~1.
+\newblock Williams and Norgate, 1864.
+
+\bibitem[Hofstadter(1944)]{Hofstadter1944}
+Richard Hofstadter.
+\newblock \emph{Social {Darwinism} in {American} Thought}.
+\newblock University of Pennsylvania Press, 1944.
+
+\bibitem[Smith et~al.(2003)Smith, Peterson, and Houston]{SmithDW2003}
+Douglas~W. Smith, Rolf~O. Peterson, and Douglas~B. Houston.
+\newblock Yellowstone after wolves.
+\newblock \emph{BioScience}, 53\penalty0 (4):\penalty0 330--340, 2003.
+\newblock \doi{10.1641/0006-3568(2003)053[0330:YAW]2.0.CO;2}.
+
+\bibitem[Ripple and Beschta(2012)]{RippleBeschta2012}
+William~J. Ripple and Robert~L. Beschta.
+\newblock Trophic cascades in {Yellowstone}: the first 15 years after wolf
+  reintroduction.
+\newblock \emph{Biological Conservation}, 145\penalty0 (1):\penalty0 205--213,
+  2012.
+\newblock \doi{10.1016/j.biocon.2011.11.005}.
+
+\bibitem[Gauthier(1986)]{Gauthier1986}
+David Gauthier.
+\newblock \emph{Morals by Agreement}.
+\newblock Oxford University Press, 1986.
+
+\bibitem[Sen(1985)]{Sen1985}
+Amartya Sen.
+\newblock \emph{Commodities and Capabilities}.
+\newblock North-Holland, Amsterdam, 1985.
+\newblock URL
+  \url{http://www.amazon.com/Commodities-Capabilities-Amartya-Sen/dp/0195650387/ref=sr_1_1?s=books\&ie=UTF8\&qid=1310679705\&sr=1-1}.
+
+\bibitem[Chapman and Fisher(2025)]{Chapman2025}
+Jonathan Chapman and Geoffrey Fisher.
+\newblock Preference elicitation: common methods and potential pitfalls.
+\newblock In Erik Snowberg and Leeat Yariv, editors, \emph{Handbook of
+  Experimental Methodology}, volume~1, chapter~2, pages 25--80. North-Holland,
+  2025.
+\newblock ISBN 9780443317583.
+\newblock \doi{10.1016/bs.hbem.2025.09.001}.
+
+\bibitem[Jackson(2008)]{Jackson2008}
+Matthew~O. Jackson.
+\newblock \emph{Social and Economic Networks}.
+\newblock Princeton University Press, 2008.
+\newblock ISBN 978-0-691-13440-6.
+
+\bibitem[Chalmers(1995)]{Chalmers1995}
+David~J. Chalmers.
+\newblock Facing up to the problem of consciousness.
+\newblock \emph{Journal of Consciousness Studies}, 2\penalty0 (3):\penalty0
+  200--219, 1995.
+
+\bibitem[Christiano et~al.(2017)Christiano, Leike, Brown, Martic, Legg, and
+  Amodei]{Christiano2017}
+Paul~F. Christiano, Jan Leike, Tom Brown, Miljan Martic, Shane Legg, and Dario
+  Amodei.
+\newblock Deep reinforcement learning from human preferences.
+\newblock In \emph{Advances in Neural Information Processing Systems},
+  volume~30, pages 4299--4307, 2017.
+
+\bibitem[Ouyang et~al.(2022)Ouyang, Wu, Jiang, Almeida, Wainwright, Mishkin,
+  Zhang, Agarwal, Slama, Ray, Schulman, Hilton, Kelton, Miller, Simens, Askell,
+  Welinder, Christiano, Leike, and Lowe]{Ouyang2022}
+Long Ouyang, Jeffrey Wu, Xu~Jiang, Diogo Almeida, Carroll Wainwright, Pamela
+  Mishkin, Chong Zhang, Sandhini Agarwal, Katarina Slama, Alex Ray, John
+  Schulman, Jacob Hilton, Fraser Kelton, Luke Miller, Maddie Simens, Amanda
+  Askell, Peter Welinder, Paul~F. Christiano, Jan Leike, and Ryan Lowe.
+\newblock Training language models to follow instructions with human feedback.
+\newblock In \emph{Advances in Neural Information Processing Systems},
+  volume~35, pages 27730--27744, 2022.
+
+\bibitem[Bowman et~al.(2022)Bowman, Hyun, Perez, Chen, Pettit, Heiner,
+  Luko{\v{s}}i{\=u}t{\.e}, Askell, Jones, Chen, Goldie, Mirhoseini, McKinnon,
+  Olah, Amodei, Amodei, Drain, Li, Tran-Johnson, et~al.]{Bowman2022}
+Samuel~R. Bowman, Jeeyoon Hyun, Ethan Perez, Edwin Chen, Craig Pettit, Scott
+  Heiner, Kamil{\.e} Luko{\v{s}}i{\=u}t{\.e}, Amanda Askell, Andy Jones, Anna
+  Chen, Anna Goldie, Azalia Mirhoseini, Cameron McKinnon, Chris Olah, Dario
+  Amodei, Daniela Amodei, Dawn Drain, Danny Li, Eli Tran-Johnson, et~al.
+\newblock Measuring progress on scalable oversight for large language models.
+\newblock \emph{arXiv preprint arXiv:2211.03540}, 2022.
+\newblock \doi{10.48550/arXiv.2211.03540}.
+
+\bibitem[Casper et~al.(2023)Casper, Davies, Shi, Gilbert, Scheurer, Rando,
+  Sharkey, Sarat, Korbak, Lindner, Freire, Wang, Marks, Segerie, Carroll, Peng,
+  Christoffersen, Damber, Slocum, et~al.]{Casper2023}
+Stephen Casper, Xander Davies, Claudia Shi, Thomas~Krendl Gilbert,
+  J{\'e}r{\'e}my Scheurer, Javier Rando, Rachel Sharkey, Ansh Sarat, Tomasz
+  Korbak, David Lindner, Pedro Freire, Tony Wang, Samuel Marks, Aidan Segerie,
+  Micah Carroll, Andi Peng, Phillip Christoffersen, Mehul Damber, Stewart
+  Slocum, et~al.
+\newblock Open problems and fundamental limitations of reinforcement learning
+  from human feedback.
+\newblock \emph{arXiv preprint arXiv:2307.15217}, 2023.
+\newblock \doi{10.48550/arXiv.2307.15217}.
+
+\bibitem[Haidt(2001)]{Haidt2001}
+Jonathan Haidt.
+\newblock The emotional dog and its rational tail: A social intuitionist
+  approach to moral judgment.
+\newblock \emph{Psychological Review}, 108\penalty0 (4):\penalty0 814--834,
+  2001.
+\newblock \doi{10.1037/0033-295X.108.4.814}.
+
+\end{thebibliography}
 \end{document}

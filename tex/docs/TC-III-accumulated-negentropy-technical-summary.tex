@@ -1,0 +1,260 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{graphicx}
+
+% ── Paragraph spacing ────────────────────────────────────────────────────────
+\usepackage{parskip}
+
+% ── Page-break quality ───────────────────────────────────────────────────────
+\widowpenalty=10000
+\clubpenalty=10000
+\raggedbottom
+
+% ── Suppress automatic section numbering ─────────────────────────────────────
+\setcounter{secnumdepth}{-1}
+
+% ── Pandoc-generated table support ───────────────────────────────────────────
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{calc}
+\usepackage{caption}
+\newcounter{none}
+
+% ── Math support ─────────────────────────────────────────────────────────────
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% ── Make \paragraph and \subparagraph block-level ────────────────────────────
+\usepackage{titlesec}
+\titleformat{\paragraph}
+  {\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+  {0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+\titleformat{\subparagraph}
+  {\normalfont\normalsize\bfseries}{\thesubparagraph}{1em}{}
+\titlespacing*{\subparagraph}
+  {0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+% ── Pandoc-generated tightlist support ───────────────────────────────────────
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% ── Pandoc 3.x figure sizing ────────────────────────────────────────────────
+\newcommand{\pandocbounded}[1]{%
+  \sbox0{#1}%
+  \ifdim\wd0>\linewidth
+    \resizebox{\linewidth}{!}{#1}%
+  \else
+    #1%
+  \fi
+}
+
+% ── Unicode character fixes ──────────────────────────────────────────────────
+\usepackage{newunicodechar}
+\newunicodechar{✓}{$\checkmark$}
+\newunicodechar{≠}{$\neq$}
+\newunicodechar{≡}{$\equiv$}
+\newunicodechar{≈}{$\approx$}
+\newunicodechar{δ}{$\delta$}
+\newunicodechar{−}{$-$}
+\let\mystRightarrow\rightarrow
+\renewcommand{\rightarrow}{\ensuremath{\mystRightarrow}}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\hypersetup{colorlinks=true, allcolors=blue}
+
+\title{Technical Summary: Accumulated Negentropy and the
+Irreplaceability of Complex Dissipative Structures}
+\author{Keith Lostracco}
+\date{}
+
+\begin{document}
+\maketitle
+
+\subsection{Model}\label{model}
+
+A physical system with \(\Omega\) microstates has Boltzmann entropy
+\(S = k_B \ln \Omega\). Its \textbf{information density} (negentropy) is
+\(\mathcal{I} \triangleq S_{\max} - S_{\text{actual}} \geq 0\), the
+amount by which the system is more ordered than thermal equilibrium. The
+\textbf{accumulated negentropy} at time \(T\) is the total thermodynamic
+work invested in creating and maintaining the current information
+density:
+
+\[\mathcal{N}(T) \triangleq \int_0^T \dot{W}_{\text{order}}(t) \, dt\]
+
+where
+\(\dot{W}_{\text{order}}(t) = \dot{W}_{\text{construct}}(t) + \dot{W}_{\text{maintain}}(t)\)
+is the instantaneous ordering work rate (construction of new structures
+plus maintenance against entropic decay). The \textbf{search cost
+amplification factor} is
+\(\Xi \triangleq \mathcal{N}(T) / (H_{\text{total}} \cdot k_B T \ln 2)\),
+the ratio of actual accumulated negentropy to the Landauer floor.
+
+For Earth's biosphere: \(\mathcal{N}_{\text{bio}} \sim 10^{29}\) J
+(top-down solar energy estimate, cross-validated via Chaisson's energy
+rate density to within a factor of 1.36),
+\(H_{\text{biosphere}} \sim 10^{15}\) bits, and
+\(\Xi_{\text{bio}} \approx 10^{35}\).
+
+Under power-law rate-stock coupling
+\(\dot{\mathcal{I}}_{\text{gen}} = \alpha \mathcal{N}^\beta\) with
+\(\beta > 1\), the generative information rate depends superlinearly on
+accumulated complexity: systems with more components have
+combinatorially richer recombination spaces.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Results}\label{results}
+
+\textbf{Theorem 17 (Landauer's Bound).} Erasing (or creating from random
+noise) one bit of information at temperature \(T\) requires minimum
+energy \(E_{\text{Landauer}} = k_B T \ln 2\). Creating a system with
+information density \(\mathcal{I}_{\text{bits}}\) from maximally
+disordered matter requires at minimum:
+
+\[W_{\text{create}}^{\min} = \mathcal{I}_{\text{bits}} \cdot k_B T \ln 2\]
+
+\textbf{Theorem 18 (Minimum Replication Cost).} A system containing
+\(\mathcal{I}_{\text{bits}}\) bits of functional information, where each
+bit was selected from a space of \(\Omega\) equally likely candidates
+and the correct configuration was found by evolutionary search over time
+\(T\) with average ordering power \(\bar{P}_{\text{order}}\), requires a
+minimum replication cost of:
+
+\[W_{\text{rebuild}}^{\text{search}} \geq \mathcal{I}_{\text{bits}} \cdot k_B T \ln 2 \cdot \Xi = \mathcal{N}(T)\]
+
+The rebuild cost is at least the accumulated negentropy itself.
+
+\textbf{Corollary 18.1 (Replication Cost).} For Earth's biosphere:
+\(W_{\text{rebuild}} \geq \mathcal{N}_{\text{bio}} \sim 10^{29}\) J.
+Replicating the biosphere's accumulated negentropy requires capturing
+the Sun's entire output for $\sim$4.4 minutes at 100\% efficiency (or
+$\sim$3 days at 0.1\%).
+
+\textbf{Proposition (Minimum Destruction Energy).} Dismantling a
+distributed adaptive system of \(N_{\text{org}}\) organisms requires
+energy \(W_{\text{destroy}} \geq \sum_{i=1}^{N_{\text{org}}} B_i\). For
+the biosphere (\(N_{\text{org}} \sim 10^{30}\),
+\(\bar{B} \sim 10^{-12}\) J): \(W_{\text{destroy}} \geq 10^{18}\) J.
+
+\textbf{Theorem 19 (Thermodynamic Cost-Benefit Bound).} For a system
+with accumulated negentropy \(\mathcal{N}\), extractable energy
+\(E_{\text{destroy}}\), destruction cost \(W_{\text{destroy}}\), and
+rebuild cost \(W_{\text{rebuild}} \geq \mathcal{N}\), a thermodynamic
+cost-benefit gap exists when
+\(E_{\text{destroy}} - W_{\text{destroy}} < W_{\text{rebuild}}\). For
+Earth's biosphere:
+
+\[\underbrace{10^{22}}_{\text{extractable energy}} - \underbrace{10^{18}}_{\text{destruction cost}} \approx 10^{22} \ll 10^{29} = \underbrace{\mathcal{N}_{\text{bio}}}_{\text{rebuild cost}}\]
+
+The net energy yield is seven orders of magnitude smaller than the
+rebuild cost.
+
+\textbf{Corollary 19.1 (Burning-Library Inequality).}
+\(E_{\text{destroy}} / \mathcal{N} = 10^{22} / 10^{29} = 10^{-7}\).
+Destruction recovers one ten-millionth of the system's accumulated
+investment as raw thermal energy.
+
+\textbf{Theorem 20 (Present Value of Generative Information).} A
+generative system producing novel information at sustained rate
+\(\dot{\mathcal{I}}_{\text{gen}}\) bits/s, valued at \(v\)
+energy-equivalents per bit of novel functional information, has present
+value at discount rate \(r\):
+
+\[PV_{\text{gen}} = \frac{\dot{\mathcal{I}}_{\text{gen}} \cdot v}{r}\]
+
+This diverges as \(r \to 0\) (long planning horizon) and is permanently
+lost upon destruction.
+
+\textbf{Proposition (Negentropy Tipping Point).} Under the dynamics
+\(d\mathcal{N}/dt = \alpha\mathcal{N}^\beta - \delta\mathcal{N} - h\)
+with \(\beta > 1\):
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\item
+  A critical threshold \(\mathcal{N}_c = (\delta/\alpha)^{1/(\beta-1)}\)
+  exists below which the generative rate cannot compensate decay.
+\item
+  For a system at stock \(\mathcal{N}_0 > \mathcal{N}_c\), maximum
+  destruction fraction avoiding collapse:
+  \(\lambda^* = 1 - \mathcal{N}_c / \mathcal{N}_0\).
+\item
+  Below \(\mathcal{N}_c\), decline is self-reinforcing (accelerating
+  decay toward informational death).
+\end{enumerate}
+
+\textbf{Corollary (Maximum Sustainable Extraction).} A system at stock
+\(\mathcal{N}_0 > \mathcal{N}_c\) can sustain extraction of at most
+\(h^*(\mathcal{N}_0) = \alpha\mathcal{N}_0^\beta - \delta\mathcal{N}_0\).
+Exceeding \(h^*\) and driving \(\mathcal{N}\) below \(\mathcal{N}_c\)
+triggers irreversible collapse regardless of whether extraction ceases.
+
+\textbf{Theorem 21 (Cross-Scale Sustainability).} For a complex
+dissipative structure, three independent thermodynamic bounds establish
+that the costs of destruction exceed its yields:
+
+\begin{enumerate}
+\def\labelenumi{(\roman{enumi})}
+\item
+  \textbf{Stock bound:} \(\mathcal{N}_{\text{bio}} \sim 10^{29}\) J
+  exceeds the net destruction yield \(\sim 10^{22}\) J by a factor of
+  \(\sim 10^7\).
+\item
+  \textbf{Flow bound:} The biosphere's generative information stream has
+  positive present value permanently lost upon destruction; under
+  rate-stock coupling, even partial destruction degrades this stream
+  superlinearly.
+\item
+  \textbf{Friction bound:} Dismantling a distributed adaptive biosphere
+  injects thermodynamic friction into every connected network.
+\end{enumerate}
+
+Two of these three bounds (flow, friction) are independent of how the
+system's complexity is valued.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Notation}\label{notation}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Symbol
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Meaning
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\(S\) & Boltzmann entropy: \(k_B \ln \Omega\) \\
+\(\mathcal{I}\) & Information density (negentropy):
+\(S_{\max} - S_{\text{actual}}\) \\
+\(\mathcal{I}_{\text{bits}}\) & Information density in bits \\
+\(\mathcal{N}(T)\) & Accumulated negentropy at time \(T\) (J) \\
+\(\dot{W}_{\text{order}}\) & Ordering work rate (W) \\
+\(\dot{W}_{\text{construct}}\) & Construction work rate (new order
+creation) \\
+\(\dot{W}_{\text{maintain}}\) & Maintenance work rate (preserving order
+against decay) \\
+\(E_{\text{Landauer}}\) & \(k_B T \ln 2\) (Landauer limit per bit, J) \\
+\(\Xi\) & Search cost amplification factor:
+\(\mathcal{N} / W_{\text{Landauer}}\) \\
+\(\dot{\mathcal{I}}_{\text{gen}}\) & Generative information rate
+(bits/s) \\
+\(\mathcal{R}_{\text{BL}}\) & Burning-Library Ratio:
+\(E_{\text{destroy}} / \mathcal{N}\) \\
+\(\mathcal{N}_c\) & Critical negentropy threshold (tipping point) \\
+\(h^*\) & Maximum sustainable extraction rate \\
+\(\lambda^*\) & Maximum destruction fraction avoiding collapse \\
+\end{longtable}
+}
+
+\end{document}

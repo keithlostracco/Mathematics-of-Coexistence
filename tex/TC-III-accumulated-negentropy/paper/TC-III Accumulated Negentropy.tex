@@ -2,9 +2,8 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{hyperref}
 \usepackage{graphicx}
-\graphicspath{{../../shared/figures/}}
+\graphicspath{{./}}
 \usepackage{natbib}
-\bibliographystyle{unsrtnat}
 \usepackage{doi}
 % \setcitestyle{numbers,super} % Superscript citation numbers (e.g. ¹, ²⁻⁴) — does not support locator notes
 \setcitestyle{numbers,square} % Square brackets around citation numbers (e.g. [1], [2-4]) — math standard
@@ -20,24 +19,32 @@
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{dsfont} % double-struck numerals (\mathds{1} for indicator functions)
-\usepackage{thmtools}
-\declaretheorem[name=Theorem]{theorem}
-\declaretheorem[name=Proposition,sibling=theorem]{proposition}
-\declaretheorem[name=Lemma,sibling=theorem]{lemma}
-\declaretheorem[name=Corollary,sibling=theorem]{corollary}
-\declaretheorem[name=Conjecture,sibling=theorem]{conjecture}
+% thmtools is only needed for the optional \listoftheorems feature. Loading it
+% patches \newtheorem, and thmtools 0.76's patch is incompatible with recent
+% LaTeX kernels (>= 2025) for shared-counter theorems (every sibling raises
+% "Command \c@... already defined"). We therefore load it only when the
+% list-of-theorems feature is actually requested.
+% Theorem-like environments defined with amsthm's native shared-counter syntax
+% (\newtheorem{child}[parent]{Name}). Numbering is grouped by counter without
+% relying on thmtools' sibling mechanism.
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{conjecture}[theorem]{Conjecture}
 
 \theoremstyle{definition}
-\declaretheorem[name=Definition,style=definition]{definition}
-\declaretheorem[name=Axiom,style=definition,sibling=definition]{axiom}
-\declaretheorem[name=Assumption,style=definition,sibling=definition]{assumption}
-\declaretheorem[name=Criterion,style=definition,sibling=definition]{criterion}
-\declaretheorem[name=Example,style=definition,sibling=definition]{example}
+\newtheorem{definition}{Definition}
+\newtheorem{axiom}[definition]{Axiom}
+\newtheorem{assumption}[definition]{Assumption}
+\newtheorem{criterion}[definition]{Criterion}
+\newtheorem{example}[definition]{Example}
 
 \theoremstyle{remark}
-\declaretheorem[name=Remark,style=remark]{remark}
-\declaretheorem[name=Observation,style=remark,sibling=remark]{observation}
-\declaretheorem[name=Property,style=remark,sibling=remark]{property}
+\newtheorem{remark}{Remark}
+\newtheorem{observation}[remark]{Observation}
+\newtheorem{property}[remark]{Property}
 
 % Prevent theorem-like environments from starting near the page bottom.
 \usepackage{etoolbox}
@@ -56,6 +63,10 @@
 \usepackage{array}
 \usepackage{calc}
 \usepackage{caption}
+% General table note: small font, flush-left, below the table (used by some papers).
+\newenvironment{tablenote}
+  {\par\addvspace{2pt}\footnotesize\noindent}
+  {\par\addvspace{4pt}}
 % Pandoc 3.x wraps uncaptioned longtables in \def\LTcaptype{none};
 % this requires a 'none' counter to exist.
 \newcounter{none}
@@ -202,9 +213,6 @@ information content was produced by extended search. The analysis
 requires only Landauer's principle, basic thermodynamics, and
 order-of-magnitude estimates from astrophysics and biology.
 \end{abstract}
-\newpage
-\tableofcontents
-\newpage
 \section{Introduction}\label{introduction}
 
 Complex dissipative structures, from individual organisms to entire
@@ -315,12 +323,12 @@ characterized living organisms as negative-entropy systems that maintain
 internal order by extracting free energy from their environment.
 
 To our knowledge, Landauer's principle has not previously been applied
-at the biosphere scale (\(\sim 10^{15}\) functional bits accumulated
-over \(4 \times 10^9\) years) to compute the total thermodynamic
-investment embodied in biological complexity and to derive the
-sustainability limits this investment imposes. We perform this
-integration and quantify the resulting cost-benefit gap at approximately
-seven orders of magnitude.
+at the biosphere scale (\(\sim 10^{15}\) total
+functional-plus-structural bits accumulated over \(4 \times 10^9\)
+years) to compute the total thermodynamic investment embodied in
+biological complexity and to derive the sustainability limits this
+investment imposes. We perform this integration and quantify the
+resulting cost-benefit gap at approximately seven orders of magnitude.
 
 \subsubsection{The Gap}\label{the-gap}
 
@@ -861,16 +869,26 @@ linear ramp as in
 \begin{remark}[Cross-Validation Agreement]
 \label{rem-chaisson-cross-validation}
 
-The Chaisson-derived estimate $\mathcal{N}_{\text{bio}}^{\text{Chaisson}} \approx 6.9 \times 10^{28}$ J agrees with the top-down estimate $\mathcal{N}_{\text{bio}}^{\text{top-down}} \approx 9.45 \times 10^{28}$ J within a factor of $\sim$1.36. For a quantity spanning more than 28 orders of magnitude above the Landauer floor, agreement between two independent estimation methods to within half an order of magnitude provides robust cross-validation. The slight discrepancy is consistent with the Chaisson route underestimating metabolic throughput (due to difficulty accounting for the active fraction of structural biomass) and the GPP route slightly overestimating ordering work (since not all photosynthetic capture flows through complexity-building pathways).
+The Chaisson-derived estimate $\mathcal{N}_{\text{bio}}^{\text{Chaisson}} \approx 6.9 \times 10^{28}$ J agrees with the top-down estimate $\mathcal{N}_{\text{bio}}^{\text{top-down}} \approx 9.45 \times 10^{28}$ J within a factor of $\sim$1.36. For a quantity spanning $\sim 35$ orders of magnitude above the Landauer floor (the amplification factor $\Xi_{\text{bio}}$), agreement between two independent estimation methods to within half an order of magnitude provides robust cross-validation. The slight discrepancy is consistent with the Chaisson route underestimating metabolic throughput (due to difficulty accounting for the active fraction of structural biomass) and the GPP route slightly overestimating ordering work (since not all photosynthetic capture flows through complexity-building pathways).
 \end{remark}
 
 Chaisson's further observation that \(\Phi_m\) has \emph{increased
 monotonically} over cosmic and biological time (from \(10^{-5}\) W/kg
 for galaxies to \(10^{1}\) W/kg for animals) is consistent with our
-linear-ramp integration model. If anything, the accelerating trend in
-complexity suggests that the true temporal profile is superlinear, which
-would make our linear ramp a \emph{conservative lower bound} on
-accumulated negentropy.
+linear-ramp integration model. Were the true temporal profile
+superlinear (accelerating toward the present rate) rather than linear,
+the historical integral would lie \emph{below} the linear ramp: a convex
+profile reaching today's rate at \(t = T_{\text{bio}}\) falls under the
+chord joining zero and \(\dot{W}_{\text{order}}^{\text{now}}\), so its
+time-average is \emph{less} than half of today's rate. The linear ramp
+would then mildly \emph{over}-estimate the temporal-averaging factor,
+consistent with the top-down route furnishing an upper bound on
+\(\mathcal{N}_{\text{bio}}\)
+(§\ref{biosphere-estimation-the-4-billion-year-ledger}). The
+conservatism of the overall \(\mathcal{N}_{\text{bio}}\) estimate rests
+instead on the low ordering efficiency \(\eta_{\text{order}} = 0.01\)
+and the many-order-of-magnitude undercount of real construction costs by
+the Landauer floor.
 
 \section{The Replication Cost: Rebuilding Complexity from
 Scratch}\label{the-replication-cost-rebuilding-complexity-from-scratch}
@@ -1017,6 +1035,17 @@ physically accessible.
 The practically extractable energy is
 \(E_{\text{destroy}} \sim 10^{22}\) J.
 
+This biosphere figure applies the caloric density directly to the carbon
+mass, whereas the Amazon worked example below
+(§\ref{the-amazon-rainforest}) first converts carbon to dry biomass (a
+factor of \(\sim 2\)) before applying a dry-biomass calorific value.
+Both are order-of-magnitude estimates well inside the stated
+factor-of-2--10 input tolerance, and the different mass bases do not
+affect the Burning-Library conclusion; harmonizing the biosphere figure
+onto the Amazon's dry-mass convention would roughly double
+\(E_{\text{destroy}}\) while leaving
+\(\mathcal{R}_{\text{BL}} \sim 10^{-7}\) unchanged.
+
 \subsection{The Destruction Cost}\label{the-destruction-cost}
 
 Destruction itself carries a thermodynamic cost. The biosphere is a
@@ -1141,7 +1170,7 @@ $$PV_{\text{gen}} \in \left[10^{14},\ 10^{22}\right] \text{ J}.$$
 
 The flow value is finite under any positive discount rate and is dominated by the stock value $\mathcal{N}_{\text{bio}} \sim 10^{29}$ J across the entire parameter range. The Burning-Library Ratio (Definition~\ref{def-burning-library-ratio}) is therefore robust to the inclusion of the generative-flow term: $E_{\text{destroy}}/(\mathcal{N}_{\text{bio}} + PV_{\text{gen}}) \approx E_{\text{destroy}}/\mathcal{N}_{\text{bio}} \sim 10^{-7}$.
 
-The discount rate $r$ entering this bound is the same time-preference rate that governs the cooperation threshold in the framework: the per-period discount factor of \citep{TC-V} is $\delta = \sigma e^{-r}$, where $\sigma$ is per-period survival probability. Using the financial calibration of DICE-2023 \citep{BarrageNordhaus2024} is therefore conservative on the lower end. Persistence-oriented agents in the Coexistence Band of \citep{TC-VI} inhabit stable environments with extended planning horizons and correspondingly low effective $r$, which only enlarges $PV_{\text{gen}}$.
+The discount rate $r$ entering this bound is the same time-preference rate that governs the cooperation threshold in the framework: the per-period discount factor of \citep{TC-V}, which combines this rate with survival risk. TC-V writes that discount factor as $\delta = \sigma\, e^{-r}$ with $\sigma$ the per-period survival probability. \textbf{Both of TC-V's symbols collide with the present paper:} TC-V's $\delta$ (discount factor) clashes with our $\delta$ (decay rate), and TC-V's $\sigma$ (survival probability) clashes with our $\sigma$ (search-efficiency factor). To keep the two disambiguated here, we relabel TC-V's discount factor $\delta_{\text{TC-V}}$ and TC-V's survival probability $p_{\text{surv}}$, so that TC-V's relation reads $\delta_{\text{TC-V}} = p_{\text{surv}}\, e^{-r}$; the unsubscripted $\delta$ and $\sigma$ throughout this paper always denote decay rate and search efficiency. Using the financial calibration of DICE-2023 \citep{BarrageNordhaus2024} is therefore conservative on the lower end. Persistence-oriented agents in the Coexistence Band of \citep{TC-VI} inhabit stable environments with extended planning horizons and correspondingly low effective $r$, which only enlarges $PV_{\text{gen}}$.
 
 The generative-rate range is consistent with paleontological data on Gyr timescales: dividing the biosphere's accumulated functional information $H_{\text{biosphere}} \sim 10^{15}$ bits (estimated in §\ref{bottom-up-information-content-of-the-biosphere} via species counts \citep{Mora2011} and per-genome bit content \citep{Milo2015}, applying the Shannon-entropy framework of \citep{Adami2004}) by Earth's $\sim 4 \times 10^9$-yr biotic history yields a time-averaged generation rate of $\sim 2.5 \times 10^5$ bits/yr, comfortably within $[10^4, 10^6]$ bits/yr. The constant-rate assumption underlying $PV_{\text{gen}} = \dot{\mathcal{I}}_{\text{gen}} v / r$ smooths over substantial temporal heterogeneity (Cambrian-scale radiations, mass extinctions, and the present anthropogenic regime in which $\dot{\mathcal{I}}_{\text{gen}}$ may be locally negative for many taxa). The endogenous rate-stock coupling introduced in Definition~\ref{def-rate-stock-coupling} and the tipping-point and recovery results that follow address these non-stationary dynamics; the bound here applies under stationarity as a baseline.
 \end{corollary}
@@ -1212,11 +1241,18 @@ against the Second Law. This yields the governing equation:
 
 \[\frac{d\mathcal{N}}{dt} = \alpha\mathcal{N}^\beta - \delta\mathcal{N} - h\]
 
-where \(\alpha\mathcal{N}^\beta\) is the generative ordering rate
-(Definition~\ref{def-rate-stock-coupling}), \(\delta\mathcal{N}\) is the
-maintenance cost, and \(h \geq 0\) is the external extraction rate
-(J/s). The net surplus available for growth or extraction at stock level
-\(\mathcal{N}\) is
+where \(\alpha\mathcal{N}^\beta\) is the generative ordering rate,
+\(\delta\mathcal{N}\) is the maintenance cost, and \(h \geq 0\) is the
+external extraction rate (J/s). Because \(d\mathcal{N}/dt\) is an energy
+rate (J/s) whereas the coupling function of
+Definition~\ref{def-rate-stock-coupling} gives an information rate
+(bits/s), the coefficient \(\alpha\) here is a distinct energy-rate
+coefficient: it is the bits/s coupling constant multiplied by the
+per-bit value \(v\) (J/bit), so that \(\alpha\mathcal{N}^\beta\) carries
+units of J/s. It shares the superlinear exponent \(\beta\) of
+Definition~\ref{def-rate-stock-coupling} but is dimensionally an
+ordering-work rate, not the information-generation rate. The net surplus
+available for growth or extraction at stock level \(\mathcal{N}\) is
 \(F(\mathcal{N}) = \alpha\mathcal{N}^\beta - \delta\mathcal{N}\).
 
 \begin{proposition}[Negentropy Tipping Point]
@@ -1256,7 +1292,7 @@ A system at stock $\mathcal{N}_0 > \mathcal{N}_c$ can sustain an extraction rate
 
 $$h^*(\mathcal{N}_0) = \alpha\mathcal{N}_0^\beta - \delta\mathcal{N}_0$$
 
-Any extraction rate $h > h^*$ causes $d\mathcal{N}/dt < 0$, reducing the stock and (by rate-stock coupling) further reducing the generative capacity. If sustained extraction above $h^*$ drives $\mathcal{N}$ below $\mathcal{N}_c$, the system enters irreversible collapse regardless of whether extraction ceases.
+Any extraction rate $h > h^*$ causes $d\mathcal{N}/dt < 0$, reducing the stock and (by rate-stock coupling) further reducing the generative capacity. If sustained extraction above $h^*$ drives $\mathcal{N}$ below $\mathcal{N}_c$, the system enters irreversible collapse regardless of whether extraction ceases. Note that $h^*$ balances decay only marginally: the resulting equilibrium at $\mathcal{N}_0$ is dynamically unstable, since $F'(\mathcal{N}_0) = \alpha\beta\mathcal{N}_0^{\beta-1} - \delta > 0$ for $\mathcal{N}_0 > \mathcal{N}_c$ (see Proposition~\ref{prop-superlinear-recovery-time}), so extraction at or above $h^*$ leaves no buffer against downward perturbation — any downward fluctuation runs away toward collapse. In this sense $h^*$ is a maximum \emph{momentary} balance rate rather than a robustly sustainable one.
 \end{corollary}
 
 \begin{proof}
@@ -1364,7 +1400,7 @@ We prove each claim in turn:
 
 (a) The marginal cost is $MC_i(\Lambda_i) = 1 + (\alpha_i v \beta_i / r)(\mathcal{N}_i - \Lambda_i)^{\beta_i - 1}$. Since $\beta_i - 1 > 0$, the term $(\mathcal{N}_i - \Lambda_i)^{\beta_i-1}$ is strictly decreasing in $\Lambda_i$ (raising a decreasing base to a positive exponent). Hence $MC_i$ is strictly decreasing: $MC_i(0) > MC_i(\Lambda_i)$ for all $\Lambda_i > 0$.
 
-(b) The second derivative of each system's cost is $C_i''(\Lambda_i) = -(\alpha_i v \beta_i (\beta_i - 1)/r)(\mathcal{N}_i - \Lambda_i)^{\beta_i - 2} < 0$, so $C_i$ is strictly concave. For a sum of concave functions subject to a linear sharing constraint $\sum \Lambda_i = \Lambda$, interior critical points where marginal costs are equalized are saddle points (not minima), so the minimum lies on the boundary. The cost-minimizing allocation therefore concentrates destruction: it loads $\Lambda$ entirely onto one system (or exhausts the cheapest and moves to the next) rather than spreading partial damage.
+(b) The second derivative of each system's cost is $C_i''(\Lambda_i) = -(\alpha_i v \beta_i (\beta_i - 1)/r)(\mathcal{N}_i - \Lambda_i)^{\beta_i - 2} < 0$, so $C_i$ is strictly concave. For a sum of concave functions subject to a linear sharing constraint $\sum \Lambda_i = \Lambda$, the objective is concave, so its reduced Hessian on the constraint hyperplane is negative definite: an interior critical point where marginal costs are equalized is a constrained \emph{maximum}, not a minimum. The minimum of a concave objective over the feasible polytope is therefore attained at an extreme point (a vertex). The cost-minimizing allocation accordingly concentrates destruction: it loads $\Lambda$ entirely onto one system (or exhausts the cheapest and moves to the next) rather than spreading partial damage.
 
 (c) The system whose complete destruction has the lowest average cost $C_i(\mathcal{N}_i)/\mathcal{N}_i$ is destroyed first. At small $\Lambda$, this reduces to the system with the lowest $MC_i(0)$. For identical $\alpha$ and $\mathcal{N}$, the function $\beta_i \mathcal{N}^{\beta_i - 1}$ is increasing in $\beta_i$ for $\mathcal{N} > 1$, so lower $\beta_i$ yields lower $MC_i(0)$.
 \end{proof}
@@ -1427,7 +1463,7 @@ Part (c): as $\lambda \to \lambda^*$, the lower integration limit $(1-\lambda)\m
 \begin{remark}[Information debt in ecological terms]
 \label{rem-information-debt}
 
-The superlinear recovery time creates what might be called an \emph{information debt}: the gap between destruction speed and recovery speed, compounded by the rate-stock coupling. If 20% of a forest is clear-cut, the recovery time exceeds the linear prediction by a factor that depends on $\beta$. For $\beta = 2$ (moderate superlinearity), 50% destruction roughly quadruples the recovery time relative to the linear baseline. Near the tipping threshold, the debt becomes infinite: the system cannot recover at all. This provides a formal basis for the ecological observation that recovery from large-scale damage (mass extinctions, wholesale habitat conversion) requires geological time scales, not human ones.
+The superlinear recovery time creates what might be called an \emph{information debt}: the gap between destruction speed and recovery speed, compounded by the rate-stock coupling. If 20% of a forest is clear-cut, the recovery time exceeds the linear prediction by a factor that depends on $\beta$. For $\beta = 2$ (moderate superlinearity), 50% destruction lengthens recovery by $\sim$2$\times$ relative to the linear baseline for well-buffered systems, rising without bound as the generative surplus ratio $R = \alpha\mathcal{N}_0^{\beta-1}/\delta$ falls toward $R = 2$ (the tipping value for 50% loss at $\beta = 2$). A moderately buffered system at $R \approx 2.25$ already incurs a $\sim$4$\times$ penalty, and the factor grows without limit as $R \to 2^+$, consistent with the divergence of $T_{\text{recover}}$ at $\lambda^*$ (Proposition~\ref{prop-superlinear-recovery-time}, part c). Near the tipping threshold, the debt becomes infinite: the system cannot recover at all. This provides a formal basis for the ecological observation that recovery from large-scale damage (mass extinctions, wholesale habitat conversion) requires geological time scales, not human ones.
 
 The $\beta$-dependent convexity of recovery time is consistent with observed ecological recovery hierarchies. Grasslands, with low interaction density ($\beta$ near 1), recover in years to decades because their generative rate depends only weakly on standing stock. Temperate forests ($\beta$ moderate) require decades to a century. Tropical rainforests and coral reefs, whose dense mutualistic networks (pollinator webs, mycorrhizal associations, coral-algal symbioses) imply high $\beta$, show sharply nonlinear recovery: partial degradation often triggers threshold collapse rather than gradual decline, consistent with the divergence predicted at $\lambda^*$. The results predict that more complex systems recover more slowly and that the functional form of recovery time transitions from approximately linear (low $\beta$) to threshold-dominated (high $\beta$), a qualitative distinction that is independently testable.
 \end{remark}
@@ -1544,7 +1580,7 @@ We verify each bound independently.
 
 \textbf{Flow bound:} Destruction eliminates a positive-NPV stream of novel information (Theorem~\ref{thm-present-value-generative-info}). A self-maintaining biosphere captures this stream at zero external cost. ✓
 
-\textbf{Friction bound:} Large-scale destruction injects friction $\Delta\phi = \eta \cdot W_{\text{destroy}}$ (Definition 8 \citep{TC-IV}) with total cascading cost $\eta \cdot W_{\text{destroy}} \cdot M \bar{E} / \epsilon$ over the full recovery period (Theorem 10 \citep{TC-IV}), degrading all connected networks (Theorem 4 \citep{TC-V}). ✓
+\textbf{Friction bound:} Large-scale destruction injects friction $\Delta\phi = \eta \cdot W_{\text{destroy}}$ (Definition 9 \citep{TC-IV}) with total cascading cost $\eta \cdot W_{\text{destroy}} \cdot M \bar{E} / \epsilon$ over the full recovery period (Theorem 10 \citep{TC-IV}), degrading all connected networks (Theorem 4 \citep{TC-V}). ✓
 
 By the valuation-independent bounds (§\ref{robustness-valuation-independent-bounds}), the flow and friction bounds are independent of how the system's complexity is valued.
 \end{proof}
@@ -1587,12 +1623,16 @@ cosmically impossible.
 \textbf{What evolution achieves:} By using selection pressure to retain
 favorable mutations incrementally, evolution reduces the search cost
 from \(\sim 10^{1.93 \times 10^8}\) J (random) to \(\sim 10^{29}\) J
-(the accumulated negentropy of the biosphere). This is a search
-efficiency factor of
-\(\sigma \approx 10^{29} / 10^{1.93 \times 10^8} \approx 10^{-1.93 \times 10^8 + 29}\),
-illustrating why evolution, despite appearing ``wasteful,'' is an
-extraordinarily efficient search algorithm relative to blind random
-search.
+(the accumulated negentropy of the biosphere). This is evolution's
+efficiency \emph{relative to blind random assembly},
+\(\sigma_{\text{rand}} \approx 10^{29} / 10^{1.93 \times 10^8} \approx 10^{-1.93 \times 10^8 + 29}\)
+--- a different and far smaller quantity than the reconstruction
+efficiency \(\sigma \in (0,1]\) of
+Definition~\ref{def-search-efficiency-factor}, which takes blind
+\emph{evolutionary} search (not random assembly) as its unit and is
+floored at \(\sigma_{\min} = 1/\Xi = 10^{-35}\). It illustrates why
+evolution, despite appearing ``wasteful,'' is an extraordinarily
+efficient search algorithm relative to blind random search.
 
 \subsection{Example 2: Accumulated Negentropy vs.~Human Energy
 Use}\label{example-2-accumulated-negentropy-vs.-human-energy-use}
@@ -2091,5 +2131,247 @@ the irreplaceability of the complex structures that cooperative networks
 produce and maintain.
 
 \addcontentsline{toc}{section}{References}
-\bibliography{../../shared/main}
+\begin{thebibliography}{34}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Landauer(1961)]{Landauer1961}
+Rolf Landauer.
+\newblock Irreversibility and heat generation in the computing process.
+\newblock \emph{IBM Journal of Research and Development}, 5\penalty0
+  (3):\penalty0 183--191, 1961.
+\newblock \doi{10.1147/rd.53.0183}.
+
+\bibitem[Chaisson(2011)]{Chaisson2011}
+Eric~J. Chaisson.
+\newblock Energy rate density as a complexity metric and evolutionary driver.
+\newblock \emph{Complexity}, 16\penalty0 (3):\penalty0 27--40, 2011.
+\newblock \doi{10.1002/cplx.20323}.
+
+\bibitem[Lostracco(2026{\natexlab{a}})]{TC-I}
+Keith Lostracco.
+\newblock Thermodynamics of cooperation: Necessary constraints,
+  2026{\natexlab{a}}.
+\newblock URL \url{https://doi.org/10.5281/zenodo.19635523}.
+\newblock \doi{10.5281/zenodo.19635523}.
+
+\bibitem[Lostracco(2026{\natexlab{b}})]{TC-IV}
+Keith Lostracco.
+\newblock Thermodynamics of cooperation: Thermodynamic friction,
+  2026{\natexlab{b}}.
+\newblock URL \url{https://doi.org/10.5281/zenodo.19635850}.
+\newblock \doi{10.5281/zenodo.19635850}.
+
+\bibitem[Szilard(1929)]{Szilard1929}
+Leo Szilard.
+\newblock {\"U}ber die {Entropieverminderung} in einem thermodynamischen
+  {System} bei {Eingriffen} intelligenter {Wesen}.
+\newblock \emph{Zeitschrift f{\"u}r Physik}, 53\penalty0 (11--12):\penalty0
+  840--856, 1929.
+\newblock \doi{10.1007/BF01341281}.
+
+\bibitem[Brillouin(1951)]{Brillouin1951}
+L{\'e}on Brillouin.
+\newblock {Maxwell}'s demon cannot operate: Information and entropy. {I}.
+\newblock \emph{Journal of Applied Physics}, 22\penalty0 (3):\penalty0
+  334--337, 1951.
+\newblock \doi{10.1063/1.1699951}.
+
+\bibitem[Brillouin(1962)]{Brillouin1962}
+L{\'e}on Brillouin.
+\newblock \emph{Science and Information Theory}.
+\newblock Academic Press, 2nd edition, 1962.
+
+\bibitem[B{\'e}rut et~al.(2012)B{\'e}rut, Arakelyan, Petrosyan, Ciliberto,
+  Dillenschneider, and Lutz]{Berut2012}
+Antoine B{\'e}rut, Artak Arakelyan, Artyom Petrosyan, Sergio Ciliberto, Raoul
+  Dillenschneider, and Eric Lutz.
+\newblock Experimental verification of {Landauer}'s principle linking
+  information and thermodynamics.
+\newblock \emph{Nature}, 483\penalty0 (7388):\penalty0 187--189, 2012.
+\newblock \doi{10.1038/nature10872}.
+
+\bibitem[Bennett(1973)]{Bennett1973}
+Charles~H. Bennett.
+\newblock Logical reversibility of computation.
+\newblock \emph{IBM Journal of Research and Development}, 17\penalty0
+  (6):\penalty0 525--532, 1973.
+\newblock \doi{10.1147/rd.176.0525}.
+
+\bibitem[Bennett(1982)]{Bennett1982}
+Charles~H. Bennett.
+\newblock The thermodynamics of computation---a review.
+\newblock \emph{International Journal of Theoretical Physics}, 21\penalty0
+  (12):\penalty0 905--940, 1982.
+\newblock \doi{10.1007/BF02084158}.
+
+\bibitem[Adami(2004)]{Adami2004}
+Christoph Adami.
+\newblock Information theory in molecular biology.
+\newblock \emph{Physics of Life Reviews}, 1\penalty0 (1):\penalty0 3--22, 2004.
+\newblock \doi{10.1016/j.plrev.2004.01.002}.
+
+\bibitem[Schr{\"o}dinger(1944)]{Schrodinger1944}
+Erwin Schr{\"o}dinger.
+\newblock \emph{What Is Life? The Physical Aspect of the Living Cell}.
+\newblock Cambridge University Press, 1944.
+
+\bibitem[Shannon(1948)]{Shannon1948}
+Claude~E. Shannon.
+\newblock A mathematical theory of communication.
+\newblock \emph{The Bell System Technical Journal}, 27\penalty0 (3):\penalty0
+  379--423, 1948.
+\newblock \doi{10.1002/j.1538-7305.1948.tb01338.x}.
+
+\bibitem[Lostracco(2026{\natexlab{c}})]{TC-II}
+Keith Lostracco.
+\newblock Thermodynamics of cooperation: Strategic entropy injection,
+  2026{\natexlab{c}}.
+\newblock URL \url{https://doi.org/10.5281/zenodo.19635814}.
+\newblock \doi{10.5281/zenodo.19635814}.
+
+\bibitem[Burch and Harris(2021)]{Burch2021}
+Sarah~L. Burch and Sara~E. Harris.
+\newblock \emph{Understanding Climate Change: Science, Policy, and Practice}.
+\newblock University of Toronto Press, 2nd edition, 2021.
+
+\bibitem[Beer et~al.(2010)Beer, Reichstein, Tomelleri, Ciais, Jung, Carvalhais,
+  R{\"o}denbeck, Arain, Baldocchi, Bonan, Bondeau, Cescatti, Lasslop, Lindroth,
+  Lomas, Luyssaert, Margolis, Oleson, Roupsard, Veenendaal, Viovy, Williams,
+  Woodward, and Papale]{Beer2010}
+Christian Beer, Markus Reichstein, Enrico Tomelleri, Philippe Ciais, Martin
+  Jung, Nuno Carvalhais, Christian R{\"o}denbeck, M.~Altaf Arain, Dennis
+  Baldocchi, Gordon~B. Bonan, Alberte Bondeau, Alessandro Cescatti, Gitta
+  Lasslop, Anders Lindroth, Mark Lomas, Sebastiaan Luyssaert, Hank Margolis,
+  Keith~W. Oleson, Olivier Roupsard, Elmar Veenendaal, Nicolas Viovy,
+  Christopher Williams, F.~Ian Woodward, and Dario Papale.
+\newblock Terrestrial gross carbon dioxide uptake: Global distribution and
+  covariation with climate.
+\newblock \emph{Science}, 329\penalty0 (5993):\penalty0 834--838, 2010.
+\newblock \doi{10.1126/science.1184984}.
+
+\bibitem[Smil(2002)]{Smil2002}
+Vaclav Smil.
+\newblock \emph{The Earth's Biosphere: Evolution, Dynamics, and Change}.
+\newblock MIT Press, 2002.
+\newblock \doi{10.7551/mitpress/2551.001.0001}.
+
+\bibitem[Kellis et~al.(2014)Kellis, Wold, Snyder, Bernstein, Kundaje, Marinov,
+  Ward, et~al.]{Kellis2014}
+Manolis Kellis, Barbara Wold, Michael~P. Snyder, Bradley~E. Bernstein, Anshul
+  Kundaje, Georgi~K. Marinov, Lucas~D. Ward, et~al.
+\newblock Defining functional {DNA} elements in the human genome.
+\newblock \emph{Proceedings of the National Academy of Sciences}, 111\penalty0
+  (17):\penalty0 6131--6138, 2014.
+\newblock \doi{10.1073/pnas.1318948111}.
+
+\bibitem[Graur(2017)]{Graur2017}
+Dan Graur.
+\newblock An upper limit on the functional fraction of the human genome.
+\newblock \emph{Genome Biology and Evolution}, 9\penalty0 (7):\penalty0
+  1880--1885, 2017.
+\newblock \doi{10.1093/gbe/evx121}.
+
+\bibitem[Mora et~al.(2011)Mora, Tittensor, Adl, Simpson, and Worm]{Mora2011}
+Camilo Mora, Derek~P. Tittensor, Sina Adl, Alastair G.~B. Simpson, and Boris
+  Worm.
+\newblock How many species are there on {Earth} and in the ocean?
+\newblock \emph{PLoS Biology}, 9\penalty0 (8):\penalty0 e1001127, 2011.
+\newblock \doi{10.1371/journal.pbio.1001127}.
+
+\bibitem[Milo and Phillips(2015)]{Milo2015}
+Ron Milo and Rob Phillips.
+\newblock \emph{Cell Biology by the Numbers}.
+\newblock Garland Science, 1st edition, 2015.
+
+\bibitem[Chaisson(2001)]{Chaisson2001}
+Eric~J. Chaisson.
+\newblock \emph{Cosmic Evolution: The Rise of Complexity in Nature}.
+\newblock Harvard University Press, 2001.
+
+\bibitem[Bar-On et~al.(2018)Bar-On, Phillips, and Milo]{BarOn2018}
+Yinon~M. Bar-On, Rob Phillips, and Ron Milo.
+\newblock The biomass distribution on {Earth}.
+\newblock \emph{Proceedings of the National Academy of Sciences}, 115\penalty0
+  (25):\penalty0 6506--6511, 2018.
+\newblock \doi{10.1073/pnas.1711842115}.
+
+\bibitem[Whitman et~al.(1998)Whitman, Coleman, and Wiebe]{Whitman1998}
+William~B. Whitman, David~C. Coleman, and William~J. Wiebe.
+\newblock Prokaryotes: The unseen majority.
+\newblock \emph{Proceedings of the National Academy of Sciences}, 95\penalty0
+  (12):\penalty0 6578--6583, 1998.
+\newblock \doi{10.1073/pnas.95.12.6578}.
+
+\bibitem[Lostracco(2026{\natexlab{d}})]{TC-V}
+Keith Lostracco.
+\newblock Thermodynamics of cooperation: Cooperative equilibrium,
+  2026{\natexlab{d}}.
+\newblock URL \url{https://doi.org/10.5281/zenodo.19635856}.
+\newblock \doi{10.5281/zenodo.19635856}.
+
+\bibitem[Barrage and Nordhaus(2024)]{BarrageNordhaus2024}
+Lint Barrage and William Nordhaus.
+\newblock Policies, projections, and the social cost of carbon: Results from
+  the {DICE-2023} model.
+\newblock \emph{Proceedings of the National Academy of Sciences}, 121\penalty0
+  (13):\penalty0 e2312030121, 2024.
+\newblock \doi{10.1073/pnas.2312030121}.
+
+\bibitem[Lostracco(2026{\natexlab{e}})]{TC-VI}
+Keith Lostracco.
+\newblock Thermodynamics of cooperation: Value dynamics, 2026{\natexlab{e}}.
+\newblock URL \url{https://doi.org/10.5281/zenodo.19635865}.
+\newblock \doi{10.5281/zenodo.19635865}.
+
+\bibitem[Lovejoy and Nobre(2018)]{LovejoyNobre2018}
+Thomas~E. Lovejoy and Carlos Nobre.
+\newblock Amazon tipping point.
+\newblock \emph{Science Advances}, 4\penalty0 (2):\penalty0 eaat2340, 2018.
+\newblock \doi{10.1126/sciadv.aat2340}.
+\newblock URL \url{https://www.science.org/doi/abs/10.1126/sciadv.aat2340}.
+
+\bibitem[Arrow and Fisher(1974)]{ArrowFisher1974}
+Kenneth~J. Arrow and Anthony~C. Fisher.
+\newblock Environmental preservation, uncertainty, and irreversibility.
+\newblock \emph{The Quarterly Journal of Economics}, 88\penalty0 (2):\penalty0
+  312--319, 1974.
+\newblock \doi{10.2307/1883074}.
+
+\bibitem[Dixit and Pindyck(1994)]{DixitPindyck1994}
+Avinash~K. Dixit and Robert~S. Pindyck.
+\newblock \emph{Investment Under Uncertainty}.
+\newblock Princeton University Press, 1994.
+
+\bibitem[Penrose(2005)]{Penrose2005}
+Roger Penrose.
+\newblock \emph{The Road to Reality: A Complete Guide to the Laws of the
+  Universe}.
+\newblock Alfred A. Knopf, 2005.
+
+\bibitem[Saatchi et~al.(2007)Saatchi, Houghton, Dos Santos~Alval{\'a}, Soares,
+  and Yu]{Saatchi2007}
+Sassan~S. Saatchi, R.~A. Houghton, Regina~C. Dos Santos~Alval{\'a}, J.~V.
+  Soares, and Y.~Yu.
+\newblock Distribution of aboveground live biomass in the {Amazon} basin.
+\newblock \emph{Global Change Biology}, 13\penalty0 (4):\penalty0 816--837,
+  2007.
+\newblock \doi{10.1111/j.1365-2486.2007.01323.x}.
+
+\bibitem[{Science Panel for the Amazon}(2021)]{SciencePanelAmazon2021}
+{Science Panel for the Amazon}.
+\newblock Chapter 6: Biogeochemical cycles of the {Amazon}.
+\newblock Technical report, Science Panel for the Amazon, 2021.
+\newblock URL
+  \url{https://www.alice.cnptia.embrapa.br/alice/bitstream/doc/1159190/1/Biogeochemical-cycles.pdf}.
+
+\bibitem[Morley(2000)]{Morley2000}
+Robert~J. Morley.
+\newblock \emph{Origin and Evolution of Tropical Rain Forests}.
+\newblock Wiley, 2000.
+
+\end{thebibliography}
 \end{document}
