@@ -1,0 +1,272 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{graphicx}
+
+% ── Paragraph spacing ────────────────────────────────────────────────────────
+\usepackage{parskip}
+
+% ── Page-break quality ───────────────────────────────────────────────────────
+\widowpenalty=10000
+\clubpenalty=10000
+\raggedbottom
+
+% ── Suppress automatic section numbering ─────────────────────────────────────
+\setcounter{secnumdepth}{-1}
+
+% ── Pandoc-generated table support ───────────────────────────────────────────
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{calc}
+\usepackage{caption}
+\newcounter{none}
+
+% ── Math support ─────────────────────────────────────────────────────────────
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% ── Make \paragraph and \subparagraph block-level ────────────────────────────
+\usepackage{titlesec}
+\titleformat{\paragraph}
+  {\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+  {0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+\titleformat{\subparagraph}
+  {\normalfont\normalsize\bfseries}{\thesubparagraph}{1em}{}
+\titlespacing*{\subparagraph}
+  {0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+% ── Pandoc-generated tightlist support ───────────────────────────────────────
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% ── Pandoc 3.x figure sizing ────────────────────────────────────────────────
+\newcommand{\pandocbounded}[1]{%
+  \sbox0{#1}%
+  \ifdim\wd0>\linewidth
+    \resizebox{\linewidth}{!}{#1}%
+  \else
+    #1%
+  \fi
+}
+
+% ── Unicode character fixes ──────────────────────────────────────────────────
+\usepackage{newunicodechar}
+\newunicodechar{✓}{$\checkmark$}
+\newunicodechar{≠}{$\neq$}
+\newunicodechar{≡}{$\equiv$}
+\newunicodechar{≈}{$\approx$}
+\newunicodechar{δ}{$\delta$}
+\newunicodechar{−}{$-$}
+\let\mystRightarrow\rightarrow
+\renewcommand{\rightarrow}{\ensuremath{\mystRightarrow}}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\hypersetup{colorlinks=true, allcolors=blue}
+
+\title{Technical Summary: Thermodynamic Friction in Multi-Agent Resource
+Contests}
+\author{Keith Lostracco}
+\date{}
+
+\begin{document}
+\maketitle
+
+\subsection{Model}\label{model}
+
+Each agent \(i\) maintains a \textbf{boundary} with integrity
+\(B_i > 0\) (energy units), representing the total energetic investment
+in the agent's defensive infrastructure. Maintaining boundary integrity
+requires continuous work at rate
+\(C_{\text{maintain},i} = \gamma_i \cdot B_i\), where \(\gamma_i > 0\)
+is the entropy leakage rate. Breaching agent \(i\)'s boundary to depth
+\(d \in [0,1]\) costs work
+\(W_{\text{breach}}(d) = \int_0^d B_i \cdot f(s) \, ds\), where \(f\) is
+a normalized resistance profile (\(\int_0^1 f(s)\,ds = 1\)), so full
+breach costs \(W_{\text{breach}}(1) = B_i\).
+
+Two agents contesting a resource \(E_j > 0\) invest energies
+\(e_A, e_B \geq 0\). The probability of winning follows the Tullock
+contest success function:
+
+\[p_A(e_A, e_B) = \frac{\sigma_A \, e_A^r}{\sigma_A \, e_A^r + \sigma_B \, e_B^r}\]
+
+where \(\sigma_i > 0\) is conflict effectiveness and \(r > 0\) is the
+decisiveness parameter. The boundary integrity \(B_i\) is the
+\textbf{embodied (negentropic) energy} of the boundary
+(\(B_i = \Delta G_{\text{boundary}}\)), consistent with
+\(W_{\text{breach}}(1) = B_i\); the damage \(\Delta B_i\) is the
+embodied energy of the destroyed portion. In conflict, each agent
+suffers offensive self-damage
+\(\Delta B_i^{\text{off}} = \psi^{\text{off}} \cdot e_i\) and inflicts
+defensive damage
+\(\Delta B_j^{\text{def}} = \psi^{\text{def}} \cdot e_i\). Restoring the
+boundary requires energy
+\(W_{\text{repair},i} = \kappa \cdot \Delta B_i\) with repair multiplier
+\(\kappa = 1 + \kappa_{\text{clear}} + \kappa_{\text{pen}} + \kappa_{\text{irr}} \geq 1\)
+(\(\kappa > 1\) in any physical system, by thermodynamic
+irreversibility). Because repair re-supplies the destroyed embodied
+energy \(\Delta B_i\) (the leading \(1\) in \(\kappa\)), the per-agent
+ledger charges contest effort plus repair only --- not a separate damage
+write-off. With
+\(\psi \triangleq \psi^{\text{off}} + \psi^{\text{def}}\), the
+\textbf{total friction multiplier} is:
+
+\[\Phi \triangleq 1 + \kappa(\psi^{\text{off}} + \psi^{\text{def}}) = 1 + \kappa\psi\]
+
+The network friction coefficient \(\phi \geq 0\) parameterizes
+per-transaction overhead:
+\(C_{\text{overhead}}(\phi) = \phi \cdot E_{\text{transaction}}\).
+Boundary violations inject friction
+(\(\phi_{t+1} = \phi_t + \eta \cdot v\)), while consistent cooperation
+allows friction to decay (\(\phi_{t+1} = (1 - \epsilon)\phi_t\) absent
+violations).
+
+\subsection{Results}\label{results}
+
+\textbf{Theorem 4 (Dissipation Scaling).} In a symmetric \(N\)-agent
+Tullock contest (\(r = 1\)) over resource \(E_j\):
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\item
+  Each agent's equilibrium investment:
+  \(e_i^* = \frac{N-1}{N^2} \cdot E_j\).
+\item
+  Total contest dissipation: \(D_N = \frac{N-1}{N} \cdot E_j\).
+\item
+  Each agent's expected payoff: \(\Pi_i^* = \frac{E_j}{N^2}\).
+\item
+  Dissipation ratio: \(D_N / E_j = 1 - 1/N\).
+\end{enumerate}
+
+\textbf{Corollary 4.1 (Vanishing Individual Returns).}
+\(\lim_{N \to \infty} \Pi_i^* = 0\). As the number of contestants grows,
+each agent's expected return collapses to zero.
+
+\textbf{Corollary 4.2 (Unit Dissipation Limit).}
+\(\lim_{N \to \infty} D_N / E_j = 1\). In the limit of many contestants,
+the entire resource value is dissipated in conflict.
+
+\textbf{Proposition 2 (Symmetric Contest Equilibrium).} In a symmetric
+Tullock contest (\(\sigma_A = \sigma_B\), \(r = 1\)) over \(E_j\):
+\(e_A^* = e_B^* = E_j/4\), total dissipation \(D_2 = E_j/2\), payoffs
+\(\Pi_A^* = \Pi_B^* = E_j/4\).
+
+\textbf{Proposition 3 (Asymmetric Contest Equilibrium).} In a Tullock
+contest (\(r = 1\)) with valuations \(V_A, V_B > 0\):
+
+\[e_A^* = \frac{V_A^2 V_B}{(V_A + V_B)^2}, \qquad e_B^* = \frac{V_A V_B^2}{(V_A + V_B)^2}\]
+
+Total dissipation: \(D_2 = V_A V_B / (V_A + V_B)\) (half the harmonic
+mean).
+
+\textbf{Theorem 5 (Net-Negative Conflict).} In a conflict contest over
+resource \(E_j\) between \(N \geq 2\) symmetric agents with friction
+multiplier \(\Phi\):
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\item
+  Total system loss:
+  \(L_{\text{system}}^{(N)} = \Phi \cdot \frac{N-1}{N} \cdot E_j\).
+\item
+  Net system value:
+  \(V_{\text{net}} = E_j\left(1 - \Phi \cdot \frac{N-1}{N}\right)\).
+\item
+  The conflict is net-negative (\(V_{\text{net}} < 0\)) if and only if
+  \(\Phi > N/(N-1)\). For \(N = 2\): \(\Phi > 2\) (equivalently
+  \(\kappa\psi > 1\)). For \(N = 3\): \(\Phi > 3/2\); since
+  \(N/(N-1) \leq 3/2\) for all \(N \geq 3\), \(\Phi > 3/2\) suffices for
+  every \(N \geq 3\). As \(N \to \infty\) the threshold falls to
+  \(\Phi > 1\).
+\end{enumerate}
+
+\textbf{Corollary 5.1 (Inevitability of Net-Negative Conflict).} For any
+physical system where \(\psi^{\text{off}} + \psi^{\text{def}} > 0\) and
+\(\kappa > 1\), there exists a finite \(N^*\) beyond which the conflict
+is net-negative.
+
+\textbf{Corollary 5.2 (Two-Agent Threshold).} For \(N = 2\), the
+conflict is net-negative when
+\(\kappa\psi = \kappa(\psi^{\text{off}} + \psi^{\text{def}}) > 1\). At
+\(\kappa = 2\) this requires \(\psi > 1/2\): the mild baseline
+\(\psi^{\text{off}} = 0.15\), \(\psi^{\text{def}} = 0.25\)
+(\(\psi = 0.4\)) gives \(\Phi = 1.8 < 2\) (net-positive), while a
+destructive \(\psi^{\text{off}} = \psi^{\text{def}} = 0.3\)
+(\(\psi = 0.6\)) gives \(\Phi = 2.2 > 2\) (net-negative).
+
+\textbf{Corollary (Escalation under Physical Budgets).} For decisive
+contests (\(r > N/(N-1)\)) with \(N \geq 2\) symmetric agents, the
+unbounded Tullock pure NE ceases to exist
+{[}@BayeKovenock-deVries1994{]}; under a finite physical energy budget
+\(\bar e \leq E_j/N\), the symmetric profile \(e_i = \bar e\) is a
+pure-strategy NE with \(D_N = N \bar e\). Once amplified by \(\Phi\),
+the system loss exceeds the contested resource value whenever
+\(\bar e > E_j/(\Phi N)\).
+
+\textbf{Theorem 6 (Cooperation Dominance).} The cooperative regime
+strictly dominates the conflict regime whenever resource collision
+occurs:
+
+\[SW_{\text{coop}} - SW_{\text{conflict}} \geq \Phi \cdot \frac{N-1}{N} \cdot E_j > 0\]
+
+The cooperation premium is increasing in \(N\), \(\Phi\), and \(E_j\).
+
+\textbf{Theorem 7 (Cascading Friction).} A single boundary violation of
+severity \(v\) in a network with \(M\) transactions of average value
+\(\bar{E}\) and friction sensitivity \(\eta\) produces a total cascading
+cost of:
+
+\[C_{\text{cascade}} = \frac{\eta \cdot v \cdot M \cdot \bar{E}}{\epsilon}\]
+
+The ratio \(C_{\text{cascade}}/v = \eta M \bar{E} / \epsilon\) scales
+linearly with network size (\(M\)) and inversely with recovery rate
+(\(\epsilon\)).
+
+\textbf{Corollary 7.1 (Friction Ratchet).} If the violation rate \(\nu\)
+exceeds
+\(\nu^* = \frac{\epsilon}{\eta v} \cdot \frac{E_{\text{coop net}}}{M \bar{E}}\),
+the friction tax exceeds the cooperative surplus and the network
+collapses.
+
+\subsection{Notation}\label{notation}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Symbol
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Meaning
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\(B_i\) & Boundary integrity of agent \(i\) (energy units) \\
+\(\gamma_i\) & Entropy leakage rate (maintenance cost coefficient) \\
+\(E_j\) & Energy value of contested resource \\
+\(e_i^*\) & Nash equilibrium contest investment \\
+\(D_N\) & Total contest dissipation (\(N\) agents) \\
+\(\psi^{\text{off}}\) & Offensive boundary-damage fraction \\
+\(\psi^{\text{def}}\) & Defensive boundary-damage fraction \\
+\(\psi\) & Combined boundary-damage fraction
+\(\psi^{\text{off}} + \psi^{\text{def}}\) \\
+\(\kappa\) & Repair multiplier (\(\kappa \geq 1\); \(\kappa > 1\) in any
+physical system by the Second Law) \\
+\(\Phi\) & Total friction multiplier:
+\(1 + \kappa(\psi^{\text{off}} + \psi^{\text{def}})\) \\
+\(\phi\) & Network friction coefficient \\
+\(\eta\) & Friction sensitivity (violation-to-friction conversion) \\
+\(v\) & Violation severity (energy units) \\
+\(\epsilon\) & Friction recovery rate per period \\
+\(M\) & Number of cooperative transactions per period \\
+\(\bar{E}\) & Average cooperative transaction value \\
+\end{longtable}
+}
+
+\end{document}

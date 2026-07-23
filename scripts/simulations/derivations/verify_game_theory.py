@@ -55,18 +55,24 @@ def section(title: str) -> None:
 E_R = 100.0       # Resource energy value
 c = 2.0            # Coordination cost
 theta = 0.15       # Exploitation efficiency
-delta_off = 0.15   # Offensive boundary damage
-delta_def = 0.25   # Defensive boundary damage
+psi_off = 0.15     # Offensive boundary damage fraction
+psi_def = 0.25     # Defensive boundary damage fraction
 kappa = 2.0        # Repair multiplier
 
-# Derived
-Phi = 1 + (1 + kappa) * (delta_off + delta_def)
+# Derived: friction multiplier (TC-IV).  The repair term kappa*dB already
+# re-supplies the destroyed boundary energy dB, so charging a standalone dB on
+# top of it double-counts by psi*e_i.  Hence kappa*psi, NOT (1+kappa)*psi.
+Phi = 1 + kappa * (psi_off + psi_def)
 
 # Payoffs (Section 2.3)
-T_pay = E_R * (1 - theta * (1 + (1 + kappa) * delta_off))
+T_pay = E_R * (1 - theta * (1 + kappa * psi_off))
 R_pay = E_R / 2 - c
 P_pay = (E_R / 2) * (1 - Phi / 2)
-S_pay = -theta * E_R * (1 + kappa) * delta_def
+S_pay = -theta * E_R * kappa * psi_def
+
+# Prisoner's-Dilemma ceiling: the ordering T>R>P>S holds while Phi < Phi_PD;
+# above it P drops below S and the game becomes Chicken (T>R>S>P).
+Phi_PD = 2 + 4 * theta * kappa * psi_def
 
 
 # ---------------------------------------------------------------------------
@@ -77,14 +83,14 @@ def verify_payoff_construction() -> None:
     section("1. Payoff Construction — Sections 2.1–2.3")
 
     # Symbolic verification
-    E, c_s, th, d_off, d_def, k = sp.symbols(
-        "E_R c theta delta_off delta_def kappa", positive=True
+    E, c_s, th, p_off, p_def, k = sp.symbols(
+        "E_R c theta psi_off psi_def kappa", positive=True
     )
-    Phi_s = 1 + (1 + k) * (d_off + d_def)
-    T_s = E * (1 - th * (1 + (1 + k) * d_off))
+    Phi_s = 1 + k * (p_off + p_def)
+    T_s = E * (1 - th * (1 + k * p_off))
     R_s = E / 2 - c_s
     P_s = (E / 2) * (1 - Phi_s / 2)
-    S_s = -th * E * (1 + k) * d_def
+    S_s = -th * E * k * p_def
 
     # Check symmetry of CC and DD payoffs
     # CC: both get R, DD: both get P — embedded in the matrix construction
@@ -97,27 +103,27 @@ def verify_payoff_construction() -> None:
           True, "defector gets T, victim gets S in both DC and CD")
 
     # Numerical payoff values (Section 2.4)
-    check("T = 78.25", np.isclose(T_pay, 78.25),
+    check("T = 80.5", np.isclose(T_pay, 80.5),
           f"T = {T_pay}")
     check("R = 48", np.isclose(R_pay, 48.0),
           f"R = {R_pay}")
-    check("Phi = 2.2", np.isclose(Phi, 2.2),
+    check("Phi = 1.8", np.isclose(Phi, 1.8),
           f"Phi = {Phi}")
-    check("P = -5", np.isclose(P_pay, -5.0),
+    check("P = +5", np.isclose(P_pay, 5.0),
           f"P = {P_pay}")
-    check("S = -11.25", np.isclose(S_pay, -11.25),
+    check("S = -7.5", np.isclose(S_pay, -7.5),
           f"S = {S_pay}")
 
     # Verify T computation step by step
-    inner = 1 + (1 + kappa) * delta_off
-    check("T inner factor = 1.45", np.isclose(inner, 1.45),
-          f"1 + (1+kappa)*delta_off = {inner}")
+    inner = 1 + kappa * psi_off
+    check("T inner factor = 1.3", np.isclose(inner, 1.3),
+          f"1 + kappa*psi_off = {inner}")
     T_check = E_R * (1 - theta * inner)
     check("T step-by-step matches", np.isclose(T_check, T_pay),
           f"{T_check} == {T_pay}")
 
     # Verify S computation step by step
-    S_check = -theta * E_R * (1 + kappa) * delta_def
+    S_check = -theta * E_R * kappa * psi_def
     check("S step-by-step matches", np.isclose(S_check, S_pay),
           f"{S_check} == {S_pay}")
 
@@ -147,7 +153,7 @@ def verify_proposition_4() -> None:
 
     # Verify cooperation premium
     coop_premium = R_pay - P_pay
-    check("Cooperation premium R - P = 53", np.isclose(coop_premium, 53.0),
+    check("Cooperation premium R - P = 43", np.isclose(coop_premium, 43.0),
           f"R - P = {coop_premium}")
 
     # System total under CC vs DD
@@ -155,27 +161,56 @@ def verify_proposition_4() -> None:
     sys_DD = 2 * P_pay
     check("System CC total = 96", np.isclose(sys_CC, 96.0),
           f"2R = {sys_CC}")
-    check("System DD total = -10", np.isclose(sys_DD, -10.0),
+    # Baseline is the MILD regime (Phi=1.8 < 2), so mutual defection is
+    # net-POSITIVE but wasteful — it no longer destroys value outright.
+    check("System DD total = +10", np.isclose(sys_DD, 10.0),
           f"2P = {sys_DD}")
     check("CC Pareto-dominates DD", sys_CC > sys_DD,
           f"{sys_CC} > {sys_DD}")
 
     # Symbolic: T > R condition — theta threshold
-    # T > R iff theta < (1/2 + c/E_R) / (1 + (1+kappa)*delta_off)
-    theta_threshold = (0.5 + c / E_R) / (1 + (1 + kappa) * delta_off)
+    # T > R iff theta < (1/2 + c/E_R) / (1 + kappa*psi_off)
+    theta_threshold = (0.5 + c / E_R) / (1 + kappa * psi_off)
     check("theta < threshold for T > R", theta < theta_threshold,
           f"theta={theta} < threshold={theta_threshold:.4f}")
-    check("theta threshold ≈ 0.3586", np.isclose(theta_threshold, 0.3586, atol=0.001),
+    check("theta threshold = 0.4 (exact, incl. c/E_R)",
+          np.isclose(theta_threshold, 0.4, atol=0.001),
           f"threshold = {theta_threshold:.4f}")
+    # The paper quotes the simplified form 0.5/(1 + kappa*psi_off), dropping the
+    # small c/E_R = 0.02 term: 0.5/1.3 ≈ 0.385 (was 0.5/1.45 ≈ 0.345).
+    theta_threshold_quoted = 0.5 / (1 + kappa * psi_off)
+    check("theta threshold ≈ 0.385 (paper's simplified quote, 0.5/1.3)",
+          np.isclose(theta_threshold_quoted, 0.385, atol=0.001),
+          f"0.5/{1 + kappa*psi_off} = {theta_threshold_quoted:.4f}")
 
     # R > P condition: Phi*E_R/4 > c
     lhs_rp = Phi * E_R / 4
     check("R > P condition: Phi*E_R/4 > c", lhs_rp > c,
           f"{lhs_rp} > {c}")
 
-    # Mutual defection is net-negative when Phi > 2
-    check("P < 0 when Phi > 2", P_pay < 0 and Phi > 2,
+    # Admissibility (rmk-admissibility): P = (E_R/2)(1-Phi/2) < 0 EXACTLY when
+    # Phi > 2, i.e. kappa*psi > 1, i.e. psi > 1/kappa (one half at kappa=2).
+    # The corrected baseline psi=0.4 < 0.5 is therefore MILD, with P = +5 > 0.
+    check("Baseline is the mild regime: Phi < 2 and P > 0",
+          Phi < 2 and P_pay > 0,
+          f"Phi={Phi} < 2, P={P_pay}")
+    check("Baseline mild regime <=> kappa*psi < 1 (psi < 1/kappa)",
+          kappa * (psi_off + psi_def) < 1 and (psi_off + psi_def) < 1 / kappa,
+          f"kappa*psi={kappa*(psi_off+psi_def)}, 1/kappa={1/kappa}")
+    check("P < 0 iff Phi > 2 (equivalence holds at baseline)",
+          (P_pay < 0) == (Phi > 2),
           f"Phi={Phi}, P={P_pay}")
+
+    # ...and the destructive regime (psi=0.6 > 1/kappa) does drive P negative.
+    psi_off_d, psi_def_d = 0.25, 0.35
+    Phi_d = 1 + kappa * (psi_off_d + psi_def_d)
+    P_d = (E_R / 2) * (1 - Phi_d / 2)
+    check("Destructive regime (psi=0.6 > 1/kappa): Phi = 2.2 and P = -5",
+          np.isclose(Phi_d, 2.2) and np.isclose(P_d, -5.0),
+          f"Phi={Phi_d}, P={P_d}")
+    check("P < 0 iff Phi > 2 (equivalence holds in destructive regime)",
+          (P_d < 0) == (Phi_d > 2),
+          f"Phi={Phi_d}, P={P_d}")
 
 
 # ---------------------------------------------------------------------------
@@ -188,17 +223,17 @@ def verify_theorem_11() -> None:
     delta_star = (T_pay - R_pay) / (T_pay - P_pay)
 
     check("delta* = (T-R)/(T-P)", True, "formula definition")
-    check("delta* = 0.3634 (baseline)", np.isclose(delta_star, 0.3634, atol=0.001),
+    check("delta* = 0.431 (baseline)", np.isclose(delta_star, 0.431, atol=0.001),
           f"delta* = {delta_star:.4f}")
 
     # Verify the derivation: V_coop >= V_deviate
     # R/(1-delta) >= T + delta*P/(1-delta)
     # => R >= (1-delta)*T + delta*P
     # => delta >= (T-R)/(T-P)
-    delta_test = 0.4  # > delta*, so cooperation should be NE
+    delta_test = 0.5  # > delta* = 0.431, so cooperation should be NE
     V_coop = R_pay / (1 - delta_test)
     V_deviate = T_pay + delta_test * P_pay / (1 - delta_test)
-    check("V_coop >= V_deviate for delta=0.4",
+    check("V_coop >= V_deviate for delta=0.5",
           V_coop >= V_deviate,
           f"V_coop={V_coop:.2f}, V_deviate={V_deviate:.2f}")
 
@@ -240,17 +275,55 @@ def verify_corollary_11_1() -> None:
 
     delta_star = (T_pay - R_pay) / (T_pay - P_pay)
 
-    check("delta* < 0.5 when Phi > 2", delta_star < 0.5 and Phi > 2,
-          f"delta*={delta_star:.4f}, Phi={Phi}")
+    # Corrected condition (ii):  c < (theta*E_R/2) * (1 + kappa*psi_off).
+    cond_ii_rhs = (theta * E_R / 2) * (1 + kappa * psi_off)
+    check("Baseline satisfies condition (ii): c < (theta*E_R/2)*(1+kappa*psi_off)",
+          c < cond_ii_rhs,
+          f"c={c} < {cond_ii_rhs}")
+    check("delta* < 0.5 at baseline", delta_star < 0.5,
+          f"delta*={delta_star:.4f}")
 
+    # The P < 0 bound is NOT exercised at the corrected baseline (mild regime,
+    # P = +5 > 0).  It applies in the destructive regime, so verify it there.
+    psi_off_d, psi_def_d = 0.25, 0.35
+    Phi_d = 1 + kappa * (psi_off_d + psi_def_d)
+    T_d = E_R * (1 - theta * (1 + kappa * psi_off_d))
+    P_d = (E_R / 2) * (1 - Phi_d / 2)
+    delta_star_d = (T_d - R_pay) / (T_d - P_d)
+    check("Destructive regime: delta* = 0.358",
+          np.isclose(delta_star_d, 0.358, atol=0.001),
+          f"delta* = {delta_star_d:.4f}")
     # When P < 0: T - P > T, so delta* = (T-R)/(T-P) < (T-R)/T = 1 - R/T
-    if P_pay < 0:
-        upper_bound = 1 - R_pay / T_pay
-        check("delta* < 1 - R/T (bound from P < 0)",
-              delta_star < upper_bound,
-              f"{delta_star:.4f} < {upper_bound:.4f}")
-        check("1 - R/T < 0.5", upper_bound < 0.5,
-              f"1 - R/T = {upper_bound:.4f}")
+    check("Destructive regime has P < 0 (bound below is live)", P_d < 0,
+          f"P = {P_d}")
+    upper_bound_d = 1 - R_pay / T_d
+    check("delta* < 1 - R/T (bound from P < 0)",
+          delta_star_d < upper_bound_d,
+          f"{delta_star_d:.4f} < {upper_bound_d:.4f}")
+    check("1 - R/T < 0.5", upper_bound_d < 0.5,
+          f"1 - R/T = {upper_bound_d:.4f}")
+
+    # Retuned counterexample: Phi > 2 (hence P < 0) does NOT by itself give
+    # delta* < 0.5 — condition (ii) is doing real work.  Here (ii) FAILS and
+    # delta* lands above 0.5.
+    theta_x, psi_off_x, psi_def_x = 0.006, 0.02, 0.49
+    Phi_x = 1 + kappa * (psi_off_x + psi_def_x)
+    T_x = E_R * (1 - theta_x * (1 + kappa * psi_off_x))
+    P_x = (E_R / 2) * (1 - Phi_x / 2)
+    delta_star_x = (T_x - R_pay) / (T_x - P_x)
+    cond_ii_rhs_x = (theta_x * E_R / 2) * (1 + kappa * psi_off_x)
+    check("Counterexample: Phi = 2.02 > 2 and P = -0.5 < 0",
+          np.isclose(Phi_x, 2.02) and np.isclose(P_x, -0.5),
+          f"Phi={Phi_x}, P={P_x}")
+    check("Counterexample violates condition (ii): RHS = 0.312 < c = 2",
+          np.isclose(cond_ii_rhs_x, 0.312) and cond_ii_rhs_x < c,
+          f"RHS={cond_ii_rhs_x} < c={c}")
+    check("Counterexample: delta* = 0.514 > 0.5 despite Phi > 2",
+          np.isclose(delta_star_x, 0.514, atol=0.001) and delta_star_x > 0.5,
+          f"delta* = {delta_star_x:.4f}")
+    check("Counterexample: Phi_PD = 2.0235",
+          np.isclose(2 + 4 * theta_x * kappa * psi_def_x, 2.0235, atol=0.0001),
+          f"Phi_PD = {2 + 4*theta_x*kappa*psi_def_x}")
 
 
 # ---------------------------------------------------------------------------
@@ -260,10 +333,13 @@ def verify_corollary_11_1() -> None:
 def verify_sensitivity_table() -> None:
     section("5. Sensitivity Analysis — Section 3.5")
 
-    # Reproduce the entire sensitivity table.
+    # Reproduce the entire sensitivity table (all 7 rows, row-index aligned).
     # Friction-regime rows vary kappa (the physical knob: Second-Law repair
     # multiplier) holding theta = 0.15. Exploitation rows vary theta holding
-    # kappa = 2. Phi, T, S all share (1+kappa) and are recomputed per row.
+    # kappa = 2. Phi, T, S all scale with kappa and are recomputed per row.
+    #
+    # The rows do NOT all share one threshold formula.  Which formula applies is
+    # decided by the regime test Phi vs Phi_PD, derived (not hardcoded) below.
     regimes = [
         # (label, kappa_val, theta_val)
         ("No repair cost (kappa=0)", 0.0, 0.15),
@@ -275,28 +351,110 @@ def verify_sensitivity_table() -> None:
         ("Expensive exploit (theta=0.30)", 2.0, 0.30),
     ]
 
-    expected_deltas = [0.513, 0.430, 0.363, 0.261, 0.186, 0.458, 0.138]
+    expected_deltas = [0.617, 0.513, 0.431, 0.308, 0.250, 0.514, 0.232]
 
     for (label, kappa_v, theta_v), exp_ds in zip(regimes, expected_deltas):
-        Phi_v = 1 + (1 + kappa_v) * (delta_off + delta_def)
-        T_v = E_R * (1 - theta_v * (1 + (1 + kappa_v) * delta_off))
+        Phi_v = 1 + kappa_v * (psi_off + psi_def)
+        T_v = E_R * (1 - theta_v * (1 + kappa_v * psi_off))
         R_v = E_R / 2 - c
         P_v = (E_R / 2) * (1 - Phi_v / 2)
-        S_v = -theta_v * E_R * (1 + kappa_v) * delta_def
+        S_v = -theta_v * E_R * kappa_v * psi_def
+        Phi_PD_v = 2 + 4 * theta_v * kappa_v * psi_def
 
-        ds_v = (T_v - R_v) / (T_v - P_v)
-        check(f"{label}: delta*={exp_ds}",
+        # Regime test.  Algebraically, P - S = (E_R/4)*(Phi_PD - Phi), so
+        #     Phi > Phi_PD  <=>  P < S  <=>  the game is Chicken (T>R>S>P),
+        # and the deviation is punished by S rather than by P.  The boundary is
+        # STRICT: at Phi == Phi_PD we have P == S exactly and the two threshold
+        # forms coincide, so the row stays on the PD branch.
+        on_boundary = bool(np.isclose(Phi_v, Phi_PD_v))
+        is_chicken = bool(Phi_v > Phi_PD_v) and not on_boundary
+
+        if is_chicken:
+            ds_v = (T_v - R_v) / (T_v - S_v)   # Chicken: punished by S
+        else:
+            ds_v = (T_v - R_v) / (T_v - P_v)   # Prisoner's Dilemma: punished by P
+
+        regime_name = "Chicken" if is_chicken else ("PD (boundary)" if on_boundary else "PD")
+        check(f"{label}: delta*={exp_ds} [{regime_name}]",
               np.isclose(ds_v, exp_ds, atol=0.002),
-              f"computed={ds_v:.3f}")
+              f"computed={ds_v:.3f}, Phi={Phi_v:.2f}, Phi_PD={Phi_PD_v:.2f}")
 
-        # Verify core PD properties: T > R and cooperation is sustainable
-        # Note: for very high Phi, P can drop below S (strengthens cooperation)
+        # The regime test must agree with the actual payoff ordering.  Compare
+        # against the identity above rather than trusting raw float order: on
+        # the boundary P and S are equal up to rounding.
+        if on_boundary:
+            check(f"{label}: boundary Phi == Phi_PD implies P == S",
+                  np.isclose(P_v, S_v),
+                  f"Phi=Phi_PD={Phi_v:.2f}, P={P_v:.2f}, S={S_v:.2f}")
+            check(f"{label}: both threshold forms coincide on the boundary",
+                  np.isclose((T_v - R_v) / (T_v - P_v), (T_v - R_v) / (T_v - S_v)),
+                  "(T-R)/(T-P) == (T-R)/(T-S)")
+        else:
+            check(f"{label}: regime test (Phi > Phi_PD) <=> (P < S)",
+                  is_chicken == (P_v < S_v),
+                  f"Phi={Phi_v:.2f} vs Phi_PD={Phi_PD_v:.2f}; P={P_v:.2f}, S={S_v:.2f}")
+
+        # Verify core properties: T > R, and cooperation beats mutual defection.
         check(f"{label}: T > R (temptation > reward)",
               T_v > R_v,
               f"T={T_v:.2f} > R={R_v:.2f}")
         check(f"{label}: R > P (cooperation > mutual defection)",
               R_v > P_v,
               f"R={R_v:.2f} > P={P_v:.2f}")
+
+    # Tablenote facts.
+    def _ds(kappa_v, theta_v=0.15):
+        Phi_v = 1 + kappa_v * (psi_off + psi_def)
+        T_v = E_R * (1 - theta_v * (1 + kappa_v * psi_off))
+        R_v = E_R / 2 - c
+        P_v = (E_R / 2) * (1 - Phi_v / 2)
+        S_v = -theta_v * E_R * kappa_v * psi_def
+        Phi_PD_v = 2 + 4 * theta_v * kappa_v * psi_def
+        if Phi_v > Phi_PD_v and not np.isclose(Phi_v, Phi_PD_v):
+            return (T_v - R_v) / (T_v - S_v)
+        return (T_v - R_v) / (T_v - P_v)
+
+    # The monotonicity sentence covers the FRICTION rows only (kappa=1,2,4,6);
+    # it deliberately excludes the kappa=0 row.
+    friction_rows = [_ds(k) for k in (1.0, 2.0, 4.0, 6.0)]
+    check("Friction rows fall monotonically in kappa (kappa=1,2,4,6)",
+          all(a > b for a, b in zip(friction_rows, friction_rows[1:])),
+          " > ".join(f"{d:.3f}" for d in friction_rows))
+    check("Threshold falls below 0.5 for all kappa >~ 1.2",
+          all(_ds(k) < 0.5 for k in (1.2, 1.5, 2.0, 4.0, 6.0)),
+          f"delta*(1.2)={_ds(1.2):.3f}")
+
+    # Closed form for the theta=0.15 rows (T-R = 37-2.25k, T-P = 60+7.75k),
+    # which pins the "below 0.5 for kappa >~ 1.2" claim to an exact crossing.
+    def _ds_closed(k):
+        return (37 - 2.25 * k) / (60 + 7.75 * k)
+    check("Closed form delta*(kappa) = (37-2.25k)/(60+7.75k) matches row formulas",
+          all(np.isclose(_ds(k), _ds_closed(k)) for k in (1.0, 1.1, 1.2, 2.0, 4.0)),
+          "agrees on kappa=1,1.1,1.2,2,4")
+    check("delta*(1.2) = 0.495 < 0.5 < 0.504 = delta*(1.1)",
+          np.isclose(_ds_closed(1.2), 0.495, atol=0.001)
+          and np.isclose(_ds_closed(1.1), 0.504, atol=0.001),
+          f"delta*(1.2)={_ds_closed(1.2):.3f}, delta*(1.1)={_ds_closed(1.1):.3f}")
+    check("Exact 0.5 crossing at kappa = 1.143",
+          np.isclose(_ds_closed(7 / 6.125), 0.5) and np.isclose(7 / 6.125, 1.143, atol=0.001),
+          f"kappa = {7/6.125:.4f}")
+
+    # The tablenote's "delta* < 0.6" sentence scopes to the FRICTION regimes
+    # (kappa >= 1; physically kappa = 1+k_clear+k_pen+k_irr > 1).  The kappa=0
+    # row is a frictionless reference, not an admissible regime, and sits ABOVE
+    # 0.6 at 0.617 — the same row the monotonicity sentence excludes.
+    check("All friction regimes (kappa>=1) give delta* < 0.6",
+          all(d < 0.6 for d in expected_deltas[1:]),
+          f"max={max(expected_deltas[1:])}")
+    check("Frictionless reference row (kappa=0) is the maximum, delta* = 0.617",
+          np.isclose(expected_deltas[0], 0.617)
+          and expected_deltas[0] == max(expected_deltas),
+          f"delta*(kappa=0) = {expected_deltas[0]}")
+    # Out-of-table caveat: just above kappa=1, very cheap exploitation can push
+    # delta* slightly over 0.6 (kappa=1.05, theta=0.01 -> 0.603).
+    check("Out-of-table caveat: kappa=1.05, theta=0.01 gives delta* = 0.603 > 0.6",
+          np.isclose(_ds(1.05, 0.01), 0.603, atol=0.001) and _ds(1.05, 0.01) > 0.6,
+          f"delta* = {_ds(1.05, 0.01):.4f}")
 
 
 # ---------------------------------------------------------------------------
@@ -328,14 +486,14 @@ def verify_theorem_12() -> None:
     # Amortized per period (recovery time ~ 1/eps = 20 periods)
     recovery_periods = 1 / eps
     P_tilde_per_period = P_pay - C_defector / recovery_periods
-    check("P_tilde_per_period = -105",
-          np.isclose(P_tilde_per_period, -105.0),
+    check("P_tilde_per_period = -95",
+          np.isclose(P_tilde_per_period, -95.0),
           f"P_tilde = {P_tilde_per_period}")
 
     # Network-adjusted delta*
     delta_star_tilde = (T_pay - R_pay) / (T_pay - P_tilde_per_period)
-    check("delta*_tilde = 0.165",
-          np.isclose(delta_star_tilde, 0.165, atol=0.001),
+    check("delta*_tilde = 0.185",
+          np.isclose(delta_star_tilde, 0.185, atol=0.001),
           f"delta*_tilde = {delta_star_tilde:.4f}")
 
     # Must be less than the baseline delta*
@@ -517,8 +675,9 @@ def verify_theorem_14() -> None:
 
     delta_star = (T_pay - R_pay) / (T_pay - P_pay)
 
-    # For delta > delta*, V_TFT > V_ALLD
-    for delta in [0.4, 0.5, 0.7, 0.9, 0.99]:
+    # For delta > delta* = 0.431, V_TFT > V_ALLD.
+    # (delta=0.4 now sits BELOW delta* and so moves to the invasion loop.)
+    for delta in [0.45, 0.5, 0.7, 0.9, 0.99]:
         V_TFT = R_pay / (1 - delta)
         V_ALLD = T_pay + delta * P_pay / (1 - delta)
         check(f"delta={delta}: V_TFT > V_ALLD",
@@ -526,7 +685,7 @@ def verify_theorem_14() -> None:
               f"V_TFT={V_TFT:.2f}, V_ALLD={V_ALLD:.2f}")
 
     # For delta < delta*, ALLD invades (V_TFT < V_ALLD)
-    for delta in [0.1, 0.2, 0.3]:
+    for delta in [0.1, 0.2, 0.3, 0.4]:
         V_TFT = R_pay / (1 - delta)
         V_ALLD = T_pay + delta * P_pay / (1 - delta)
         check(f"delta={delta}: V_ALLD > V_TFT (invasion possible)",
@@ -550,18 +709,18 @@ def verify_theorem_15() -> None:
 
     # Without friction: delta > (T-R)/(R-S) for one-shot deviation + TFT retaliation
     delta_erase_basic = (T_pay - R_pay) / (R_pay - S_pay)
-    check("Basic erasure threshold = (T-R)/(R-S) = 0.511",
-          np.isclose(delta_erase_basic, 0.511, atol=0.002),
+    check("Basic erasure threshold = (T-R)/(R-S) = 0.586",
+          np.isclose(delta_erase_basic, 0.586, atol=0.002),
           f"threshold = {delta_erase_basic:.3f}")
 
     # The one-shot deviation under TFT:
-    # Period t: gain T - R = 30.25
-    # Period t+1: lose R - S = 59.25
+    # Period t: gain T - R = 32.5
+    # Period t+1: lose R - S = 55.5
     gain = T_pay - R_pay
     loss = R_pay - S_pay
-    check("One-shot gain = 30.25", np.isclose(gain, 30.25),
+    check("One-shot gain = 32.5", np.isclose(gain, 32.5),
           f"T - R = {gain}")
-    check("Retaliation loss = 59.25", np.isclose(loss, 59.25),
+    check("Retaliation loss = 55.5", np.isclose(loss, 55.5),
           f"R - S = {loss}")
 
     # Delta_V = (T-R) - delta*(R-S) < 0 iff delta > (T-R)/(R-S)
@@ -595,9 +754,36 @@ def verify_theorem_15() -> None:
     check("Friction-adjusted erasure threshold < basic threshold",
           threshold_adj < delta_erase_basic,
           f"friction threshold={threshold_adj:.3f} < basic={delta_erase_basic:.3f}")
+    check("Friction-adjusted erasure threshold = 0.183",
+          np.isclose(threshold_adj, 0.183, atol=0.002),
+          f"threshold = {threshold_adj:.4f}")
     check("Friction-adjusted erasure threshold < 0.2",
           threshold_adj < 0.2,
           f"threshold = {threshold_adj:.3f}")
+
+    # Closed form: taking the infinite-horizon limit of the friction sum
+    # (delta^n negligible) gives the quadratic
+    #     (R-S)*d^2 - [(T-R) + (R-S) + F]*d + (T-R) = 0
+    #     55.5*d^2 - 188*d + 32.5 = 0
+    quad_a = loss
+    quad_b = -(gain + loss + F_per_period)
+    quad_c = gain
+    check("Erasure quadratic coefficients = (55.5, -188, 32.5)",
+          np.isclose(quad_a, 55.5) and np.isclose(quad_b, -188.0)
+          and np.isclose(quad_c, 32.5),
+          f"({quad_a}, {quad_b}, {quad_c})")
+    disc = quad_b**2 - 4 * quad_a * quad_c
+    root_lo = (-quad_b - math.sqrt(disc)) / (2 * quad_a)
+    root_hi = (-quad_b + math.sqrt(disc)) / (2 * quad_a)
+    check("Erasure quadratic: admissible root = 0.1827",
+          np.isclose(root_lo, 0.18274, atol=0.0001),
+          f"root = {root_lo:.5f}")
+    check("Erasure quadratic: other root = 3.20 is rejected (delta > 1)",
+          root_hi > 1.0 and np.isclose(root_hi, 3.20, atol=0.01),
+          f"root = {root_hi:.3f}")
+    check("Bisection root matches the closed-form quadratic root",
+          np.isclose(threshold_adj, root_lo, atol=0.001),
+          f"bisection={threshold_adj:.5f}, closed-form={root_lo:.5f}")
 
 
 # ---------------------------------------------------------------------------
@@ -659,7 +845,7 @@ def verify_corollary_16_1() -> None:
     delta = 0.5
     V_coop = R_pay / (1 - delta)
     V_deviate = T_pay + delta * P_pay / (1 - delta)
-    check("(a) CC is NE for delta=0.5 > delta*=0.363",
+    check("(a) CC is NE for delta=0.5 > delta*=0.431",
           V_coop >= V_deviate and delta > delta_star,
           f"V_coop={V_coop:.2f} >= V_deviate={V_deviate:.2f}")
 

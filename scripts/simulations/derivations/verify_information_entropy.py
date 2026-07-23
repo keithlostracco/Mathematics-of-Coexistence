@@ -123,21 +123,41 @@ def verify_redundancy_factor() -> None:
         C = 1.0 - h_num(q_val)
         return 1.0 / C if C > 0 else float("inf")
 
-    # Table from Section 4.2
+    # Table from Section 4.2.
+    # Verification overhead = h/(1−h) = ρ − 1. The paper tabulates it only for
+    # q ≤ 0.10; the last two rows carry no published overhead, so None skips it.
+    # Tolerances track the paper's own printed precision: ρ to 2dp (1dp at
+    # q=0.40 → ±0.05), overhead to 1dp at q=0.01 (8.8% → ±0.0005) and 0dp at
+    # q=0.05, 0.10 (±0.005). The tight atol at q=0.01 is deliberate: the true
+    # value is 0.0879, and a looser bound would fail to distinguish the correct
+    # 8.8% from the superseded 9% claim (0.09, only 0.0021 away).
     table = [
-        (0.00, 1.00),
-        (0.01, 1.09),
-        (0.05, 1.40),
-        (0.10, 1.88),
-        (0.25, 5.30),
-        (0.40, 34.4),
+        # (q, rho_expected, overhead_expected, overhead_atol)
+        (0.00, 1.00, 0.000, 0.0005),
+        (0.01, 1.09, 0.088, 0.0005),
+        (0.05, 1.40, 0.400, 0.005),
+        (0.10, 1.88, 0.880, 0.005),
+        (0.25, 5.30, None, None),
+        (0.40, 34.4, None, None),
     ]
 
-    for q_val, rho_expected in table:
+    for q_val, rho_expected, overhead_expected, overhead_atol in table:
         rho_actual = rho(q_val)
         check(f"ρ({q_val}) ≈ {rho_expected}",
-              np.isclose(rho_actual, rho_expected, atol=0.15),
+              np.isclose(rho_actual, rho_expected, atol=0.05),
               f"ρ = {rho_actual:.2f}")
+
+        if overhead_expected is None:
+            continue
+        h_val = h_num(q_val)
+        overhead_actual = h_val / (1.0 - h_val)
+        check(f"overhead({q_val}) = h/(1−h) ≈ {overhead_expected:.3f}",
+              np.isclose(overhead_actual, overhead_expected, atol=overhead_atol),
+              f"overhead = {overhead_actual*100:.1f}%")
+        # Identity: the overhead is exactly ρ − 1
+        check(f"overhead({q_val}) = ρ({q_val}) − 1 (identity)",
+              np.isclose(overhead_actual, rho_actual - 1.0),
+              f"{overhead_actual:.4f} = {rho_actual - 1.0:.4f}")
 
     # Divergence at q → 0.5
     rho_049 = rho(0.49)
@@ -265,8 +285,8 @@ def verify_verification_cost() -> None:
     W_honest = 2.0
     rho_val = 1.0 / (1.0 - h_num(q_val))
     delta_W = W_honest * (rho_val - 1.0)
-    check("Example 6.1: rho(0.1) ≈ 1.884",
-          np.isclose(rho_val, 1.884, atol=0.01),
+    check("Example 6.1: rho(0.1) ≈ 1.883",
+          np.isclose(rho_val, 1.883, atol=0.0005),
           f"ρ = {rho_val:.3f}")
     check("Example 6.1: ΔW ≈ 1.77",
           np.isclose(delta_W, 1.77, atol=0.02),
@@ -603,8 +623,8 @@ def verify_modules() -> None:
 
     # redundancy_factor
     check("module: ρ(0) = 1", np.isclose(redundancy_factor(0.0), 1.0))
-    check("module: ρ(0.1) ≈ 1.884",
-          np.isclose(redundancy_factor(0.1), 1.884, atol=0.01))
+    check("module: ρ(0.1) ≈ 1.883",
+          np.isclose(redundancy_factor(0.1), 1.883, atol=0.0005))
 
     # decision_cost_binary
     aH, aL, b = 20.0, 4.0, 2.0

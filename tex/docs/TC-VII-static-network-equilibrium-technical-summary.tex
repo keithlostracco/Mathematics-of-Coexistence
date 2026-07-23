@@ -1,0 +1,164 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{graphicx}
+
+% ── Paragraph spacing ────────────────────────────────────────────────────────
+\usepackage{parskip}
+
+% ── Page-break quality ───────────────────────────────────────────────────────
+\widowpenalty=10000
+\clubpenalty=10000
+\raggedbottom
+
+% ── Suppress automatic section numbering ─────────────────────────────────────
+\setcounter{secnumdepth}{-1}
+
+% ── Pandoc-generated table support ───────────────────────────────────────────
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{calc}
+\usepackage{caption}
+\newcounter{none}
+
+% ── Math support ─────────────────────────────────────────────────────────────
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% ── Make \paragraph and \subparagraph block-level ────────────────────────────
+\usepackage{titlesec}
+\titleformat{\paragraph}
+  {\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+  {0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+\titleformat{\subparagraph}
+  {\normalfont\normalsize\bfseries}{\thesubparagraph}{1em}{}
+\titlespacing*{\subparagraph}
+  {0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+% ── Pandoc-generated tightlist support ───────────────────────────────────────
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% ── Pandoc 3.x figure sizing ────────────────────────────────────────────────
+\newcommand{\pandocbounded}[1]{%
+  \sbox0{#1}%
+  \ifdim\wd0>\linewidth
+    \resizebox{\linewidth}{!}{#1}%
+  \else
+    #1%
+  \fi
+}
+
+% ── Unicode character fixes ──────────────────────────────────────────────────
+\usepackage{newunicodechar}
+\newunicodechar{✓}{$\checkmark$}
+\newunicodechar{≠}{$\neq$}
+\newunicodechar{≡}{$\equiv$}
+\newunicodechar{≈}{$\approx$}
+\newunicodechar{δ}{$\delta$}
+\newunicodechar{−}{$-$}
+\let\mystRightarrow\rightarrow
+\renewcommand{\rightarrow}{\ensuremath{\mystRightarrow}}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\hypersetup{colorlinks=true, allcolors=blue}
+
+\title{Technical Summary: Static Network Equilibrium}
+\author{Keith Lostracco}
+\date{}
+
+\begin{document}
+\maketitle
+
+\subsection{Model}\label{model}
+
+The model augments the agent framework from TC-I with production: each
+agent \(i \in \{1, \ldots, N\}\) has input vector
+\(\mathbf{x}_i^{\mathrm{in}} \in \mathbb{R}_{\geq 0}^n\), output vector
+\(\mathbf{x}_i^{\mathrm{out}} \in \mathbb{R}_{\geq 0}^n\), and a concave
+production function
+\(\mathbf{x}_i^{\mathrm{out}} = f_i(\mathbf{x}_i^{\mathrm{in}}, B_i, \mathbf{s}_i)\).
+Every production step satisfies thermodynamic admissibility: output
+energy \(\leq\) input energy minus maintenance \(\gamma_i B_i\) and
+obligatory dissipation \(D_i \geq 0\). At steady state, aggregate flow
+balances:
+\(\sum_i x_{ij}^{\mathrm{in}} = \sum_i x_{ij}^{\mathrm{out}} + \psi_j - \delta_j R_j^*\).
+The dependency matrix \(A \in \mathbb{R}_{\geq 0}^{n \times n}\) has
+entry \(A_{jk}\) = units of \(j\) consumed per unit \(k\) produced. Each
+agent solves a constrained optimization subject to production,
+admissibility, shared flow balance, negative boundary constraints
+(TC-I), and positive provision constraints.
+
+\subsection{Results}\label{results}
+
+\textbf{Theorem (Network Feasibility).} A positive-flow steady state
+exists iff (a) \(\rho(A) < 1\), (b) the Hawkins--Simon condition holds
+on \((I - A)\), and (c) \(\sum_j \psi_j \geq \sum_i D_i\).
+
+\textbf{Theorem (Positive-Constraint Necessity).} Every supplier whose
+output is essential to a downstream agent has an active provision
+constraint \(x_{ij}^{\mathrm{out}} \geq \tau_{ij} > 0\) at any
+sustainable equilibrium.
+
+\textbf{Theorem (Shadow Price Decomposition).} At a network VE,
+\(\partial U_i / \partial x_{ij}^{\mathrm{in}} = \lambda_j^* + \sum_{B,k} \mu_{Bk}^{(i)} \partial g_{Bk} / \partial x_{ij}^{\mathrm{in}} - \sum_\ell \pi_{i\ell}^* \partial x_{i\ell}^{\mathrm{out}} / \partial x_{ij}^{\mathrm{in}}\),
+decomposing into scarcity price, boundary multiplier, and
+flow-dependency price (network obligation).
+
+\textbf{Theorem (Network-Augmented Cooperation Threshold).}
+\(\delta_i^* \leq \delta^*_{\mathrm{autarkic}} - \kappa(d_{\mathrm{in},i}, d_{\mathrm{out},i}, \rho(A))\)
+with \(\kappa \geq 0\), non-decreasing in both degrees, zero at
+\(d_{\mathrm{in}} = d_{\mathrm{out}} = 0\).
+
+\textbf{Proposition (Deception in Production Networks).} The critical
+per-layer deception rate \(q_L^* \leq q_1^*\) with strict inequality for
+\(L \geq 2\). Effective crossover:
+\(q_{\mathrm{eff}}(L) = \frac{1}{2}(1 - (1-2q)^L)\). Verification
+overhead compounds along the chain.
+
+\subsection{Notation}\label{notation}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Symbol
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Meaning
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\(\mathbf{x}_i^{\mathrm{in}}, \mathbf{x}_i^{\mathrm{out}}\) & Agent
+\(i\)'s input and output vectors \\
+\(f_i\) & Production function for agent \(i\) \\
+\(\alpha_j^{\mathrm{in}}, \alpha_j^{\mathrm{out}}\) & Energy density of
+resource \(j\) (J/unit) \\
+\(D_i\) & Obligatory dissipation for agent \(i\) (J/s) \\
+\(\psi_j\) & Exogenous inflow of resource \(j\) \\
+\(\delta_j\) & Environmental decay rate for resource \(j\) \\
+\(R_j^*\) & Steady-state stock of resource \(j\) \\
+\(A\) & Dependency matrix (\(n \times n\), non-negative) \\
+\(\rho(A)\) & Spectral radius of \(A\) \\
+\(\lambda_j^*\) & Scarcity price of resource \(j\) at VE \\
+\(\mu_{Bk}^{(i)}\) & Boundary multiplier \\
+\(\pi_{i\ell}^*\) & Flow-dependency price of agent \(i\)'s output
+\(\ell\) \\
+\(\tau_{ij}\) & Provision threshold for agent \(i\), resource \(j\) \\
+\(\nu_{ij}^*\) & Provision obligation multiplier \\
+\(\delta_i^*\) & Cooperation threshold (discount factor) \\
+\(\kappa\) & Network embeddedness reduction \\
+\(d_{\mathrm{in},i}, d_{\mathrm{out},i}\) & In-degree and out-degree of
+agent \(i\) \\
+\(q_L^*\) & Critical per-layer deception rate at depth \(L\) \\
+\(q_{\mathrm{eff}}(L)\) & Effective crossover probability at depth
+\(L\) \\
+\end{longtable}
+}
+
+\end{document}

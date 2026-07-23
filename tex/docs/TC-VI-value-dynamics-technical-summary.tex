@@ -1,0 +1,370 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{graphicx}
+
+% ── Paragraph spacing ────────────────────────────────────────────────────────
+\usepackage{parskip}
+
+% ── Page-break quality ───────────────────────────────────────────────────────
+\widowpenalty=10000
+\clubpenalty=10000
+\raggedbottom
+
+% ── Suppress automatic section numbering ─────────────────────────────────────
+\setcounter{secnumdepth}{-1}
+
+% ── Pandoc-generated table support ───────────────────────────────────────────
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{calc}
+\usepackage{caption}
+\newcounter{none}
+
+% ── Math support ─────────────────────────────────────────────────────────────
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% ── Make \paragraph and \subparagraph block-level ────────────────────────────
+\usepackage{titlesec}
+\titleformat{\paragraph}
+  {\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+  {0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+\titleformat{\subparagraph}
+  {\normalfont\normalsize\bfseries}{\thesubparagraph}{1em}{}
+\titlespacing*{\subparagraph}
+  {0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+% ── Pandoc-generated tightlist support ───────────────────────────────────────
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% ── Pandoc 3.x figure sizing ────────────────────────────────────────────────
+\newcommand{\pandocbounded}[1]{%
+  \sbox0{#1}%
+  \ifdim\wd0>\linewidth
+    \resizebox{\linewidth}{!}{#1}%
+  \else
+    #1%
+  \fi
+}
+
+% ── Unicode character fixes ──────────────────────────────────────────────────
+\usepackage{newunicodechar}
+\newunicodechar{✓}{$\checkmark$}
+\newunicodechar{≠}{$\neq$}
+\newunicodechar{≡}{$\equiv$}
+\newunicodechar{≈}{$\approx$}
+\newunicodechar{δ}{$\delta$}
+\newunicodechar{−}{$-$}
+\let\mystRightarrow\rightarrow
+\renewcommand{\rightarrow}{\ensuremath{\mystRightarrow}}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\hypersetup{colorlinks=true, allcolors=blue}
+
+\title{Technical Summary: Value Dynamics}
+\author{Keith Lostracco}
+\date{}
+
+\begin{document}
+\maketitle
+
+\subsection{Model}\label{model}
+
+A \textbf{high-energy center} (HEC) is a network node with accumulated
+value mass \(\mathcal{M} > 0\) (energy units). The \textbf{coupling
+distance} \(r \in (0, \infty)\) between an agent and a HEC measures the
+degree of the agent's independence (\(r \to 0\): maximal coupling;
+\(r \to \infty\): minimal coupling). This is a generalized coordinate,
+not a spatial distance.
+
+The agent's \textbf{net energy rate} at coupling distance \(r\) is:
+
+\[\Pi(r) = \underbrace{\frac{G\mathcal{M}}{r}}_{\text{resource inflow}} - \underbrace{\frac{\tau\mathcal{M}}{r^2}}_{\text{dissolution cost}} - \underbrace{\gamma B_i}_{\text{entropy maintenance}}\]
+
+where \(G > 0\) is the resource coupling coefficient, \(\tau > 0\) is
+the dissolution coupling coefficient, \(\gamma > 0\) is the entropy
+leakage rate, and \(B_i > 0\) is boundary integrity. The
+\textbf{coexistence potential} is \(V(r) = -\Pi(r)\):
+
+\[V(r) = \frac{\tau\mathcal{M}}{r^2} - \frac{G\mathcal{M}}{r} + \gamma B_i\]
+
+This potential has exactly one critical point on \((0, \infty)\), a
+global minimum at the \textbf{coexistence attractor} \(r^* = 2\tau/G\),
+with minimum value \(V(r^*) = \gamma B_i - G^2\mathcal{M}/(4\tau)\). The
+well depth is \(D = G^2\mathcal{M}/(4\tau)\).
+
+Agents adjust coupling via gradient dynamics \(\dot{r} = -\mu V'(r)\),
+where \(\mu > 0\) is the adjustment rate. The boundary is an
+\textbf{active dissipative structure} with reference integrity
+\(\bar{B} > 0\), collapse floor \(B_{\min} \in (0, \bar{B})\) (the set
+\(\{B_i \leq B_{\min}\}\) is absorbing: reaching it is dissolution), and
+structural-capacity factor
+\(\zeta(B_i) = \max((B_i - B_{\min})/(\bar{B} - B_{\min}), 0) \in [0, 1]\),
+the fraction of repair and mobility capacity retained at integrity
+\(B_i \in (B_{\min}, \bar{B}]\). Boundary dynamics couple to coupling
+distance through assimilation pressure
+\(D_{\text{assimilate}}(r) = \sigma\mathcal{M}/r^3\) and autocatalytic,
+thermodynamically priced repair
+\(R_{\text{repair}}(r, B_i) = (\rho/\kappa)\,\zeta(B_i)\,\max(\Pi(r), 0)\),
+where \(\kappa > 1\) is the repair multiplier of TC-IV. The coupled
+system, for \(B_i > B_{\min}\):
+
+\[\dot{r} = -\mu_0\,\zeta(B_i)\,V'(r), \qquad \dot{B}_i = \frac{\rho}{\kappa}\,\zeta(B_i)\,\max(\Pi(r), 0) - \frac{\sigma\mathcal{M}}{r^3} - \gamma B_i\]
+
+with baseline mobility \(\mu_0 > 0\); the constant-\(\mu\) dynamics are
+recovered in the healthy regime with \(\mu = \mu_0\zeta(B_i^*)\).
+\textbf{Proposition (Healthy Boundary Equilibrium):} at fixed \(r\)
+satisfying the repair-viability condition
+\(q\Pi_0(r) > \gamma + 2\sqrt{q\gamma d_0(r)}\) --- where
+\(q = \rho/(\kappa(\bar{B} - B_{\min}))\),
+\(\Pi_0(r) = G\mathcal{M}/r - \tau\mathcal{M}/r^2 - \gamma B_{\min}\),
+\(d_0(r) = \sigma\mathcal{M}/r^3 + \gamma B_{\min}\) --- the boundary
+dynamics have exactly two fixed points above the floor: an unstable
+\(B_{\mathrm{u}}(r)\) and a stable \(B_i^*(r)\) (saturated at
+\(\bar{B}\) if it exceeds the reference integrity), with \(\Pi > 0\) at
+\(B_i^*(r)\). Under the viable-agent condition (repair-viability at
+\(r^*\) with \(B_{\mathrm{u}}(r^*) < \bar{B}\)), the point
+\((r^*, \min(B_i^*(r^*), \bar{B}))\) is a locally asymptotically stable
+equilibrium of the coupled system, and the band/attractor results hold
+verbatim at \(B_i = B_i^*\).
+
+\subsection{Results}\label{results}
+
+\textbf{Theorem 22 (Stability of the Coexistence Attractor).} Under
+gradient dynamics \(\dot{r} = -\mu V'(r)\), the coexistence attractor
+\(r^* = 2\tau/G\) is:
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\item
+  A fixed point: \(\dot{r}|_{r=r^*} = 0\).
+\item
+  Locally asymptotically stable: eigenvalue
+  \(\lambda = -\mu G^4\mathcal{M}/(8\tau^3) < 0\).
+\item
+  Globally attracting on \((0, \infty)\): every trajectory starting at
+  \(r_0 \in (0, \infty)\) converges to \(r^*\) as \(t \to \infty\).
+\end{enumerate}
+
+\textbf{Theorem 23 (Existence of the Coexistence Band).} The Stable
+Coexistence Band \(\mathcal{B} = (r_-, r_+)\) exists if and only if:
+
+\[\mathcal{M} > \mathcal{M}_{\min} \triangleq \frac{4\gamma B_i \tau}{G^2}\]
+
+The band boundaries are
+\(r_\pm = (G\mathcal{M} \pm \sqrt{\Delta})/(2\gamma B_i)\) where
+\(\Delta = G^2\mathcal{M}^2 - 4\gamma B_i \tau \mathcal{M}\). When
+\(\mathcal{M} = \mathcal{M}_{\min}\), the open band is empty:
+\(V \geq 0\) everywhere with equality only at \(r^*\) (marginal,
+non-surviving). When \(\mathcal{M} < \mathcal{M}_{\min}\), no viable
+coupling distance exists.
+
+\textbf{Theorem 24 (Freedom Bandwidth).} The width of the Stable
+Coexistence Band is:
+
+\[w \triangleq r_+ - r_- = \frac{\sqrt{\Delta}}{\gamma B_i} = \frac{\sqrt{G^2\mathcal{M}^2 - 4\gamma B_i \tau \mathcal{M}}}{\gamma B_i}\]
+
+The bandwidth satisfies:
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\item
+  \(w > 0\) iff \(\mathcal{M} > \mathcal{M}_{\min}\).
+\item
+  \(\partial w / \partial \mathcal{M} > 0\) (richer centers offer wider
+  freedom).
+\item
+  \(w\) is decreasing in \(\gamma\), \(B_i\), and \(\tau\).
+\item
+  \(w\) is increasing in \(G\).
+\item
+  For \(\mathcal{M} \gg \mathcal{M}_{\min}\):
+  \(w \approx G\mathcal{M}/(\gamma B_i)\) (linear growth).
+\item
+  Near \(\mathcal{M}_{\min}\):
+  \(w \sim \sqrt{\mathcal{M} - \mathcal{M}_{\min}}\) (square-root
+  vanishing).
+\end{enumerate}
+
+\textbf{Corollary 24.1 (Freedom Is Finite).} For any finite
+\(\mathcal{M}\), \(w\) is finite. Infinite freedom requires
+\(\mathcal{M} \to \infty\) or \(\gamma B_i \to 0\) (physically
+impossible).
+
+\textbf{Theorem 25 (Basin of No Return).} Let
+\(\bar{\Pi} \triangleq G^2\mathcal{M}/(4\tau) - \gamma B_{\min}\)
+(surplus ceiling) and let \(B_c\) be the smaller root of
+\(q(B_i - B_{\min})(G^2\mathcal{M}/(4\tau) - \gamma B_i) = \gamma B_i\).
+If repair-viability holds at some \(r\), \(B_c\) exists with
+\(B_{\min} < B_c \leq B_{\mathrm{u}}(r)\); for any agent admitting a
+healthy equilibrium, moreover
+\(B_c \leq B_{\mathrm{u}}(r^*) < \bar{B}\), and:
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\item
+  If \(B_i(t_0) < B_c\), then \(\dot{B}_i < 0\) along every trajectory
+  regardless of the path \(r(t)\), and \(B_i\) reaches \(B_{\min}\) in
+  finite time; no later surplus can reverse the decline.
+\item
+  As \(B_i \downarrow B_{\min}\), mobility dies:
+  \(\mu(B_i) = \mu_0\zeta(B_i) \to 0\).
+\item
+  Above the basin, recovery is possible: from \(r(t_0) = r^*\) with
+  \(B_i(t_0) > B_{\mathrm{u}}(r^*)\), the agent converges to the healthy
+  equilibrium. \(B_c\) is a certified inner bound of the basin.
+\end{enumerate}
+
+\textbf{Theorem 26 (Irreversibility of Dissolution).} Define the
+dissolution threshold
+\(r_d \triangleq (\kappa\sigma\mathcal{M}/(\rho\bar{\Pi} + \kappa\gamma B_{\min}))^{1/3}\),
+i.e.~\(\sigma\mathcal{M}/r_d^3 = (\rho/\kappa)\bar{\Pi} + \gamma B_{\min}\).
+Then:
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\item
+  Whenever \(r(t) < r_d\): \(\dot{B}_i < -\gamma(B_i + B_{\min}) < 0\)
+  for every \(B_i \in (B_{\min}, \bar{B}]\).
+\item
+  If \(r(t) < r_d\) for all \(t \geq t_0\) (in particular if
+  \(r_d \geq r^*\), by (c)), then \(B_i\) reaches \(B_{\min}\) at a
+  finite \(t_d \leq t_0 + (B_i(t_0) - B_{\min})/(2\gamma B_{\min})\):
+  the agent dissolves.
+\item
+  If \(r_d \geq r^*\), every trajectory starting below \(r_d\) remains
+  below \(r_d\) (the attractor lies inside the dissolution zone) and (b)
+  applies unconditionally; if \(r_d < r^*\) and \(\ell > \ell_c\)
+  (below), \(B_i\) falls below \(B_c\) before escape and collapse is
+  irreversible by Theorem 25.
+\end{enumerate}
+
+\emph{Remark (Race-Condition Closure).} For \(r_d < r^*\), the
+phase-space bound \(dB_i/dr \leq -\alpha\) with
+\(\alpha = \sigma\kappa\gamma B_{\min}/(2\mu_0\tau(\rho\bar{\Pi} + \kappa\gamma B_{\min})) = \gamma B_{\min} r_d^3/(2\mu_0\tau\mathcal{M})\)
+holds on \((0, r_d)\); dissolution is irreversible when the penetration
+depth \(\ell = r_d - r_0\) exceeds
+\(\ell_c = (B_i^{(0)} - B_c)/\alpha\): boundary depletion crosses the
+basin before the gradient escape reaches \(r_d\). The bound is
+conservative --- mobility death (\(\mu(B_i) \to 0\)) makes the true
+decline per unit escape distance diverge as \(B_i \to B_{\min}\) --- so
+\(\ell > \ell_c\) is sufficient, far from necessary.
+
+\textbf{Corollary 26.1 (Assimilation Trap).} \(r_d\) and the energetic
+inner boundary \(r_-\) are distinct and either ordering can occur. If
+\(r_d > r_-\), an agent at \(r \in (r_-, r_d)\) earns positive net
+energy (\(\Pi(r) > 0\)) while losing identity (\(\dot{B}_i < 0\)); as
+\(B_i\) falls, \(r_-\) moves inward, so an agent that entered below
+\(r_-\) becomes energetically viable while remaining inside the
+dissolution zone --- irreversibly once \(B_i < B_c\).
+
+\textbf{Theorem 27 (Starvation Spiral).} If \(r > r_+\) (outside the
+Coexistence Band):
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\item
+  \(\Pi(r) < 0\): energy deficit, no repair.
+\item
+  \(\dot{B}_i = -\sigma\mathcal{M}/r^3 - \gamma B_i < 0\), with
+  \(B_i(t) \leq B_i^{(0)}e^{-\gamma t}\) while the deficit lasts; in the
+  isolation limit the collapse floor is reached at the finite time
+  \(t^* = (1/\gamma)\ln(B_i^{(0)}/B_{\min})\).
+\item
+  Recovery channels --- inward drift (re-entry from \(r_0\) while
+  \(B_i > B_c\) takes at least
+  \((r_0^3 - r_+(B_c)^3)/(3\mu_0\mathcal{M}G)\), the expanding boundary
+  remaining inside \(r_+(B_c)\)) and outward expansion of \(r_+(B_i)\)
+  as the maintenance load falls --- both close at \(B_c\).
+\item
+  If \(B_i < B_c\) --- sufficient condition:
+  \(r_0^3 \geq r_+(B_c)^3 + (3\mu_0\mathcal{M}G/\gamma)\ln(B_i^{(0)}/B_c)\)
+  --- mobility and repair vanish together, the drift stalls before
+  re-entry, and \(B_i\) reaches \(B_{\min}\) in finite time:
+  irreversible starvation. Briefly starved agents above the basin can
+  recover.
+\end{enumerate}
+
+\textbf{Corollary 27.1 (Inequality of Freedom).} If \(B_i > B_j\) (agent
+\(i\) is more complex): (a) \(w_i < w_j\); (b)
+\(\mathcal{M}_{\min,i} > \mathcal{M}_{\min,j}\); (c) for any
+\(\mathcal{M}\) with
+\(\mathcal{M}_{\min,j} < \mathcal{M} < \mathcal{M}_{\min,i}\), agent
+\(j\) survives near the HEC but agent \(i\) cannot.
+
+\textbf{Theorem 28 (Multi-Center Attractor).} The multi-center
+coexistence potential
+\(V(\mathbf{r}) = \sum_{k=1}^K [\tau_k\mathcal{M}_k/r_k^2 - G_k\mathcal{M}_k/r_k] + \gamma B_i\)
+has a unique global minimum at \(r_k^* = 2\tau_k/G_k\) for each \(k\),
+which is globally attracting under gradient dynamics. The multi-center
+Coexistence Band exists iff:
+
+\[\sum_{k=1}^{K} \frac{G_k^2 \mathcal{M}_k}{4\tau_k} > \gamma B_i\]
+
+\textbf{Corollary 28.1 (Diversification Benefit).} An agent may be
+viable when coupled to \(K\) HECs even if no single HEC has sufficient
+mass
+(\(\mathcal{M}_k < \mathcal{M}_{\min,k} \triangleq 4\gamma B_i \tau_k / G_k^2\)
+individually), provided the combined well depths exceed \(\gamma B_i\).
+
+\textbf{Corollary (Cascade Collapse).} If a HEC with mass
+\(\mathcal{M}\) is destroyed, all \(N\) agents within its Coexistence
+Band simultaneously lose viability with respect to that center (agents
+coupled solely to it lose viability outright). Total freedom destroyed:
+\(\mathcal{F}_{\text{lost}} = \sum_i w_i(\mathcal{M})\), reducing to
+\(N \cdot w(\mathcal{M})\) for homogeneous agents.
+
+\subsection{Notation}\label{notation}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Symbol
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Meaning
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\(\mathcal{M}\) & HEC value mass (accumulated negentropy, J) \\
+\(r\) & Coupling distance (generalized coordinate) \\
+\(G\) & Resource coupling coefficient \\
+\(\tau\) & Dissolution coupling coefficient \\
+\(\gamma\) & Entropy leakage rate \\
+\(B_i\) & Agent boundary integrity (energy units) \\
+\(V(r)\) & Coexistence potential:
+\(\tau\mathcal{M}/r^2 - G\mathcal{M}/r + \gamma B_i\) \\
+\(r^*\) & Coexistence attractor: \(2\tau/G\) \\
+\(\mathcal{M}_{\min}\) & Minimum viable HEC mass:
+\(4\gamma B_i \tau / G^2\) \\
+\(r_-, r_+\) & Energetic inner boundary and outer (starvation) threshold
+of the band \\
+\(w\) & Freedom bandwidth: \(r_+ - r_-\) \\
+\(D\) & Potential well depth: \(G^2\mathcal{M}/(4\tau)\) \\
+\(\mu_0\), \(\mu(B_i)\) & Baseline mobility; health-dependent mobility
+\(\mu_0\zeta(B_i)\) \\
+\(\sigma\) & Assimilation intensity coefficient \\
+\(\rho\) & Repair allocation fraction \\
+\(\kappa\) & Repair multiplier (\(> 1\), TC-IV) \\
+\(\bar{B}\), \(B_{\min}\) & Reference integrity; collapse floor
+(absorbing below) \\
+\(\zeta(B_i)\) & Structural-capacity factor:
+\(\max((B_i - B_{\min})/(\bar{B} - B_{\min}), 0)\) \\
+\(\bar{\Pi}\) & Surplus ceiling:
+\(G^2\mathcal{M}/(4\tau) - \gamma B_{\min}\) \\
+\(B_c\) & Basin boundary (basin of no return below) \\
+\(r_d\) & Dissolution threshold:
+\((\kappa\sigma\mathcal{M}/(\rho\bar{\Pi} + \kappa\gamma B_{\min}))^{1/3}\) \\
+\(\ell_c\) & Critical penetration depth: \((B_i^{(0)} - B_c)/\alpha\) \\
+\end{longtable}
+}
+
+\end{document}

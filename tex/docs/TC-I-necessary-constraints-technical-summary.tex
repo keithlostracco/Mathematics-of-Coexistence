@@ -1,0 +1,260 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{graphicx}
+
+% ── Paragraph spacing ────────────────────────────────────────────────────────
+\usepackage{parskip}
+
+% ── Page-break quality ───────────────────────────────────────────────────────
+\widowpenalty=10000
+\clubpenalty=10000
+\raggedbottom
+
+% ── Suppress automatic section numbering ─────────────────────────────────────
+\setcounter{secnumdepth}{-1}
+
+% ── Pandoc-generated table support ───────────────────────────────────────────
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{calc}
+\usepackage{caption}
+\newcounter{none}
+
+% ── Math support ─────────────────────────────────────────────────────────────
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% ── Make \paragraph and \subparagraph block-level ────────────────────────────
+\usepackage{titlesec}
+\titleformat{\paragraph}
+  {\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+  {0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+\titleformat{\subparagraph}
+  {\normalfont\normalsize\bfseries}{\thesubparagraph}{1em}{}
+\titlespacing*{\subparagraph}
+  {0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+% ── Pandoc-generated tightlist support ───────────────────────────────────────
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% ── Pandoc 3.x figure sizing ────────────────────────────────────────────────
+\newcommand{\pandocbounded}[1]{%
+  \sbox0{#1}%
+  \ifdim\wd0>\linewidth
+    \resizebox{\linewidth}{!}{#1}%
+  \else
+    #1%
+  \fi
+}
+
+% ── Unicode character fixes ──────────────────────────────────────────────────
+\usepackage{newunicodechar}
+\newunicodechar{✓}{$\checkmark$}
+\newunicodechar{≠}{$\neq$}
+\newunicodechar{≡}{$\equiv$}
+\newunicodechar{≈}{$\approx$}
+\newunicodechar{δ}{$\delta$}
+\newunicodechar{−}{$-$}
+\let\mystRightarrow\rightarrow
+\renewcommand{\rightarrow}{\ensuremath{\mystRightarrow}}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\hypersetup{colorlinks=true, allcolors=blue}
+
+\title{Technical Summary: Necessary Constraints in Multi-Agent
+Dissipative Optimization}
+\author{Keith Lostracco}
+\date{}
+
+\begin{document}
+\maketitle
+
+\subsection{Model}\label{model}
+
+Consider \(N \geq 2\) agents sharing a finite resource endowment
+\(\mathbf{R} = (R_1, \ldots, R_n) \in \mathbb{R}_{>0}^n\). Each agent
+\(i\) selects a strategy vector
+\(\mathbf{x}_i \in \mathbb{R}_{\geq 0}^n\) and maximizes a utility
+function \(U_i(\mathbf{x}_i)\) subject to shared resource constraints
+\(\sum_i x_{ij} \leq R_j\) for all \(j\). Each \(U_i\) is \(C^2\),
+strictly concave, monotonically increasing at the origin, and coercive
+(\(U_i \to -\infty\) as \(\|\mathbf{x}_i\| \to \infty\)). These are
+regularity conditions for Lagrange multiplier theory; the physical
+content is diminishing returns and bounded metabolism.
+
+Each agent maintains a boundary against environmental entropy at cost
+\(C_{\text{maintain},i} = \gamma_i B_i\) (the baseline metabolic cost of
+persistence).
+
+Agent \(B\)'s boundary constraints are inequality constraints
+\(g_{Bk}(\mathbf{x}_A) \leq 0\) on every other agent \(A\)'s problem,
+where each \(g_{Bk}\) is continuously differentiable and convex,
+satisfying \(g_{Bk}(\mathbf{0}) < 0\) (the zero-action strategy violates
+no agent's boundary constraints). Agent \(A\)'s constrained problem is:
+
+\[\max_{\mathbf{x}_A \geq \mathbf{0}} \; U_A(\mathbf{x}_A) \quad \text{s.t.} \quad x_{Aj} + \hat{x}_{-Aj} \leq R_j \;\; \forall j, \qquad g_{Bk}(\mathbf{x}_A) \leq 0 \;\; \forall B \neq A,\, k\]
+
+The KKT stationarity condition at the optimum reads, at every resource
+\(j\) that agent \(A\) consumes in positive quantity (\(x_{Aj}^* > 0\)):
+
+\[\frac{\partial U_A}{\partial x_{Aj}}\bigg|_{\mathbf{x}_A^*} = \lambda_j + \sum_{B,k} \mu_{Bk} \frac{\partial g_{Bk}}{\partial x_{Aj}}\bigg|_{\mathbf{x}_A^*}\]
+
+with the corresponding ``\(\leq\)'' at any corner \(x_{Aj}^* = 0\),
+where the nonnegativity multiplier enters.
+
+\subsection{Results}\label{results}
+
+\textbf{Theorem 1 (Shadow Price).} Let
+\(\mathbf{x}_A^*(\boldsymbol{c})\) denote agent \(A\)'s optimal strategy
+as a function of the constraint parameters
+\(\boldsymbol{c} = \{c_{Bk}\}\), where the \(k\)-th boundary constraint
+of agent \(B\) is parameterized as \(g_{Bk}(\mathbf{x}_A) \leq c_{Bk}\).
+Then:
+
+\[\frac{\partial U_A^*}{\partial c_{Bk}} = \mu_{Bk}^* \geq 0\]
+
+Every active boundary constraint has a quantifiable energetic cost to
+the constrained agent.
+
+\textbf{Lemma 1 (Inevitability of Collision).} Given a finite resource
+endowment \(\mathbf{R}\) shared by \(N \geq 2\) agents with overlapping
+resource needs, collision is guaranteed whenever \(N\) is sufficiently
+large. Specifically, for any resource \(j\) essential to all agents,
+collision occurs whenever
+\(N \geq N_j^* := \lfloor R_j / \min_i x_{ij}^{\circ} \rfloor + 1\).
+
+\textbf{Theorem 2 (Impossibility of Infinite Freedom).} Let \(N \geq 2\)
+agents share a finite resource endowment \(\mathbf{R}\). Suppose each
+agent has at least one essential resource (a resource \(j\) for which
+\(\partial U_i / \partial x_{ij} |_{\mathbf{x}_i = \mathbf{0}} > 0\)) in
+common with at least one other agent, and that aggregate unconstrained
+demand exceeds supply for at least one resource
+(\(\sum_i x_{ij}^{\circ} > R_j\) for some \(j\)). Then no feasible
+strategy profile can simultaneously be unconstrained-optimal for all
+agents:
+
+\[\nexists \; (\mathbf{x}_1, \ldots, \mathbf{x}_N) \in \mathcal{F}_R \; \text{ such that } \; \mathbf{x}_i = \mathbf{x}_i^{\circ} \;\; \forall i\]
+
+where \(\mathcal{F}_R\) is the resource-feasible set
+(resource-conservation and nonnegativity constraints only).
+
+\textbf{Corollary 2.1 (Necessity of Active Constraints).} In any
+multi-agent system with resource collision, at least one constraint
+restricting some agent must be active at the variational equilibrium; in
+particular, in the resource-only GNEP over \(\mathcal{F}_R\) with
+utilities separable across resources (as in the quadratic model), the
+shared scarcity multiplier satisfies \(\lambda_j^* > 0\) for every
+collided resource \(j\) (with binding boundary constraints, aggregate
+consumption can be held strictly below \(R_j\), in which case
+\(\lambda_j^* = 0\) and the constraint activity resides in the boundary
+multipliers). Moreover, at any feasible profile at least one agent's
+allocation of the collided resource lies strictly below its
+unconstrained optimum. Some agent is therefore always constrained.
+
+\textbf{Theorem 3 (Variational Equilibrium).} Under the regularity
+conditions, the GNEP possesses a Variational Equilibrium
+\((\mathbf{x}_1^*, \ldots, \mathbf{x}_N^*, \boldsymbol{\lambda}^*)\) in
+which:
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\item
+  The shared shadow prices \(\lambda_j^*\) are identical for all agents.
+\item
+  The stationarity condition for each agent \(i\) reads, at every
+  resource \(j\) with \(x_{ij}^* > 0\):
+\end{enumerate}
+
+\[\frac{\partial U_i}{\partial x_{ij}}\bigg|_{\mathbf{x}_i^*} = \lambda_j^* + \sum_{B \neq i, k} \mu_{Bk}^{(i)} \frac{\partial g_{Bk}}{\partial x_{ij}}\bigg|_{\mathbf{x}_i^*}\]
+
+(with the corresponding ``\(\leq\)'' at any corner \(x_{ij}^* = 0\),
+where the nonnegativity multiplier enters).
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\setcounter{enumi}{2}
+\tightlist
+\item
+  No agent can improve its utility by unilaterally deviating from
+  \(\mathbf{x}_i^*\), given the constraints.
+\end{enumerate}
+
+\textbf{Corollary 3.1 (Symmetry of Scarcity).} At the variational
+equilibrium, all agents experience the same marginal cost
+\(\lambda_j^*\) per unit of each shared resource.
+
+\textbf{Theorem 4 (Welfare Optimality).} Under the regularity
+conditions, the variational equilibrium is the unique maximizer of total
+social welfare \(W = \sum_i U_i(\mathbf{x}_i)\) over the feasible set
+\(\mathcal{F}\) (shared resource and boundary constraints):
+
+\[\sum_{i=1}^{N} U_i(\mathbf{x}_i^*) > \sum_{i=1}^{N} U_i(\mathbf{x}_i) \qquad \forall \; (\mathbf{x}_1, \ldots, \mathbf{x}_N) \in \mathcal{F} \setminus \{\mathbf{x}^*\}\]
+
+\textbf{Corollary 4.1 (Welfare Dominance).} The variational equilibrium
+is welfare-superior to every other allocation in \(\mathcal{F}\); any
+feasible greedy or equal-split allocation differing from the VE is
+strictly dominated. (Greedy dominance requires the greedy allocation to
+be feasible; for symmetric agents the VE coincides with the equal
+split.)
+
+\textbf{Corollary 4.2 (Constraint Value Scales with Scarcity).} In the
+symmetric quadratic model, on the window
+\(\alpha/\beta \leq R < 2\alpha/\beta\) (the portion of the collision
+regime in which the defector's unconstrained optimum remains feasible),
+the VE-vs-defection welfare gap
+\(V(R) = \tfrac{\beta}{4}(2\alpha/\beta - R)^2\) is strictly increasing
+in scarcity; under abundance the constraint system is slack (\(V = 0\)),
+and under extreme scarcity (\(R < \alpha/\beta\)) the defector absorbs
+the entire endowment and \(V(R) = \tfrac{\beta}{4}R^2\), increasing in
+\(R\). The general case is left as a conjecture.
+
+\textbf{Proposition 1 (Unconstrained Regime Implies Conflict).} If all
+boundary constraints are removed and the system is in collision, then:
+(a) no stable allocation exists without an enforcement mechanism; (b)
+each agent's attempt to realize its unconstrained optimum generates a
+negative externality on other agents; (c) the resulting contested
+resource must be resolved by direct energy expenditure.
+
+\subsection{Notation}\label{notation}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Symbol
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Meaning
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\(N\) & Number of agents \\
+\(n\) & Number of resource dimensions \\
+\(\mathbf{x}_i \in \mathbb{R}_{\geq 0}^n\) & Agent \(i\)'s strategy
+(resource-allocation) vector \\
+\(R_j\) & Total available quantity of resource \(j\) \\
+\(U_i(\mathbf{x}_i)\) & Agent \(i\)'s utility (boundary-maintenance
+objective) \\
+\(\alpha_{ij}, \beta_{ij}\) & Marginal yield and diminishing-returns
+parameters (quadratic model) \\
+\(\mathbf{x}_i^{\circ}\) & Agent \(i\)'s unconstrained optimum \\
+\(g_{Bk}(\mathbf{x}_A)\) & Constraint function encoding agent \(B\)'s
+\(k\)-th boundary constraint \\
+\(\lambda_j\) & Lagrange multiplier for resource \(j\) scarcity \\
+\(\mu_{Bk}\) & Lagrange multiplier (shadow price) for agent \(B\)'s
+\(k\)-th boundary constraint \\
+\(\mathcal{F}_R\) & Resource-feasible set: resource-conservation and
+nonnegativity constraints only (Theorem 2) \\
+\(\mathcal{F}\) & Feasible strategy set under resource \emph{and}
+boundary constraints (Theorem 4) \\
+\end{longtable}
+}
+
+\end{document}

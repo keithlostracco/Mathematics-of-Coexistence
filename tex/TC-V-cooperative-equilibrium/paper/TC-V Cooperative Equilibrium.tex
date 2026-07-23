@@ -2,7 +2,7 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{hyperref}
 \usepackage{graphicx}
-\graphicspath{{../../shared/figures/}}
+\graphicspath{{./}}
 \usepackage{natbib}
 \bibliographystyle{unsrtnat}
 \usepackage{doi}
@@ -20,24 +20,32 @@
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{dsfont} % double-struck numerals (\mathds{1} for indicator functions)
-\usepackage{thmtools}
-\declaretheorem[name=Theorem]{theorem}
-\declaretheorem[name=Proposition,sibling=theorem]{proposition}
-\declaretheorem[name=Lemma,sibling=theorem]{lemma}
-\declaretheorem[name=Corollary,sibling=theorem]{corollary}
-\declaretheorem[name=Conjecture,sibling=theorem]{conjecture}
+% thmtools is only needed for the optional \listoftheorems feature. Loading it
+% patches \newtheorem, and thmtools 0.76's patch is incompatible with recent
+% LaTeX kernels (>= 2025) for shared-counter theorems (every sibling raises
+% "Command \c@... already defined"). We therefore load it only when the
+% list-of-theorems feature is actually requested.
+% Theorem-like environments defined with amsthm's native shared-counter syntax
+% (\newtheorem{child}[parent]{Name}). Numbering is grouped by counter without
+% relying on thmtools' sibling mechanism.
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{conjecture}[theorem]{Conjecture}
 
 \theoremstyle{definition}
-\declaretheorem[name=Definition,style=definition]{definition}
-\declaretheorem[name=Axiom,style=definition,sibling=definition]{axiom}
-\declaretheorem[name=Assumption,style=definition,sibling=definition]{assumption}
-\declaretheorem[name=Criterion,style=definition,sibling=definition]{criterion}
-\declaretheorem[name=Example,style=definition,sibling=definition]{example}
+\newtheorem{definition}{Definition}
+\newtheorem{axiom}[definition]{Axiom}
+\newtheorem{assumption}[definition]{Assumption}
+\newtheorem{criterion}[definition]{Criterion}
+\newtheorem{example}[definition]{Example}
 
 \theoremstyle{remark}
-\declaretheorem[name=Remark,style=remark]{remark}
-\declaretheorem[name=Observation,style=remark,sibling=remark]{observation}
-\declaretheorem[name=Property,style=remark,sibling=remark]{property}
+\newtheorem{remark}{Remark}
+\newtheorem{observation}[remark]{Observation}
+\newtheorem{property}[remark]{Property}
 
 % Prevent theorem-like environments from starting near the page bottom.
 \usepackage{etoolbox}
@@ -56,6 +64,10 @@
 \usepackage{array}
 \usepackage{calc}
 \usepackage{caption}
+% General table note: small font, flush-left, below the table (used by some papers).
+\newenvironment{tablenote}
+  {\par\addvspace{2pt}\footnotesize\noindent}
+  {\par\addvspace{4pt}}
 % Pandoc 3.x wraps uncaptioned longtables in \def\LTcaptype{none};
 % this requires a 'none' counter to exist.
 \newcounter{none}
@@ -175,27 +187,34 @@
 We prove that in a repeated multi-agent game with energy-denominated
 payoffs derived from thermodynamic first principles, universal
 cooperation is the unique Nash equilibrium that simultaneously satisfies
-Pareto efficiency and welfare maximization. The payoff matrix is not
-stipulated but constructed from physical parameters (resource energy,
-friction multipliers, exploitation efficiency, and repair costs),
-yielding a Prisoner's Dilemma in which mutual defection is net-negative
-(\(P < 0\)) rather than merely suboptimal. This structural property
-drives the cooperation threshold to \(\delta^* = 0.363\), substantially
-below the canonical \(0.5\). We prove that defection is evolutionarily
-unstable, self-extinguishing in friction-coupled networks, and
-unprofitable even from a single deviation when network effects are
-included. The friction state variable, encoding the cumulative memory of
-past violations, enters payoffs endogenously, making punishment
-self-reinforcing without external enforcement. We explicitly
-characterize the relationship between these results and established
-repeated-game theory: the known machinery is the Folk Theorem and ESS
-analysis; the novel content is the derived payoff matrix, structurally
-negative mutual defection, equilibrium selection, and endogenous
-persistent friction.
+Pareto efficiency and welfare maximization. Because the payoff matrix is
+constructed from physical parameters (resource energy, friction
+multipliers, exploitation efficiency, and repair costs) rather than
+stipulated, mutual defection is net-negative rather than merely
+suboptimal whenever combined boundary damage exceeds a modest threshold
+fixed by the repair multiplier, a regime we argue is physically typical.
+This property yields a principled welfare-based selection criterion
+within the continuum of Folk Theorem equilibria, which persists:
+cooperation is singled out as the unique equilibrium that is also
+Pareto-efficient and welfare-maximizing, not the only equilibrium. Our
+central result concerns scale: in the N-player public goods extension
+the frictionless cooperation threshold rises toward a ceiling equal to
+the inverse of the cooperative multiplier, which approaches 1 as
+cooperation becomes marginally beneficial, reproducing the canonical
+large-group free-rider collapse. Non-zero background friction lowers
+that ceiling to a value bounded strictly below 1 for every group size,
+approaching 0.4 at the baseline parameters. In the two-player game the
+same mechanism places the critical discount factor near 0.43, well below
+the canonical 0.5, dropping to about 0.19 once network friction is
+included. We further prove that defection is evolutionarily unstable,
+self-extinguishing in friction-coupled networks, and unprofitable even
+from a single deviation. The friction state variable, encoding the
+cumulative memory of past violations, enters payoffs endogenously,
+making punishment self-reinforcing without external enforcement. The
+repeated-game machinery (Folk Theorem, ESS) is classical; the
+contribution is the equilibrium-selection and scale consequences that
+energy denomination yields under physically calibrated parameters.
 \end{abstract}
-\newpage
-\tableofcontents
-\newpage
 \section{Introduction}\label{introduction}
 
 The classical repeated Prisoner's Dilemma demonstrates that cooperation
@@ -217,10 +236,12 @@ on multi-agent optimization, thermodynamic friction as the energy cost
 of constraint violation, and information-theoretic costs of strategic
 signal corruption. We inherit those results and construct the two-player
 and \(N\)-player games with payoffs denominated in energy units
-(Joules).
+(Joules). The specific results inherited from these papers are recalled,
+without proof, in the Appendix.
 
 The energy denomination imposes structural constraints on the admissible
-payoff space that break the Folk Theorem's indeterminacy. In particular:
+payoff space that address the Folk Theorem's indeterminacy by supplying
+a principled selection criterion among its equilibria. In particular:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -230,19 +251,39 @@ payoff space that break the Folk Theorem's indeterminacy. In particular:
   Prisoner's Dilemma ordering emerging as a theorem
   (Proposition~\ref{prop-physical-prisoners-dilemma}).
 \item
-  Mutual defection is net-negative (\(P < 0\)) rather than merely
-  suboptimal, because thermodynamic friction makes conflict
-  self-destructive.
+  Mutual defection becomes net-negative (\(P < 0\)) rather than merely
+  suboptimal once combined boundary damage exceeds \(1/\kappa\) (one
+  half at \(\kappa = 2\)) --- the destructive regime --- because
+  thermodynamic friction then makes conflict self-destructive; at milder
+  damage it remains costly but net-positive. This two-player regime map
+  is the \emph{mechanism} beneath the headline \(N\)-player result, not
+  the load-bearing claim itself.
 \item
-  The resulting cooperation threshold \(\delta^* = 0.363\) is
-  substantially below the canonical \(0.5\).
+  In the \(N\)-player public goods extension, cooperation is sustainable
+  as a Nash equilibrium in arbitrarily large populations and uniquely
+  maximizes system welfare there (\(SW^{CC} = N(\alpha-1)c\),
+  Theorem~\ref{thm-cooperation-maximizes-welfare}) --- the paper's
+  load-bearing conclusion, and one that is \emph{independent of the
+  friction multiplier} \(\Phi\): the threshold \(\delta_N^*\) contains
+  no \(\kappa\), \(\psi\), or \(\Phi\). Concretely, the frictionless
+  cooperation threshold rises to a ceiling of \(1/\alpha\) as
+  \(N \to \infty\), reproducing the canonical large-group collapse in
+  the limit of marginally beneficial cooperation (\(\alpha \to 1\),
+  ceiling \(\to 1\)). Non-zero background friction replaces that ceiling
+  with \(c/(\alpha c + \phi_0 \bar{E})\), bounded strictly below \(1\)
+  for every \(\alpha\) and every \(N\), approaching \(0.4\) at the
+  baseline \(\alpha = 2\)
+  (Corollary~\ref{cor-cooperation-strengthens-scale}).
+\item
+  The resulting two-player cooperation threshold
+  \(\delta^* \approx 0.431\) is below the canonical \(0.5\), and drops
+  further to \(\approx 0.185\) once network friction enters the
+  punishment branch.
 \item
   A friction state variable encoding the cumulative memory of past
   violations enters payoffs endogenously, making punishment
   self-reinforcing.
 \end{enumerate}
-
-All formal results are stated as numbered theorems with full proofs.
 
 The paper proceeds as follows: model and physical setup,
 energy-denominated payoff model, two-player Prisoner's Dilemma ordering,
@@ -286,11 +327,14 @@ can be sustained as a subgame-perfect Nash equilibrium. This result
 simultaneously supports cooperation and creates indeterminacy: the
 theory predicts everything and therefore nothing.
 \citet{OsborneRubinstein1994} provide a comprehensive treatment of
-equilibrium concepts in repeated games. Our framework resolves the Folk
-Theorem's indeterminacy through the structural properties of the
-energy-denominated payoff matrix: the net-negative mutual defection
-payoff (\(P < 0\)) and the endogenous friction state variable together
-select universal cooperation as the unique efficient equilibrium.
+equilibrium concepts in repeated games. Our framework addresses the Folk
+Theorem's indeterminacy with an equilibrium-selection criterion rather
+than an elimination of equilibria: the continuum of equilibria persists,
+but the derived Prisoner's Dilemma structure --- with mutual defection
+net-negative in the destructive damage regime --- together with the
+endogenous friction state variable and the \(N\)-player
+welfare-maximization result single out universal cooperation as the
+unique equilibrium that is also Pareto-optimal and welfare-maximizing.
 
 \textbf{Energy-denominated and physically grounded payoffs.} The
 ecological economics tradition \citep{Lotka1922, GeorgescuRoegen1971}
@@ -302,10 +346,10 @@ thermodynamic friction framework \citep{TC-IV} provides the missing
 link: contest dissipation, boundary damage, and repair costs yield a
 friction multiplier \(\Phi\) that denominates the Prisoner's Dilemma
 payoff matrix entirely in energy units. The resulting payoff structure
-(\(P < 0\) under realistic parameters) is derived rather than
-stipulated, and its consequences for equilibrium selection, evolutionary
-stability, and welfare uniqueness are the central contributions of this
-work.
+(with mutual defection net-negative once \(\kappa\psi > 1\)) is derived
+from physical parameters rather than stipulated, and its consequences
+for equilibrium selection, evolutionary stability, and welfare
+uniqueness are the central contributions of this work.
 
 \section{Model and Physical Setup}\label{model-and-physical-setup}
 
@@ -331,13 +375,13 @@ meta-strategies:
   of \citep{TC-II}.
 \end{itemize}
 
-The exploitation efficiency \(\theta \in (0,1)\), damage fractions
-\(\delta^{\text{off}}, \delta^{\text{def}} \in [0,1]\), repair
-multiplier \(\kappa \geq 1\), and friction multiplier
-\(\Phi = 1 + (1+\kappa)(\delta^{\text{off}} + \delta^{\text{def}})\)
-retain their definitions from \citep{TC-IV}. The bare \(\delta\) (no
-superscript) denotes the discount factor throughout; context
-distinguishes it from the superscripted damage fractions.
+The damage fractions \(\psi^{\text{off}}, \psi^{\text{def}} \in [0,1]\)
+(with combined boundary damage
+\(\psi := \psi^{\text{off}} + \psi^{\text{def}}\)), repair multiplier
+\(\kappa \geq 1\), and friction multiplier \(\Phi = 1 + \kappa\psi\)
+retain their definitions from \citep{TC-IV}. The symbol \(\delta\)
+denotes the discount factor exclusively; the boundary-damage fractions
+carry the distinct glyph \(\psi\).
 
 \subsection{The Friction State
 Variable}\label{the-friction-state-variable}
@@ -438,13 +482,22 @@ on conflict.
 
 \subsection{The Energy Variables}\label{the-energy-variables}
 
-For a pairwise interaction over resource \(E_R > 0\):
-
-{\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.5556}}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
+\caption{Energy variables for a pairwise interaction over resource
+\(E_R > 0\).}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Symbol
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Meaning
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Source
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 Symbol
@@ -464,16 +517,16 @@ overhead; \(c \ll E_R\) \\
 \(e^*\) & Nash equilibrium contest investment per agent & Proposition 1
 \citep{TC-IV}: \(e^* = E_R/4\) (symmetric) \\
 \(\Phi\) & Total friction multiplier & \citep{TC-IV}:
-\(\Phi = 1 + (1+\kappa)(\delta^{\text{off}} + \delta^{\text{def}})\) \\
-\(\phi_0\) & Current network friction coefficient & Definition 7
+\(\Phi = 1 + \kappa\psi\),
+\(\psi = \psi^{\text{off}} + \psi^{\text{def}}\) \\
+\(\phi_0\) & Current network friction coefficient & Definition 8
 \citep{TC-IV} \\
-\(\Delta\phi\) & Friction injection from defection & Definition 8
+\(\Delta\phi\) & Friction injection from defection & Definition 9
 \citep{TC-IV}: \(\Delta\phi = \eta \cdot v\) \\
 \(\bar{E}\) & Average cooperative transaction value & Network
 parameter \\
 \(M\) & Number of transactions per period & Network parameter \\
 \end{longtable}
-}
 
 \subsection{Admissibility: What Energy Denomination
 Forbids}\label{admissibility-what-energy-denomination-forbids}
@@ -483,7 +536,7 @@ Forbids}\label{admissibility-what-energy-denomination-forbids}
 
 The energy denomination restricts the class of admissible payoff matrices to those satisfying three constraints:
 
-(a) \textbf{Resource-bounded payoffs.} All payoffs are bounded by the resource endowment: $|T|, |R|, |P|, |S| \leq E_R$. No player can extract more energy than the resource contains.
+(a) \textbf{Resource-bounded gains.} All payoffs are bounded above by the resource endowment: $T, R, P, S \leq E_R$. No player can extract more energy than the resource contains. Losses are not symmetrically bounded: conflict can destroy more energy than the resource provides \citep{TC-IV}, e.g., $P < -E_R$ once $\Phi > 6$, though in every regime studied in this paper ($\Phi \leq 3.4$) all payoffs also satisfy $|T|, |R|, |P|, |S| \leq E_R$.
 
 (b) \textbf{Strictly positive conflict costs.} Offensive and defensive actions require $e^* > 0$ energy investment. Costless aggression is physically inadmissible.
 
@@ -491,13 +544,13 @@ The energy denomination restricts the class of admissible payoff matrices to tho
 
 Any payoff matrix violating (a)–(c) is physically inadmissible under energy denomination. Constraints (a)–(b) restrict the payoff space; constraint (c) restricts the game form.
 
-A further property is not assumed but \textbf{derived} from (a)–(b) combined with the friction multiplier (Theorem 6 \citep{TC-IV}):
+A further property follows from (a)–(b) combined with the friction multiplier (Theorem 6 \citep{TC-IV}), conditional on the magnitude of the damage fractions:
 
-\textbf{Derived consequence: Net-negative mutual defection.} When $\Phi > 2$ (which holds for all physically realistic parameter ranges), the mutual defection payoff satisfies $P < 0$. Both agents lose energy in absolute terms. This is a structural consequence of the friction multiplier: no parameter is set to produce it. The derivation chain is: boundary damage exists on both sides ($\delta^{\text{off}} + \delta^{\text{def}} > 0$, since costless conflict is excluded by (b)); repair is thermodynamically irreversible since repair requires thermodynamic work exceeding the damage energy ($\kappa > 1$, by the Second Law); therefore $(1+\kappa)(\delta^{\text{off}} + \delta^{\text{def}}) > 1$, giving $\Phi > 2$ and $P = \frac{E_R}{2}(1 - \Phi/2) < 0$. See §\ref{construction} for the full derivation.
+\textbf{Conditional consequence: Net-negative mutual defection.} The mutual defection payoff satisfies $P = \frac{E_R}{2}(1 - \Phi/2) < 0$ exactly when $\Phi > 2$, which is equivalent to $\kappa(\psi^{\text{off}} + \psi^{\text{def}}) > 1$, i.e., to the combined boundary damage $\psi = \psi^{\text{off}} + \psi^{\text{def}}$ exceeding $1/\kappa$ (one half at $\kappa = 2$). The Second Law supplies the ingredients of this condition but not its magnitude: boundary damage exists on both sides ($\psi > 0$, since costless conflict is excluded by (b)), and repair is thermodynamically irreversible since repair requires thermodynamic work exceeding the damage energy ($\kappa > 1$, by the Second Law), but positivity and irreversibility alone do not force $\kappa\psi > 1$. Whether $\Phi > 2$ holds is therefore a regime condition on damage magnitudes rather than a derived necessity: it identifies the \textbf{destructive regime} ($\psi > 1/\kappa$), in which mutual conflict is self-destructive, and separates it from the mild regime ($\psi < 1/\kappa$) in which mutual defection is costly but net-positive. The two-agent crossover $\kappa\psi > 1$ is the same threshold established in \citep{TC-IV}; for three or more contestants it falls to $\Phi > N/(N-1)$, equivalently $\kappa\psi > 1/(N-1)$ — a threshold that shrinks as contestants are added and vanishes only in the large-$N$ limit, where any positive damage suffices. See §\ref{construction} for the full derivation.
 
-In particular, the standard Prisoner's Dilemma with $P > 0$ is the low-friction limit of this model, arising only when $\Phi < 2$, i.e., $(1+\kappa)(\delta^{\text{off}} + \delta^{\text{def}}) < 1$. At $\kappa = 2$ this requires combined damage $< 1/3$, the mild end of the conflict spectrum (low-stakes disputes, minor skirmishes). Once damage and repair costs are even moderately realistic, $\Phi > 2$ and $P < 0$.
+In particular, the standard Prisoner's Dilemma with $P > 0$ is the mild-friction regime of this model, arising when $\Phi < 2$, i.e., $\kappa\psi < 1$. At $\kappa = 2$ this requires combined damage $\psi < 1/2$, which includes the baseline calibration ($\psi = 0.4$, giving $P = +5$) alongside lower-stakes disputes. Once combined damage exceeds $1/\kappa$, $\Phi > 2$ and $P < 0$.
 
-\textbf{What is excluded:} Payoff specifications with unbounded gains, costless aggression, or memoryless (i.i.d.) interaction histories are inadmissible. Positive mutual-defection payoffs ($P > 0$) are not excluded by fiat but are \emph{proved impossible} under realistic friction (derived consequence above). These exclusions are non-trivial: they eliminate entire families of payoff matrices that are routinely studied in abstract game theory but cannot arise when payoffs are denominated in conserved physical quantities subject to thermodynamic friction.
+\textbf{What is excluded:} Payoff specifications with unbounded gains, costless aggression, or memoryless (i.i.d.) interaction histories are inadmissible. Positive mutual-defection payoffs ($P > 0$) are not excluded by fiat: they arise in the mild regime $\Phi < 2$ (including the baseline) and become impossible once combined damage exceeds $1/\kappa$ (conditional consequence above). These exclusions are non-trivial: they eliminate entire families of payoff matrices that are routinely studied in abstract game theory but cannot arise when payoffs are denominated in conserved physical quantities subject to thermodynamic friction.
 \end{remark}
 
 \section{The Two-Player Payoff
@@ -522,16 +575,18 @@ pays the coordination cost \(c\).
 Agent \(A\) attacks the cooperating agent \(B\). Since \(B\) is not
 investing in contest (expecting cooperation), \(A\) seizes the resource
 but still incurs: - The metabolic cost of the aggressive action:
-\(e_A^{\text{attack}}\) (energy of mounting the violation) - Boundary
-damage to self (offensive):
-\(\delta^{\text{off}} \cdot e_A^{\text{attack}}\) (exposure cost) -
-Repair of self-damage:
-\(\kappa \cdot \delta^{\text{off}} \cdot e_A^{\text{attack}}\)
+\(e_A^{\text{attack}}\) (energy of mounting the violation) - Repair of
+offensive self-damage:
+\(\kappa \cdot \psi^{\text{off}} \cdot e_A^{\text{attack}}\) (the
+destroyed embodied energy \(\psi^{\text{off}} e_A^{\text{attack}}\) is
+re-supplied by this repair term, not charged separately)
 
-Agent \(B\), caught unprepared, suffers: - Loss of the full resource:
-\(-E_R\) (relative to the cooperative baseline) - Defensive boundary
-damage: \(\delta^{\text{def}} \cdot e_A^{\text{attack}}\) - Repair cost:
-\(\kappa \cdot \delta^{\text{def}} \cdot e_A^{\text{attack}}\)
+Agent \(B\), caught unprepared, suffers: - No resource share: \(B\)
+receives \(0\) from the resource (forgoing the \(E_R/2\) it would have
+obtained under cooperation) - Repair of defensive boundary damage:
+\(\kappa \cdot \psi^{\text{def}} \cdot e_A^{\text{attack}}\) (again the
+damage \(\psi^{\text{def}} e_A^{\text{attack}}\) is re-supplied by
+repair, not counted twice)
 
 However, the defector against a cooperator faces much lower resistance.
 We model the attack cost against an undefended boundary as
@@ -540,31 +595,33 @@ is the \textbf{exploitation efficiency}, the fraction of the resource's
 value the defector must spend to seize it from an unprepared cooperator.
 Typically \(\theta \ll 1/2\) (attacking an undefended target is cheap).
 
-\[\pi_A^{DC} = E_R - \theta E_R \left[1 + (1 + \kappa)\delta^{\text{off}}\right] = E_R\left[1 - \theta(1 + (1+\kappa)\delta^{\text{off}})\right]\]
+\[\pi_A^{DC} = E_R - \theta E_R \left[1 + \kappa\psi^{\text{off}}\right] = E_R\left[1 - \theta(1 + \kappa\psi^{\text{off}})\right]\]
 
-\[\pi_B^{DC} = -\theta E_R (1 + \kappa)\delta^{\text{def}}\]
+\[\pi_B^{DC} = -\theta E_R \kappa\psi^{\text{def}}\]
 
 The victim \(B\) receives nothing from the resource and additionally
 suffers boundary damage and repair costs from the attack.
 
 \textbf{Case (C, D): Symmetric mirror of (D, C):}
 
-\[\pi_A^{CD} = -\theta E_R (1 + \kappa)\delta^{\text{def}}\]
+\[\pi_A^{CD} = -\theta E_R \kappa\psi^{\text{def}}\]
 
-\[\pi_B^{CD} = E_R\left[1 - \theta(1 + (1+\kappa)\delta^{\text{off}})\right]\]
+\[\pi_B^{CD} = E_R\left[1 - \theta(1 + \kappa\psi^{\text{off}})\right]\]
 
 \textbf{Case (D, D): Mutual Defection:}
 
 Both agents fight. This is the Tullock contest from the thermodynamic
 friction derivation (Proposition 1 \citep{TC-IV}). Each invests
-\(e^* = E_R/4\), wins with probability 1/2, and suffers boundary damage
-from both offense and defense plus repair costs.
+\(e^* = E_R/4\), wins with probability 1/2, and pays the repair cost of
+the boundary damage inflicted through both offense and defense (the
+destroyed embodied energy is re-supplied by repair, so it is not charged
+a second time as a standalone loss).
 
 Each agent's expected payoff is the winning prize minus all costs:
 
-\[\pi_A^{DD} = \pi_B^{DD} = \frac{E_R}{2} - e^* - (\delta^{\text{off}} + \delta^{\text{def}}) e^* - \kappa(\delta^{\text{off}} + \delta^{\text{def}}) e^*\]
+\[\pi_A^{DD} = \pi_B^{DD} = \frac{E_R}{2} - e^* - \kappa(\psi^{\text{off}} + \psi^{\text{def}}) e^*\]
 
-\[= \frac{E_R}{2} - \left[1 + (1 + \kappa)(\delta^{\text{off}} + \delta^{\text{def}})\right] e^* = \frac{E_R}{2} - \Phi \cdot \frac{E_R}{4}\]
+\[= \frac{E_R}{2} - \left[1 + \kappa(\psi^{\text{off}} + \psi^{\text{def}})\right] e^* = \frac{E_R}{2} - \Phi \cdot \frac{E_R}{4}\]
 
 \[= \frac{E_R}{2}\left(1 - \frac{\Phi}{2}\right)\]
 
@@ -573,13 +630,13 @@ Each agent's expected payoff is the winning prize minus all costs:
 
 Assembling into standard normal form, define the shorthand payoffs:
 
-\[T = \pi^{DC}_{\text{defector}} = E_R\left[1 - \theta(1 + (1+\kappa)\delta^{\text{off}})\right] \quad \text{(Temptation)}\]
+\[T = \pi^{DC}_{\text{defector}} = E_R\left[1 - \theta(1 + \kappa\psi^{\text{off}})\right] \quad \text{(Temptation)}\]
 
 \[R = \pi^{CC} = \frac{E_R}{2} - c \quad \text{(Reward for cooperation)}\]
 
 \[P = \pi^{DD} = \frac{E_R}{2}\left(1 - \frac{\Phi}{2}\right) \quad \text{(Punishment for mutual defection)}\]
 
-\[S = \pi^{CD}_{\text{sucker}} = -\theta E_R (1+\kappa)\delta^{\text{def}} \quad \text{(Sucker's payoff)}\]
+\[S = \pi^{CD}_{\text{sucker}} = -\theta E_R \kappa\psi^{\text{def}} \quad \text{(Sucker's payoff)}\]
 
 The normal-form game with row player \(A\) and column player \(B\) is
 then:
@@ -599,16 +656,16 @@ each inequality under physical constraints:
 \textbf{Claim: \(T > R\) (temptation exceeds reward) when exploitation
 is cheap.}
 
-\[T > R \iff E_R[1 - \theta(1 + (1+\kappa)\delta^{\text{off}})] > \frac{E_R}{2} - c\]
+\[T > R \iff E_R[1 - \theta(1 + \kappa\psi^{\text{off}})] > \frac{E_R}{2} - c\]
 
-\[\iff \frac{E_R}{2} + c > \theta E_R(1 + (1+\kappa)\delta^{\text{off}})\]
+\[\iff \frac{E_R}{2} + c > \theta E_R(1 + \kappa\psi^{\text{off}})\]
 
-\[\iff \theta < \frac{1/2 + c/E_R}{1 + (1+\kappa)\delta^{\text{off}}}\]
+\[\iff \theta < \frac{1/2 + c/E_R}{1 + \kappa\psi^{\text{off}}}\]
 
-For \(c \ll E_R\) and \(\delta^{\text{off}} = 0.15\), \(\kappa = 2\):
-threshold \(\approx 0.5/1.45 \approx 0.345\). So \(T > R\) when the
-exploitation cost \(\theta < 0.345\), i.e., when stealing from a
-cooperator is less than 34.5\% of the resource value. This is the
+For \(c \ll E_R\) and \(\psi^{\text{off}} = 0.15\), \(\kappa = 2\):
+threshold \(\approx 0.5/1.3 \approx 0.385\). So \(T > R\) when the
+exploitation cost \(\theta < 0.385\), i.e., when stealing from a
+cooperator is less than 38.5\% of the resource value. This is the
 standard condition: defection is \emph{tempting} when exploiting a
 cooperator is cheap.
 
@@ -627,27 +684,30 @@ dissipation.
 \textbf{Claim: \(P > S\) (mutual defection beats being the sucker) when
 friction is not too extreme.}
 
-\[P > S \iff \frac{E_R}{2}\left(1 - \frac{\Phi}{2}\right) > -\theta E_R(1+\kappa)\delta^{\text{def}}\]
+\[P > S \iff \frac{E_R}{2}\left(1 - \frac{\Phi}{2}\right) > -\theta E_R\kappa\psi^{\text{def}}\]
 
-\[\iff \frac{1}{2} - \frac{\Phi}{4} + \theta(1+\kappa)\delta^{\text{def}} > 0 \iff \Phi < 2 + 4\theta(1+\kappa)\delta^{\text{def}} \equiv \Phi_{\text{PD}}\]
+\[\iff \frac{1}{2} - \frac{\Phi}{4} + \theta\kappa\psi^{\text{def}} > 0 \iff \Phi < 2 + 4\theta\kappa\psi^{\text{def}} \equiv \Phi_{\text{PD}}\]
 
 For the baseline parameters (\(\theta = 0.15\), \(\kappa = 2\),
-\(\delta^{\text{def}} = 0.25\)):
-\(\Phi_{\text{PD}} = 2 + 4(0.15)(3)(0.25) = 2.45\). Since the baseline
-\(\Phi = 2.2 < 2.45\), the PD ordering \(P > S\) holds. For
-\(\Phi \geq \Phi_{\text{PD}}\), the game transitions to a
-\textbf{Chicken} (Hawk-Dove) structure with \(T > R > S > P\): mutual
-defection becomes \emph{worse} than being the sucker, because the
-contest dissipation at high friction overwhelms the sucker's one-sided
-damage. This transition is \emph{favorable} for cooperation: the
-repeated-game cooperation condition
-(Theorem~\ref{thm-cooperation-theorem}) becomes easier to satisfy since
-\(T - P\) grows larger, and even the one-shot game admits cooperative
+\(\psi^{\text{def}} = 0.25\)):
+\(\Phi_{\text{PD}} = 2 + 4(0.15)(2)(0.25) = 2.3\). Since the baseline
+\(\Phi = 1.8 < 2.3\), the PD ordering \(P > S\) holds. For
+\(\Phi > \Phi_{\text{PD}}\), the game transitions to a \textbf{Chicken}
+(Hawk-Dove) structure with \(T > R > S > P\): mutual defection becomes
+\emph{worse} than being the sucker, because the contest dissipation at
+high friction overwhelms the sucker's one-sided damage. In the Chicken
+regime the grim-trigger threshold changes form: the deviator's best
+response to perpetual punishment is then \(C\) rather than \(D\), so the
+threshold is \((T-R)/(T-S)\) rather than \((T-R)/(T-P)\) (see
+Theorem~\ref{thm-cooperation-theorem} and the sensitivity-table note
+below). Numerically the transition remains \emph{favorable} for
+cooperation, because the sucker payoff \(S\) worsens with friction and
+enlarges \(T - S\), and even the one-shot game admits cooperative
 mixed-strategy Nash equilibria under the Chicken structure.
 
 \textbf{Claim: \(S < 0\) (the sucker always loses).}
 
-\[S = -\theta E_R(1 + \kappa)\delta^{\text{def}} < 0\]
+\[S = -\theta E_R \kappa\psi^{\text{def}} < 0\]
 
 since all parameters are positive. The sucker not only fails to obtain
 the resource but suffers boundary damage from the defector's attack.
@@ -657,7 +717,7 @@ the resource but suffers boundary damage from the defector's attack.
 \begin{proposition}[Physical Prisoner's Dilemma]
 \label{prop-physical-prisoners-dilemma}
 
-Under the energy-based payoff model with physical constraints ($E_R > 0$, $c \ll E_R$, $\theta < (1/2 + c/E_R)/(1 + (1+\kappa)\delta^{\text{off}})$, $1 < \Phi < \Phi_{\text{PD}} = 2 + 4\theta(1+\kappa)\delta^{\text{def}}$), the single-round game has the structure of a Prisoner's Dilemma: $T > R > P > S$.
+Under the energy-based payoff model with physical constraints ($E_R > 0$, $c \ll E_R$, $\theta < (1/2 + c/E_R)/(1 + \kappa\psi^{\text{off}})$, $1 < \Phi < \Phi_{\text{PD}} = 2 + 4\theta\kappa\psi^{\text{def}}$), the single-round game has the structure of a Prisoner's Dilemma: $T > R > P > S$.
 
 In the single-round game, defection is the dominant strategy for each agent. The unique Nash Equilibrium is $(D, D)$ with payoffs $(P, P)$, even though $(C, C)$ with payoffs $(R, R)$ is Pareto-superior.
 \end{proposition}
@@ -676,46 +736,51 @@ So $D$ strictly dominates $C$ for each player. The unique NE is $(D, D)$. But $R
 \textbf{Physical interpretation:} Each agent's individually rational
 choice (defect regardless of the opponent's action) leads to a
 collectively irrational outcome. The inefficiency is stronger than in
-the standard abstract PD: because \(P < 0\) when \(\Phi > 2\) (the
-physically realistic regime), mutual defection does not merely yield a
-smaller gain but an absolute energy loss. Both agents would prefer the
-cooperative outcome \((R, R)\), yet neither can unilaterally switch to
-\(C\) without risking the sucker's payoff \(S < P < 0\). The one-shot
-game therefore traps both agents in a net-negative equilibrium that the
-repeated game (§\ref{the-repeated-game-cooperation-as-equilibrium})
-resolves.
+the standard abstract PD: because \(P\) becomes net-negative once
+\(\kappa\psi > 1\) (the destructive regime), mutual defection can yield
+not merely a smaller gain but an absolute energy loss. Both agents would
+prefer the cooperative outcome \((R, R)\), yet neither can unilaterally
+switch to \(C\) without exposure to the sucker's payoff \(S < P\) (and
+\(S < 0\) in every regime). The one-shot game therefore traps both
+agents in the mutual-defection equilibrium --- net-negative in the
+destructive regime --- that the repeated game
+(§\ref{the-repeated-game-cooperation-as-equilibrium}) resolves.
 
 \subsection{Numerical Illustration: The Baseline
 Game}\label{numerical-illustration-the-baseline-game}
 
 \textbf{Parameters:} \(E_R = 100\), \(c = 2\), \(\theta = 0.15\),
-\(\delta^{\text{off}} = 0.15\), \(\delta^{\text{def}} = 0.25\),
+\(\psi^{\text{off}} = 0.15\), \(\psi^{\text{def}} = 0.25\),
 \(\kappa = 2\).
 
 Computed payoffs:
 
-\[T = 100[1 - 0.15(1 + 3 \times 0.15)] = 100[1 - 0.15 \times 1.45] = 100 \times 0.7825 = 78.25\]
+\[T = 100[1 - 0.15(1 + 2 \times 0.15)] = 100[1 - 0.15 \times 1.3] = 100 \times 0.805 = 80.5\]
 
 \[R = 50 - 2 = 48\]
 
-\[\Phi = 1 + 3(0.15 + 0.25) = 2.2\]
+\[\Phi = 1 + 2(0.15 + 0.25) = 1.8\]
 
-\[P = 50(1 - 2.2/2) = 50(1 - 1.1) = 50 \times (-0.1) = -5\]
+\[P = 50(1 - 1.8/2) = 50(1 - 0.9) = 50 \times 0.1 = 5\]
 
-\[S = -0.15 \times 100 \times 3 \times 0.25 = -11.25\]
+\[S = -0.15 \times 100 \times 2 \times 0.25 = -7.5\]
 
-{\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}lll@{}}
+\caption{Baseline single-round payoff matrix (energy
+units).}\tabularnewline
+\toprule\noalign{}
+& \(B: C\) & \(B: D\) \\
+\midrule\noalign{}
+\endfirsthead
 \toprule\noalign{}
 & \(B: C\) & \(B: D\) \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-\(A: C\) & \textbf{(48, 48)} & (−11.25, 78.25) \\
-\(A: D\) & (78.25, −11.25) & (−5, −5) \\
+\(A: C\) & \textbf{(48, 48)} & (−7.5, 80.5) \\
+\(A: D\) & (80.5, −7.5) & (5, 5) \\
 \end{longtable}
-}
 
 \textbf{Observations:}
 
@@ -723,21 +788,69 @@ Computed payoffs:
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \textbf{Mutual defection is net-negative} (\(P = -5\)): both agents
-  \emph{lose} energy. The conflict destroys more than the resource
-  provides (consistent with Theorem 6 \citep{TC-IV}, since
-  \(\Phi = 2.2 > 2\)).
+  \textbf{Mutual defection is costly but net-positive at the mild
+  baseline} (\(P = +5\)): the contest dissipation consumes most of the
+  resource's value, leaving each agent only a small positive residual.
+  Net-negativity (\(P < 0\)) requires the destructive regime
+  \(\kappa\psi > 1\) (\(\psi > 1/2\) at \(\kappa = 2\)); see the worked
+  example below and Theorem 6 \citep{TC-IV}.
 \item
   \textbf{Mutual cooperation yields a large surplus} (\(R = 48\) each,
   system total = 96).
 \item
-  \textbf{Temptation is high} (\(T = 78.25\)), but the victim suffers
-  (\(S = -11.25\)).
+  \textbf{Temptation is high} (\(T = 80.5\)), but the victim suffers
+  (\(S = -7.5\)).
 \item
-  \textbf{The cooperation premium} is \(R - P = 48 - (-5) = 53\) per
-  agent, the energy saved by cooperative behavior compared to the
-  conflict equilibrium.
+  \textbf{The cooperation premium} is \(R - P = 48 - 5 = 43\) per agent,
+  the energy saved by cooperative behavior compared to the conflict
+  equilibrium.
 \end{enumerate}
+
+\subsection{Numerical Illustration: The Destructive
+Regime}\label{numerical-illustration-the-destructive-regime}
+
+The baseline above sits in the mild regime (\(\kappa\psi = 0.8 < 1\)),
+where mutual defection is costly but net-positive. To exhibit a
+genuinely net-negative conflict equilibrium we raise the damage
+fractions into the destructive regime.
+
+\textbf{Parameters:} \(E_R = 100\), \(c = 2\), \(\theta = 0.15\),
+\(\psi^{\text{off}} = 0.25\), \(\psi^{\text{def}} = 0.35\) (so
+\(\psi = 0.6 > 1/\kappa = 0.5\)), \(\kappa = 2\).
+
+\[\Phi = 1 + 2(0.25 + 0.35) = 2.2\]
+
+\[T = 100[1 - 0.15(1 + 2 \times 0.25)] = 100[1 - 0.15 \times 1.5] = 77.5\]
+
+\[R = 50 - 2 = 48, \qquad P = 50(1 - 2.2/2) = -5, \qquad S = -0.15 \times 100 \times 2 \times 0.35 = -10.5\]
+
+\begin{longtable}[]{@{}lll@{}}
+\caption{Destructive-regime single-round payoff matrix (energy
+units).}\tabularnewline
+\toprule\noalign{}
+& \(B: C\) & \(B: D\) \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+& \(B: C\) & \(B: D\) \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\(A: C\) & \textbf{(48, 48)} & (−10.5, 77.5) \\
+\(A: D\) & (77.5, −10.5) & (−5, −5) \\
+\end{longtable}
+
+Here mutual defection is net-negative (\(P = -5\)): contest dissipation
+plus repair now exceed the resource value, consistent with Theorem 6
+\citep{TC-IV} (\(\Phi = 2.2 > 2\)). The Prisoner's Dilemma ordering is
+preserved
+(\(\Phi = 2.2 < \Phi_{\text{PD}} = 2 + 4(0.15)(2)(0.35) = 2.42\)), and
+the cooperation threshold falls to
+\(\delta^* = (77.5 - 48)/(77.5 - (-5)) = 29.5/82.5 = 0.358\), below the
+baseline \(0.431\): harsher conflict makes cooperation easier to
+sustain. This destructive regime, not the mild baseline, is where the
+``mutual defection is net-negative'' reading of the model applies.
 
 \section{The Repeated Game: Cooperation as
 Equilibrium}\label{the-repeated-game-cooperation-as-equilibrium}
@@ -755,12 +868,14 @@ In the standard (abstract-utility) PD, this result is qualitative:
 cooperation \emph{can} be sustained for sufficiently patient agents, but
 the critical patience threshold \(\delta^*\) depends on payoff values
 that are free parameters. In our physical PD, the threshold is
-\emph{structurally constrained}. Because mutual defection is
-net-negative (\(P < 0\) when \(\Phi > 2\)), the punishment for defection
-is automatically severe, and the resulting \(\delta^*\) is low. The
-repeated-game analysis that follows is standard in its mechanism
-(trigger strategies, folk theorem) but novel in its conclusion: the
-physics sets the threshold, not the modeler.
+\emph{structurally constrained}. Because mutual defection is heavily
+discounted by contest dissipation --- and net-negative once
+\(\kappa\psi > 1\) (the destructive regime) --- the punishment for
+defection is severe relative to the cooperative reward, and the
+resulting \(\delta^*\) is low. The repeated-game analysis that follows
+is standard in its mechanism (trigger strategies, folk theorem) but
+novel in its conclusion: the physics, once the damage magnitudes are
+calibrated, sets the threshold rather than the modeler.
 
 The key parameter is the \textbf{discount factor} \(\delta \in (0, 1)\),
 representing how much agents value future payoffs relative to present
@@ -770,7 +885,7 @@ interpretation:
 \begin{definition}[Discount Factor]
 \label{def-discount-factor}
 
-The discount factor $\delta$ for an agent with planning horizon $T$ (periods) and per-period survival probability $\sigma \in (0, 1]$ is:
+The discount factor $\delta$ for an agent with per-period survival probability $\sigma \in (0, 1]$ is:
 
 $$\delta = \sigma \cdot e^{-r}$$
 
@@ -816,11 +931,11 @@ Under the grim trigger strategy, the following holds:
 \begin{theorem}[Cooperation as Nash Equilibrium: The Cooperation Theorem]
 \label{thm-cooperation-theorem}
 
-In the infinitely repeated energy-based game with discount factor $\delta$, the cooperative outcome $(C, C)$ in every period is sustainable as a Nash Equilibrium (under grim trigger) if and only if:
+In the infinitely repeated energy-based game with discount factor $\delta$ and the Prisoner's Dilemma ordering ($P > S$), the cooperative outcome $(C, C)$ in every period is sustainable as a Nash Equilibrium (under grim trigger) if and only if:
 
 $$\delta \geq \frac{T - R}{T - P} = \delta^*$$
 
-where $T$, $R$, $P$ are the temptation, reward, and punishment payoffs. The critical discount factor $\delta^*$ has the physical interpretation: cooperation is sustainable when agents sufficiently value future interactions.
+where $T$, $R$, $P$ are the temptation, reward, and punishment payoffs. In the Chicken regime ($S > P$, arising when $\Phi > \Phi_{\text{PD}}$), the deviator's best response to perpetual punishment is $C$ rather than $D$, and the corresponding threshold is $\delta^* = (T - R)/(T - S)$. In both regimes the critical discount factor $\delta^*$ has the physical interpretation: cooperation is sustainable when agents sufficiently value future interactions.
 \end{theorem}
 
 \begin{proof}
@@ -832,7 +947,7 @@ $$V_A^{\text{coop}} = R + \delta R + \delta^2 R + \cdots = \frac{R}{1 - \delta}$
 
 \textbf{Payoff from one-shot defection (then punished forever):}
 
-The deviating agent gets $T$ in the current period, then $(D, D)$ forever:
+The deviating agent gets $T$ in the current period, after which the opponent plays $D$ forever. In the PD regime ($P > S$) the deviator's best per-period reply to perpetual $D$ is $D$, so the punishment stream pays $P$:
 
 $$V_A^{\text{deviate}} = T + \delta P + \delta^2 P + \cdots = T + \frac{\delta P}{1 - \delta}$$
 
@@ -848,7 +963,7 @@ $$\frac{R - P}{T - P} \geq 1 - \delta$$
 
 $$\delta \geq 1 - \frac{R - P}{T - P} = \frac{T - R}{T - P}$$
 
-Since both agents face the same calculation (the game is symmetric), $(C, C)$ sustained by grim trigger is a NE whenever $\delta \geq \delta^*$.
+Since both agents face the same calculation (the game is symmetric), $(C, C)$ sustained by grim trigger is a NE whenever $\delta \geq \delta^*$. In the Chicken regime ($S > P$) the deviator's best per-period reply to perpetual $D$ is instead $C$, earning $S > P$; replacing $P$ with $S$ throughout the same calculation yields the threshold $(T - R)/(T - S)$.
 \end{proof}
 
 \subsection{\texorpdfstring{Computing \(\delta^*\) Under Physical
@@ -862,50 +977,55 @@ Using the energy-based payoffs from
 \textbf{Baseline numerical example}
 (§\ref{numerical-illustration-the-baseline-game} parameters):
 
-\[\delta^* = \frac{78.25 - 48}{78.25 - (-5)} = \frac{30.25}{83.25} = 0.3634\]
+\[\delta^* = \frac{80.5 - 48}{80.5 - 5} = \frac{32.5}{75.5} = 0.4305\]
 
 \begin{corollary}[Low Cooperation Threshold]
 \label{cor-low-cooperation-threshold}
 
-Under the physical payoff model with $\Phi > 2$ (net-negative mutual defection), the critical discount factor satisfies $\delta^* < 0.5$. Agents need only value the future at more than 36% of the present to sustain cooperation.
+Under the physical payoff model, the critical discount factor satisfies $\delta^* < 0.5$ if and only if $T + P < 2R$. At the baseline parameters this exact condition holds directly ($T + P = 85.5 < 96 = 2R$), giving $\delta^* = 0.431 < 0.5$: agents need only value the future at more than 43% of the present to sustain cooperation. In the destructive regime, a transparent sufficient condition for $\delta^* < 0.5$ is that both
+
+(i) $\Phi > 2$ (net-negative mutual defection, $P < 0$), and
+
+(ii) $c < \frac{\theta E_R}{2}\bigl(1 + \kappa\psi^{\text{off}}\bigr)$ (the coordination cost is less than half the exploitation overhead, equivalently $R > T/2$)
+
+hold; conditions (i)–(ii) are sufficient but not necessary, and at the mild baseline (i) fails while $\delta^* < 0.5$ still holds via the exact condition.
 \end{corollary}
 
 \begin{proof}
-When $P < 0$ (which occurs for $\Phi > 2$, per the baseline illustration, §\ref{numerical-illustration-the-baseline-game}):
+For the exact condition: since $T - P > 0$,
+
+$$\delta^* = \frac{T - R}{T - P} < \frac{1}{2} \iff 2(T - R) < T - P \iff T + P < 2R$$
+
+For sufficiency of (i)–(ii): when $P < 0$ (which occurs exactly when $\Phi > 2$):
 
 $$T - P = T + |P| > T$$
 
 $$\delta^* = \frac{T - R}{T - P} < \frac{T - R}{T} = 1 - \frac{R}{T}$$
 
-It remains to show $R > T/2$, i.e., $1 - R/T < 0.5$. Substituting the payoff expressions from the physical parameterization (§\ref{parameterization-the-physical-prisoners-dilemma}), $R = E_R/2 - c$ and $T = E_R[1 - \theta(1 + (1+\kappa)\delta^{\text{off}})]$, the condition $R > T/2$ reduces to:
+Condition (ii) is $R > T/2$, i.e., $1 - R/T < 0.5$: substituting the payoff expressions from the physical parameterization (§\ref{parameterization-the-physical-prisoners-dilemma}), $R = E_R/2 - c$ and $T = E_R[1 - \theta(1 + \kappa\psi^{\text{off}})]$, the condition $R > T/2$ reduces to exactly (ii). Together, (i) and (ii) give $T + P < T < 2R$.
 
-$$c < \frac{\theta E_R}{2}\bigl(1 + (1+\kappa)\delta^{\text{off}}\bigr)$$
+Condition (ii) is a genuine magnitude restriction, not a consequence of the PD ordering: $c \ll E_R$ does not imply it when exploitation is very cheap (small $\theta$). For example, $(E_R, c, \theta, \kappa, \psi^{\text{off}}, \psi^{\text{def}}) = (100, 2, 0.006, 2, 0.02, 0.49)$ satisfies the full PD ordering with $\Phi = 2.02 > 2$ and $P = -0.5 < 0$, yet the right side of (ii) is $0.312 < 2 = c$ and $\delta^* = 51.376/99.876 = 0.514 > 0.5$. The claim $\delta^* < 0.5$ therefore requires (ii) and does not follow from $\Phi > 2$ alone.
 
-This holds whenever the exploitation overhead exceeds twice the coordination cost, a condition satisfied for any non-trivial $\theta$, since the PD ordering already requires $c \ll E_R$. For the baseline values ($c = 2$, $\theta = 0.15$, $E_R = 100$, $\kappa = 2$, $\delta^{\text{off}} = 0.15$): the right side is $0.15 \times 100 \times 1.45 / 2 = 10.875 \gg 2 = c$, and $R/T = 48/78.25 = 0.614 > 0.5$, giving $\delta^* < 1 - 0.614 = 0.386 < 0.5$.
+For the baseline values ($c = 2$, $\theta = 0.15$, $E_R = 100$, $\kappa = 2$, $\psi^{\text{off}} = 0.15$, $\psi^{\text{def}} = 0.25$), mutual defection is net-positive ($P = 5 > 0$, since $\Phi = 1.8 < 2$), so sufficient condition (i) does not apply; the exact condition certifies the threshold directly, $T + P = 80.5 + 5 = 85.5 < 96 = 2R$, giving $\delta^* = 0.431 < 0.5$. In the destructive regime ($\psi > 1/\kappa$, e.g. $\psi^{\text{off}} = 0.25$, $\psi^{\text{def}} = 0.35$) condition (i) holds and the sufficient route also applies: the right side of (ii) is $0.15 \times 100 \times 1.5 / 2 = 11.25 \gg 2 = c$, so $\delta^* < 0.5$ there as well.
 \end{proof}
 
 \textbf{Physical interpretation:} Because mutual defection under
-physical energy payoffs is net-negative (\(P < 0\)), the punishment for
-defection is \textbf{automatically severe}: agents do not just earn
-less, they actively \emph{lose} energy. This makes cooperation easy to
-sustain: even agents with modest foresight (\(\delta > 0.36\)) find it
-in their interest to cooperate. Compare this with the abstract PD (e.g.,
-\(T=5, R=3, P=1, S=0\)) where \(\delta^* = 0.5\). Physical constraints
-make cooperation \textbf{more} accessible, not less.
+physical energy payoffs is heavily eroded by contest dissipation --- and
+net-negative once \(\kappa\psi > 1\) --- the punishment for defection is
+severe relative to the cooperative reward: agents earn far less, and in
+the destructive regime actively \emph{lose} energy. Provided
+exploitation is not so cheap that the temptation dwarfs the reward (the
+exact condition \(T + P < 2R\), sufficient condition (ii)), this makes
+cooperation easy to sustain: even agents with modest foresight
+(\(\delta > 0.43\) at baseline) find it in their interest to cooperate.
+Compare this with the abstract PD (e.g., \(T=5, R=3, P=1, S=0\)) where
+\(\delta^* = 0.5\). At realistic magnitudes, physical constraints make
+cooperation \textbf{more} accessible, not less.
 
 \subsection{\texorpdfstring{Sensitivity Analysis: \(\delta^*\) Across
 Parameter
 Regimes}{Sensitivity Analysis: \textbackslash delta\^{}* Across Parameter Regimes}}\label{sensitivity-analysis-delta-star}
 
-The friction-regime rows below vary the repair multiplier \(\kappa\)
-(the physical knob from the Second Law: see Theorem 6 \citep{TC-IV})
-holding \(\delta^{\text{off}} = 0.15\), \(\delta^{\text{def}} = 0.25\),
-\(\theta = 0.15\), \(c = 2\), \(E_R = 100\). Because \(\Phi\), \(T\),
-and \(S\) all share the factor \((1+\kappa)\), they are recomputed
-consistently for each row. The exploitation-cost rows hold
-\(\kappa = 2\) and vary \(\theta\).
-
-{\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.2609}}
   >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.0435}}
@@ -916,6 +1036,30 @@ consistently for each row. The exploitation-cost rows hold
   >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.0870}}
   >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1304}}
   >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1304}}@{}}
+\caption{Cooperation threshold \(\delta^*\) across friction and
+exploitation-cost regimes.}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Regime
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(\kappa\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(\theta\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(\Phi\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(T\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(R\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(P\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(S\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(\delta^*\)
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 Regime
@@ -940,30 +1084,64 @@ Regime
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-No repair cost & 0 & 0.15 & 1.4 & 82.75 & 48 & 15 & −3.75 & 0.513 \\
-Low repair & 1 & 0.15 & 1.8 & 80.50 & 48 & 5 & −7.50 & 0.430 \\
-\textbf{Baseline} & 2 & 0.15 & 2.2 & 78.25 & 48 & −5 & −11.25 &
-\textbf{0.363} \\
-High repair & 4 & 0.15 & 3.0 & 73.75 & 48 & −25 & −18.75 & 0.261 \\
-Very high & 6 & 0.15 & 3.8 & 69.25 & 48 & −45 & −26.25 & 0.186 \\
-Cheap exploit & 2 & 0.05 & 2.2 & 92.75 & 48 & −5 & −3.75 & 0.458 \\
-Expensive exploit & 2 & 0.30 & 2.2 & 56.50 & 48 & −5 & −22.50 & 0.138 \\
+No repair cost & 0 & 0.15 & 1.0 & 85.00 & 48 & 25 & 0 & 0.617 \\
+Low repair & 1 & 0.15 & 1.4 & 82.75 & 48 & 15 & −3.75 & 0.513 \\
+\textbf{Baseline} & 2 & 0.15 & 1.8 & 80.50 & 48 & 5 & −7.50 &
+\textbf{0.431} \\
+High repair & 4 & 0.15 & 2.6 & 76.00 & 48 & −15 & −15.00 & 0.308 \\
+Very high & 6 & 0.15 & 3.4 & 71.50 & 48 & −35 & −22.50 & 0.250 \\
+Cheap exploit & 2 & 0.05 & 1.8 & 93.50 & 48 & 5 & −2.50 & 0.514 \\
+Expensive exploit & 2 & 0.30 & 1.8 & 61.00 & 48 & 5 & −15.00 & 0.232 \\
 \end{longtable}
-}
 
-\begin{quote}
-\textbf{Note on game type.} The PD/Chicken boundary is
-\(\Phi_{\text{PD}} = 2 + 4\theta(1+\kappa)\delta^{\text{def}}\). The
-high-repair rows (\(\kappa = 4\) with
-\(\Phi = 3.0 > \Phi_{\text{PD}} = 2.75\); \(\kappa = 6\) with
-\(\Phi = 3.8 > \Phi_{\text{PD}} = 3.05\)) and the cheap-exploit row
-(\(\Phi_{\text{PD}} = 2 + 4(0.05)(3)(0.25) = 2.15 < 2.2\)) are Chicken
-games (\(T > R > S > P\)), not Prisoner's Dilemmas. The cooperation
-threshold formula \(\delta^* = (T - R)/(T - P)\) and all subsequent
-theorems apply identically to both game structures; the Chicken
-structure actually yields a \emph{lower} \(\delta^*\) because \(T - P\)
-is larger.
-\end{quote}
+\begin{tablenote}
+
+The friction-regime rows above vary the repair multiplier \(\kappa\)
+(the physical knob from the Second Law: see Theorem 6 \citep{TC-IV})
+holding \(\psi^{\text{off}} = 0.15\), \(\psi^{\text{def}} = 0.25\),
+\(\theta = 0.15\), \(c = 2\), \(E_R = 100\). Because \(\Phi\), \(T\),
+and \(S\) all vary with \(\kappa\), they are recomputed consistently for
+each row. The exploitation-cost rows hold \(\kappa = 2\) and vary
+\(\theta\).
+
+\emph{Note on game type.} The PD/Chicken boundary is
+\(\Phi_{\text{PD}} = 2 + 4\theta\kappa\psi^{\text{def}}\). The
+very-high-repair row (\(\kappa = 6\) with
+\(\Phi = 3.4 > \Phi_{\text{PD}} = 2.9\)) is a Chicken game
+(\(T > R > S > P\)), for which the grim-trigger threshold is
+\(\delta^* = (T - R)/(T - S)\), not \((T - R)/(T - P)\), because the
+deviator's best reply to perpetual punishment is \(C\) once \(S > P\)
+(Theorem~\ref{thm-cooperation-theorem}). The high-repair row
+(\(\kappa = 4\)) sits exactly on the boundary
+\(\Phi = \Phi_{\text{PD}} = 2.6\), where \(P = S = -15\) and the two
+threshold forms coincide (\(\delta^* = 0.308\)). All remaining rows,
+including both exploitation-cost variants, are Prisoner's Dilemmas
+(\(\Phi < \Phi_{\text{PD}}\)), computed with
+\(\delta^* = (T - R)/(T - P)\). The friction rows fall monotonically in
+\(\kappa\) (\(0.513, 0.431, 0.308, 0.250\) for \(\kappa = 1, 2, 4, 6\)),
+driven by the punishment payoffs \(P\) and \(S\) worsening as \(\kappa\)
+rises. At the calibration baseline \(\kappa = 2\) and above, these lie
+strictly below the canonical \(0.5\); at the baseline \(\theta\) and
+damage fractions the threshold falls below \(0.5\) for all
+\(\kappa \gtrsim 1.2\), so the comparison is knife-edge only near the
+admissibility boundary \(\kappa \to 1^+\) (recall that \citep{TC-IV}
+derives \(\kappa > 1\) for any physical system, calibrates repair
+energetics to roughly \(1.2\)--\(1.7\), and takes \(\kappa = 2\) as a
+representative baseline at the high end of that range). The excluded
+\(\kappa = 0\) comparison row reaches \(0.617\) and the boundary
+\(\kappa = 1\) row \(0.513\), reflecting that with little or no repair
+surcharge the punishment for mutual defection is far milder and
+cooperation is correspondingly harder. Very cheap exploitation
+(\(\theta = 0.05\)) likewise lifts \(\delta^*\) slightly above \(0.5\)
+(to \(0.514\)) even at \(\kappa = 2\); every physically admissible
+regime tabulated here nonetheless remains below \(0.6\). One further
+caveat: in the PD regime the grim punishment path repeats the stage Nash
+equilibrium \((D,D)\), so grim trigger is subgame-perfect there; in the
+Chicken regime the grim punishment profile \((D,D)\) is not a stage Nash
+equilibrium (with \(S > P\), \(D\) is not a best reply to \(D\)), so
+grim trigger sustains cooperation as a Nash equilibrium only.
+
+\end{tablenote}
 
 \textbf{Key findings:}
 
@@ -980,9 +1158,15 @@ is larger.
   is expensive (well-defended targets), the temptation premium shrinks
   and cooperation is easier.
 \item
-  \textbf{In all physical regimes, \(\delta^* < 0.6\).} Cooperation is
-  sustainable for any agent that values future interactions at more than
-  \textasciitilde60\% of present ones, a modest requirement.
+  \textbf{Across all physically admissible regimes tabulated above,
+  \(\delta^* < 0.6\).} Cooperation is sustainable for any agent that
+  values future interactions at more than \textasciitilde60\% of present
+  ones, a modest requirement. This bound is a property of the tabulated
+  regimes, not a theorem of the model: near the admissibility boundary
+  \(\kappa \to 1^+\) combined with very cheap exploitation, \(\delta^*\)
+  can slightly exceed \(0.6\) (e.g., \(\kappa = 1.05\),
+  \(\theta = 0.01\) at the baseline damage fractions gives
+  \(\delta^* = 0.603\)).
 \end{enumerate}
 
 \section{Network Effects: The Friction
@@ -992,7 +1176,7 @@ Amplifier}\label{network-effects-the-friction-amplifier}
 Payoffs}\label{incorporating-network-friction-into-payoffs}
 
 The single-interaction payoffs above omit a crucial physical cost:
-defection injects friction into the network (Definition 8
+defection injects friction into the network (Definition 9
 \citep{TC-IV}), degrading all future cooperative transactions for every
 agent in the network. This makes defection costlier than the
 single-round analysis suggests, and the additional cost enters the
@@ -1052,12 +1236,12 @@ Using baseline parameters (\(E_R = 100\), \(M = 1000\),
 
 Amortized over the recovery period (\(\sim 1/\epsilon = 20\) periods):
 
-\[\tilde{P}_{\text{per period}} \approx P - 2000/20 = -5 - 100 = -105\]
+\[\tilde{P}_{\text{per period}} \approx P - 2000/20 = 5 - 100 = -95\]
 
-\[\tilde{\delta}^* = \frac{78.25 - 48}{78.25 - (-105)} = \frac{30.25}{183.25} = 0.165\]
+\[\tilde{\delta}^* = \frac{80.5 - 48}{80.5 - (-95)} = \frac{32.5}{175.5} = 0.185\]
 
 \textbf{With network friction, the cooperation threshold drops to
-\(\tilde{\delta}^* = 0.165\).} Even extremely short-sighted agents find
+\(\tilde{\delta}^* = 0.185\).} Even extremely short-sighted agents find
 cooperation rational when the network punishes defection through
 friction cascades.
 
@@ -1105,10 +1289,20 @@ $$\pi_i = \frac{\alpha \sum_{j=1}^{N} c_j \cdot \mathds{1}[j \text{ cooperates}]
 where $n_C$ is the number of cooperators and the last term captures the friction tax from defectors (proportional to the defection rate).
 \end{definition}
 
-In our framework, \(\alpha\) is the \textbf{cooperative multiplier}, the
-ratio of total output under cooperation to total input. This is derived
-from the Lagrangian constraints result that the variational equilibrium
-allocates resources more efficiently than the unconstrained regime.
+In our framework, \(\alpha\) is the \textbf{cooperative
+multiplier}\footnote{Within this paper, \(\alpha\) denotes the
+  cooperative multiplier exclusively. Other papers in the series reuse
+  the symbol for unrelated quantities, such as the marginal energy-yield
+  coefficient \(\alpha_{ij}\) in the quadratic utility of \citep{TC-I};
+  the two should not be conflated when the papers are read together.},
+the ratio of total output under cooperation to total input. That
+\(\alpha > 1\) is an assumption of the model, motivated qualitatively by
+the welfare-dominance result of \citep{TC-I} (Theorem 9 \citep{TC-I},
+Corollary 10 \citep{TC-I}): the variational equilibrium allocates
+resources more efficiently than the unconstrained regime, but no
+quantitative value of \(\alpha\) is derived there. Its specific value
+(here \(\alpha = 2\), cooperative doubling) is an illustrative baseline,
+not a derived constant.
 
 More concretely, when all \(N\) agents cooperate, each contributes \(c\)
 and receives \(\alpha c\) (net gain \((\alpha - 1)c\)). When \(n_C < N\)
@@ -1118,19 +1312,27 @@ defectors free-ride, but the system suffers friction loss.
 \subsection{\texorpdfstring{The One-Shot \(N\)-Player
 Equilibrium}{The One-Shot N-Player Equilibrium}}\label{the-one-shot-n-player-equilibrium}
 
-In the single-round game, defection is dominant when:
+In the single-round game, an agent's switch from \(D\) to \(C\) gains it
+\(\alpha c/N\) from the enlarged pool and, because \(n_C\) rises by one,
+reduces its own friction tax by \(\phi_0 \bar{E}/N\), at contribution
+cost \(c\). Defection is therefore dominant when:
 
-\[\frac{\alpha c}{N} < c \iff \alpha < N\]
+\[\frac{\alpha c}{N} + \frac{\phi_0 \bar{E}}{N} < c \iff N > \alpha + \frac{\phi_0 \bar{E}}{c}\]
 
 That is, defection dominates when the cooperative return to each
-individual is less than the individual's contribution, the standard
-free-rider problem. For large \(N\), this holds unless \(\alpha\) is
-very large.
+individual, plus the avoided share of the friction tax, is less than the
+individual's contribution, the standard free-rider problem sharpened by
+friction. At the baseline calibration below (\(\alpha = 2\),
+\(\phi_0\bar{E} = 5\), \(c = 10\)) the condition is \(N > 2.5\): for all
+group sizes \(N \geq 3\) defection is dominant, while at \(N = 2\)
+cooperation is one-shot dominant (consistent with \(\delta_2^* = 0\) in
+the table below). For large \(N\), defection dominates unless \(\alpha\)
+is very large.
 
-The one-shot NE is universal defection, yielding payoff
-\(\pi_i^{DD} = -\phi_0 \bar{E}\) (only the friction tax from the
-non-cooperative environment). The cooperative payoff is
-\(\pi_i^{CC} = (\alpha - 1)c\). The efficiency loss is:
+For \(N > \alpha + \phi_0\bar{E}/c\), the one-shot NE is universal
+defection, yielding payoff \(\pi_i^{DD} = -\phi_0 \bar{E}\) (only the
+friction tax from the non-cooperative environment). The cooperative
+payoff is \(\pi_i^{CC} = (\alpha - 1)c\). The efficiency loss is:
 
 \[\Delta\pi = (\alpha - 1)c + \phi_0 \bar{E} > 0\]
 
@@ -1210,29 +1412,48 @@ $$\delta_N^* = \frac{c(1 - \alpha/N)}{\alpha(1 - 1/N)c + \phi_0\bar{E}} \xrighta
 Since $\phi_0 > 0$: $\alpha c + \phi_0\bar{E} > c$ (for $\alpha > 1$ or $\phi_0 > 0$), so the limit is strictly less than 1.
 \end{proof}
 
-\textbf{Physical interpretation:} In classical game theory (abstract
-payoffs, no friction), the critical discount factor for \(N\)-player
-public goods games approaches 1 as \(N \to \infty\), so cooperation
-becomes unsustainable in large groups. With energy-based payoffs and
-network friction, this pathology \textbf{disappears}: the friction
-penalty of universal defection grows with group size, keeping
-cooperation accessible even in large populations. This is the formal
-proof that the cooperative equilibrium holds and strengthens as the
-network scales.
+\textbf{Physical interpretation:} Without friction (\(\phi_0 = 0\)) the
+threshold has the ceiling \(\lim_{N \to \infty} \delta_N^* = 1/\alpha\):
+cooperation grows progressively harder as the group expands, and in the
+limit of marginally beneficial cooperation (\(\alpha \to 1^+\),
+vanishing per-capita surplus) the ceiling approaches \(1\), recovering
+the canonical large-group free-rider collapse in which no admissible
+discount factor sustains cooperation. Non-zero friction removes this:
+the limit becomes \(c/(\alpha c + \phi_0 \bar{E})\), strictly below
+\(1\) for every \(\alpha\) and every \(N\), because the friction penalty
+on universal defection grows with group size while the per-capita
+deviation gain saturates. Cooperation therefore remains sustainable as a
+Nash equilibrium in arbitrarily large populations, rather than
+collapsing with group size.
 
 \subsection{\texorpdfstring{Numerical Illustration: \(N\)-Player
 Cooperation
 Thresholds}{Numerical Illustration: N-Player Cooperation Thresholds}}\label{n-player-cooperation-thresholds}
 
 \textbf{Parameters:} \(c = 10\), \(\alpha = 2\) (cooperative doubling),
-\(\phi_0 = 0.5\) (moderate background friction), \(\bar{E} = 10\).
+\(\phi_0 = 0.5\) (moderate background friction; \(\phi_0 > 0\) is an
+assumed calibration parameter, not a derived quantity --- it is what
+keeps the large-\(N\) limit below 1), \(\bar{E} = 10\).
 
-{\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}@{}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.0909}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3636}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3636}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1818}}@{}}
+\caption{\(N\)-player cooperation threshold \(\delta_N^*\) versus group
+size \(N\).}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\(N\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Deviation gain \(\pi^{\text{dev}} - \pi^{CC}\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Punishment gap \(\pi^{\text{dev}} - \pi^{DD}\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(\delta_N^*\)
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 \(N\)
@@ -1255,7 +1476,6 @@ Punishment gap \(\pi^{\text{dev}} - \pi^{DD}\)
 100 & 9.80 & 19.8 + 5 = 24.8 & 0.395 \\
 \(\infty\) & 10.00 & 20 + 5 = 25 & 0.400 \\
 \end{longtable}
-}
 
 \textbf{Key result:} Even as \(N \to \infty\), \(\delta_N^*\) converges
 to 0.4, well below 1. Cooperation remains a Nash Equilibrium for any
@@ -1307,7 +1527,7 @@ The ALLD mutant is strictly dominated ($V_{\text{ALLD}} < V_{\text{TFT}}$) when:
 
 $$\delta > \frac{T - R}{T - P} = \delta^*$$
 
-Under the physical payoff model with $\Phi > 2$, this holds for all $\delta > 0.363$ (baseline parameters).
+Under the physical payoff model, this holds for all $\delta > 0.431$ (baseline parameters).
 \end{theorem}
 
 \begin{proof}
@@ -1333,10 +1553,12 @@ which is exactly the cooperation condition from Theorem~\ref{thm-cooperation-the
 \textbf{Physical interpretation:} A defector entering a cooperative
 population gets one ``hit'' (the temptation payoff \(T\)) and then finds
 itself in perpetual mutual defection, which under physical payoffs means
-perpetual net-negative returns (\(P < 0\)). The defector's strategy is
-self-defeating: it destroys the cooperative environment it needs to
-profit from. In evolutionary terms, the ``invasion fitness'' of
-defection is negative in a cooperative population.
+a punishment stream far below the cooperative reward \(R\) --- and, in
+the destructive regime (\(\kappa\psi > 1\)), net-negative returns
+(\(P < 0\)). The defector's strategy is self-defeating: it destroys the
+cooperative environment it needs to profit from. In evolutionary terms,
+the ``invasion fitness'' of defection is negative in a cooperative
+population.
 
 \subsection{The Defector's Dilemma: Extinction Through
 Friction}\label{the-defectors-dilemma-extinction-through-friction}
@@ -1373,7 +1595,7 @@ An agent that defects once against a TFT population and then returns to cooperat
 
 $$\delta > \frac{T - R}{R - S}$$
 
-(without friction). Under the physical payoff model (baseline parameters), the basic threshold is $\delta = 0.511$. When network friction costs are included ($F = 100$ per period over 20 recovery periods), the threshold drops to $\delta \approx 0.17$.
+(without friction). Under the physical payoff model (baseline parameters), the basic threshold is $\delta = 0.586$. When network friction costs are included ($F = 100$ per period over 20 recovery periods), the threshold drops to $\delta \approx 0.183$.
 \end{theorem}
 
 \begin{proof}
@@ -1392,26 +1614,32 @@ The deviation is unprofitable ($\Delta V < 0$) when:
 
 $$\delta > \frac{T - R}{R - S}$$
 
-With baseline parameters: $\delta > (78.25 - 48)/(48 - (-11.25)) = 30.25/59.25 = 0.511$.
+With baseline parameters: $\delta > (80.5 - 48)/(48 - (-7.5)) = 32.5/55.5 = 0.586$.
 
 However, this analysis ignores the network friction cost. Including the per-period friction penalty amortized over recovery time ($\sim 1/\epsilon = 20$ periods), even a single defection imposes a sustained future cost. From §\ref{numerical-illustration}, the per-defector cascade cost is $C_{\text{defector}}^{\text{cascade}} = 2{,}000$, giving $F = 2{,}000 / 20 = 100$ energy units per period of degraded cooperative returns. When we include this:
 
 $$\Delta V_{\text{adj}} = (T - R) - \delta(R - S) - \delta \sum_{k=1}^{1/\epsilon} \delta^{k-1} F$$
 
-This makes the defection-erasure threshold strictly lower than $\delta = 0.511$:
+Over the recovery horizon $1/\epsilon = 20$ the discounted friction stream is $\delta\sum_{k=1}^{20}\delta^{k-1}F = F\,\delta(1 - \delta^{20})/(1 - \delta)$, indistinguishable at the relevant small $\delta$ from its infinite-horizon envelope $\delta F/(1 - \delta)$ (since $\delta^{20} \approx 0$). Setting $\Delta V_{\text{adj}} = 0$ with this envelope and clearing the factor $(1 - \delta) > 0$:
 
-$$\frac{T - R}{R - S + \delta F/(1-\delta)} < \frac{T - R}{R - S}$$
+$$(T - R)(1 - \delta) - \delta(R - S)(1 - \delta) - \delta F = 0$$
 
-Numerically, the condition $\Delta V_{\text{adj}} < 0$ holds for $\delta \gtrsim 0.17$ after including friction.
+$$\iff (R - S)\,\delta^2 - \bigl[(T - R) + (R - S) + F\bigr]\delta + (T - R) = 0.$$
+
+At the baseline ($T - R = 32.5$, $R - S = 55.5$, $F = 100$) this is $55.5\,\delta^2 - 188\,\delta + 32.5 = 0$, whose admissible root is
+
+$$\delta = \frac{188 - \sqrt{188^2 - 4(55.5)(32.5)}}{2(55.5)} = \frac{188 - \sqrt{28129}}{111} \approx 0.183.$$
+
+Including friction thus lowers the erasure threshold from $0.586$ to $\delta \approx 0.183$: the deviation is unprofitable for any agent with $\delta \gtrsim 0.183$.
 \end{proof}
 
 \textbf{Physical interpretation:} The defector's profit
-(\(T - R = 30.25\)) is a one-time energy windfall. The retaliation cost
-(\(R - S = 59.25\)) comes one period later. The friction cost
+(\(T - R = 32.5\)) is a one-time energy windfall. The retaliation cost
+(\(R - S = 55.5\)) comes one period later. The friction cost
 (\(F = 100\)/period) compounds over \(\sim 20\) periods. For any agent
 that expects to survive more than a few interactions
-(\(\delta > 0.17\)), the short-term defection profit is negative on net.
-Defection is an energetic ``payday loan'' with punishing interest.
+(\(\delta > 0.183\)), the short-term defection profit is negative on
+net. Defection is an energetic ``payday loan'' with punishing interest.
 
 \section{System-Level Optimality: The Welfare
 Theorem}\label{system-level-optimality-the-welfare-theorem}
@@ -1425,7 +1653,18 @@ all agents after interaction costs:
 \[SW = \sum_{i=1}^{N} \pi_i - \mathcal{C}_{\text{total}}\]
 
 where \(\mathcal{C}_{\text{total}}\) is the total interaction cost
-(Definition 11 \citep{TC-IV} plus Definition 7 \citep{TC-II}).
+(Definition 12 \citep{TC-IV} plus Definition 7 \citep{TC-II}).
+
+The unweighted sum embeds an assumption that should be stated
+explicitly: adding payoffs across agents presumes a common zero and a
+common scale, i.e., full interpersonal comparability. The energy
+denomination supplies exactly this --- payoffs are measured in Joules, a
+shared physical unit, whereas utils correspond to no physical observable
+and are not interpersonally comparable (see the Related Work
+discussion). This comparability is a modeling premise imported with the
+energy denomination, not a result derived within the series. The welfare
+statements that follow, including the uniqueness corollary, are made
+relative to it.
 
 \subsection{The Maximum Welfare
 Theorem}\label{the-maximum-welfare-theorem}
@@ -1452,14 +1691,14 @@ Under any profile with $n_D > 0$ defectors:
 \begin{itemize}
 \item Resource input: $(N - n_D)c < Nc$ (defectors do not contribute)
 \item Output: $\alpha(N - n_D)c < \alpha Nc$ (reduced by lost contributions)
-\item Network friction tax: $\phi \cdot M \cdot \bar{E} > 0$ (deviators bear friction penalty)
+\item Network friction tax: per Definition~\ref{def-n-player-public-goods}, each of the $N$ agents pays $\phi(s) \bar{E} \cdot n_D / N$, for a system total of $n_D \, \phi(s) \bar{E} > 0$
 \item Net welfare: strictly less than $N(\alpha - 1)c$
 \end{itemize}
-Formally:
+Formally, summing the payoffs of Definition~\ref{def-n-player-public-goods}:
 
-$$SW^{CC} - SW^{s} = \underbrace{n_D (\alpha - 1)c}_{\text{lost contributions}} + \underbrace{\phi(s) M \bar{E}}_{\text{friction tax}} > 0$$
+$$SW^{CC} - SW^{s} = \underbrace{n_D (\alpha - 1)c}_{\text{lost contributions}} + \underbrace{n_D \, \phi(s) \bar{E}}_{\text{friction tax}} > 0$$
 
-for any $s$ with $n_D > 0$. Uniqueness follows from the strict inequality above: for any strategy profile with $n_D \geq 1$ defectors, the lost-contributions term $n_D(\alpha - 1)c > 0$ ensures that no defecting profile achieves $SW^{CC}$. (*Note: The Tullock contest dissipation term $D(s)$ applies to arms-race conflict settings (see Proposition 1 \citep{TC-IV}) and does not apply in this public goods free-rider context; uniqueness here rests solely on the lost-contributions and friction-tax terms.*)
+for any $s$ with $n_D > 0$. In addition, defection raises the ambient per-period transaction tax $\phi(s) \cdot M \cdot \bar{E}$ of Definition 12 \citep{TC-IV} ($M$ transactions of average value $\bar{E}$), which enters $SW$ through $\mathcal{C}_{\text{total}}$ and vanishes only under universal cooperation ($\phi = 0$); this contribution only widens the gap above. Uniqueness follows from the strict inequality above: for any strategy profile with $n_D \geq 1$ defectors, the lost-contributions term $n_D(\alpha - 1)c > 0$ ensures that no defecting profile achieves $SW^{CC}$. (*Note: The Tullock contest dissipation term $D(s)$ applies to arms-race conflict settings (see Proposition 1 \citep{TC-IV}) and does not apply in this public goods free-rider context; uniqueness here rests solely on the lost-contributions and friction-tax terms.*)
 \end{proof}
 
 \subsection{The System-Level Nash
@@ -1485,9 +1724,13 @@ Therefore, the cooperative strategy profile ("cooperation") is the unique Nash E
 \textbf{Physical interpretation:} Among all Nash Equilibria of the
 repeated energy-denominated game, universal cooperation is the unique
 profile that maximizes aggregate welfare and minimizes total
-dissipation. The selection is not hypothetical; it is the standard Nash
-equilibrium selection criterion applied to energy-denominated payoffs
-under physical constraints.
+dissipation. This is an equilibrium-selection result, not equilibrium
+uniqueness: the Folk Theorem continuum persists --- in the Prisoner's
+Dilemma regime, where mutual defection is a stage-game equilibrium
+(\(P > S\)), universal defection remains a Nash equilibrium at every
+discount factor --- and what the framework supplies is a principled
+welfare-dominance criterion that singles out cooperation among these
+equilibria.
 
 \section{Discussion}\label{discussion}
 
@@ -1499,22 +1742,31 @@ efficiency \(\theta\), the friction multiplier \(\Phi\), and the
 coordination cost \(c\). The Prisoner's Dilemma ordering
 \(T > R > P > S\) (Proposition~\ref{prop-physical-prisoners-dilemma})
 holds in the parameter region where exploitation is cheap and friction
-is moderate; at higher friction (\(\Phi \geq \Phi_{\text{PD}}\)) the
-ordering becomes that of Hawk-Dove, with \(S > P\). Both orderings
-emerge from the same physical model under different parameter values,
-and the location of the transition is fixed by \citep{TC-IV} rather than
-chosen.
+is moderate; at higher friction (\(\Phi > \Phi_{\text{PD}}\)) the
+ordering becomes that of Hawk-Dove, with \(S > P\), where the
+grim-trigger threshold takes the form \((T-R)/(T-S)\) rather than
+\((T-R)/(T-P)\). Both orderings emerge from the same physical model
+under different parameter values, and the location of the transition
+(\(\Phi_{\text{PD}} = 2 + 4\theta\kappa\psi^{\text{def}}\)) is derived
+within the model --- from the friction quantities of \citep{TC-IV}
+together with the exploitation efficiency \(\theta\) introduced here ---
+rather than chosen.
 
-The negativity of \(P\) under \(\Phi > 2\) is a direct consequence of
-the Second Law as it acts on contested boundaries. Boundary structures
-are organized configurations that required directed work to assemble; an
-attack disrupts that organization in a single irreversible step, while
-restoration requires sustained work against the entropic gradient. The
-condition \(\Phi > 2\) states that the work cost of repair, amplified by
-the irreversibility factor \(\kappa > 1\), exceeds the work value
-extracted from the resource. Mutual defection is therefore
-net-dissipative: more energy is converted to waste heat than is captured
-as usable resource.
+The negativity of \(P\) under \(\Phi > 2\) reflects the Second Law as it
+acts on contested boundaries, combined with a magnitude condition on
+damage. Boundary structures are organized configurations that required
+directed work to assemble; an attack disrupts that organization in a
+single irreversible step, while restoration requires sustained work
+against the entropic gradient. The condition \(\Phi > 2\) states that
+the work cost of repair, amplified by the irreversibility factor
+\(\kappa > 1\), exceeds the work value extracted from the resource; it
+is equivalent to combined boundary damage exceeding \(1/\kappa\) (one
+half at \(\kappa = 2\)). The Second Law forces \(\kappa > 1\) but not
+the damage magnitudes, so \(\Phi > 2\) marks the destructive regime
+rather than a thermodynamic necessity; at the mild baseline
+(\(\kappa\psi < 1\)) mutual defection is costly but net-positive. In the
+destructive regime mutual defection is net-dissipative: more energy is
+converted to waste heat than is captured as usable resource.
 
 The cooperation threshold \(\delta^*\) admits a corresponding physical
 reading. The discount factor \(\delta = \sigma e^{-r}\) encodes
@@ -1522,7 +1774,7 @@ per-period survival probability \(\sigma\) and time-preference rate
 \(r\). An agent satisfying \(\delta \geq \delta^*\) is one whose
 expected continuation in the system is sufficient that future energy
 access dominates the immediate energy windfall of seizure. The threshold
-\(\delta^* \approx 0.363\) is the level of expected persistence at which
+\(\delta^* \approx 0.431\) is the level of expected persistence at which
 an agent's own thermodynamic future outweighs the one-shot temptation;
 the cooperation theorem (Theorem~\ref{thm-cooperation-theorem}) is the
 statement that an agent intending to persist will not defect on a
@@ -1537,7 +1789,7 @@ of restoration distributed across all participants: a defector exports
 entropy onto the network, and subsequent cooperative transactions pay
 the work cost of importing free energy to drive \(\phi_t\) back toward
 baseline. The network-adjusted threshold
-\(\tilde{\delta}^* \approx 0.165\) reflects this additional cost;
+\(\tilde{\delta}^* \approx 0.185\) reflects this additional cost;
 defection becomes more difficult to sustain because each instance
 damages the substrate of all future interactions.
 
@@ -1553,13 +1805,22 @@ of the underlying energy accounting.
 
 \subsection{Testable Predictions}\label{testable-predictions}
 
-The model generates numerically specific, falsifiable predictions:
-
-{\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2222}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4444}}@{}}
+\caption{Testable predictions and their falsification
+criteria.}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Prediction
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Formal source
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Falsification criterion
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 Prediction
@@ -1572,10 +1833,10 @@ Falsification criterion
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-Cooperation threshold \(\delta^* \approx 0.36\) under baseline friction
+Cooperation threshold \(\delta^* \approx 0.43\) under baseline friction
 & Theorem~\ref{thm-cooperation-theorem} & Cooperation thresholds in
 energy-denominated experimental games consistently exceed \(0.5\) \\
-Single-deviation profit is net-negative for \(\delta > 0.17\) &
+Single-deviation profit is net-negative for \(\delta > 0.183\) &
 Theorem~\ref{thm-defection-profit-erasure} & Single defectors in
 iterated games with endogenous reputation costs show net-positive
 lifetime payoffs \\
@@ -1592,7 +1853,6 @@ Theorem~\ref{thm-defection-invasion-barrier} & Defector mutants
 consistently invade and persist in cooperative populations under
 physical payoff conditions \\
 \end{longtable}
-}
 
 \subsection{Limitations}\label{limitations}
 
@@ -1622,7 +1882,7 @@ repeated-games literature:
   standard result is that cooperation remains a NE but requires a higher
   \(\delta > \delta^*_{\text{noisy}} > \delta^*\)
   \citep{GreenPorter1984, Fudenberg1991}. The model's baseline
-  \(\delta^* = 0.363\) provides substantial headroom before cooperation
+  \(\delta^* = 0.431\) provides substantial headroom before cooperation
   ceases to be sustainable.
 \end{enumerate}
 
@@ -1667,14 +1927,14 @@ interactions involve measurable resource costs and repeated engagement:
 \subsection{Future Work}\label{future-work}
 
 \textbf{Continuous strategy spaces.} Extending from binary \(\{C, D\}\)
-to continuous compliance \(\alpha \in [0,1]\) with energy-denominated
+to continuous compliance \(\lambda \in [0,1]\) with energy-denominated
 payoffs, to characterize the full cooperation manifold and verify that
 partial defection is dominated.
 
 \textbf{Imperfect monitoring.} Incorporating noisy observation channels,
 where defection is detected with probability \(p < 1\), to bound
 \(\delta^*_{\text{noisy}}\) as a function of detection probability and
-determine when the baseline headroom (\(\delta^* = 0.363\) versus the
+determine when the baseline headroom (\(\delta^* = 0.431\) versus the
 canonical \(0.5\)) is sufficient.
 
 \textbf{Heterogeneous agents.} Agents with asymmetric endowments, time
@@ -1687,7 +1947,7 @@ pairwise interaction and universal cooperation, to characterize when and
 how stable coalitions form and how they resist internal defection.
 
 \textbf{Embeddedness-dependent cooperation threshold.} The cooperation
-threshold \(\delta^* \approx 0.363\) is derived for agents in a
+threshold \(\delta^* \approx 0.431\) is derived for agents in a
 shared-pool environment. Embedding agents in a production network, where
 each agent's output feeds other agents' inputs, would lower this
 threshold for agents with high in-degree and out-degree, because
@@ -1695,6 +1955,15 @@ defection would additionally sever supply lines that downstream agents
 must rebuild at thermodynamic cost. Such an extension would provide a
 first-principles derivation of why specialized, division-of-labor
 economies exhibit more stable cooperation than autarkic ones.
+
+\textbf{Endogenizing the cooperative multiplier.} The multiplier
+\(\alpha\) is treated here as a parameter, grounded qualitatively in the
+welfare-dominance of the variational equilibrium \citep{TC-I} but not
+derived to a specific value. Deriving \(\alpha\) from the underlying
+production and allocation structure, for example the input-output
+couplings of a production network, would replace the illustrative
+baseline with a first-principles value and sharpen the scale results,
+whose ceiling \(1/\alpha\) depends directly on it.
 
 \section{Conclusion}\label{conclusion}
 
@@ -1704,21 +1973,33 @@ Equilibrium that simultaneously satisfies Pareto efficiency and welfare
 maximization, for agents with \(\delta \geq \delta^*\)
 (Theorem~\ref{thm-cooperation-theorem},
 Theorem~\ref{thm-cooperation-maximizes-welfare},
-Corollary~\ref{cor-cooperation-unique-efficient-ne}). The result rests
-on the structural properties of the payoff matrix, derived from
-thermodynamic parameters rather than stipulated, which make mutual
-defection net-negative and cooperation self-reinforcing through
-endogenous friction dynamics.
+Corollary~\ref{cor-cooperation-unique-efficient-ne}). This is an
+equilibrium-selection result: the Folk Theorem's continuum of equilibria
+persists, and what the framework supplies is a principled
+welfare-dominance criterion that singles out cooperation among them. The
+result rests on the structural properties of the payoff matrix, derived
+from thermodynamic parameters rather than stipulated, which make mutual
+defection net-negative in the destructive damage regime
+(\(\kappa\psi > 1\)) and cooperation self-reinforcing through endogenous
+friction dynamics. Crucially, the load-bearing \(N\)-player
+welfare-uniqueness result rests on \(\Phi\)-independent machinery ---
+the threshold \(\delta_N^*\) carries no friction multiplier --- so it is
+robust to the calibration of the damage parameters; the two-player
+regime map supplies the mechanism, not the conclusion.
 
-The cooperation threshold is substantially below the canonical \(0.5\)
-of the standard Prisoner's Dilemma, and drops further to
-\(\tilde{\delta}^* \approx 0.165\) when network friction is included
+In the two-player game the cooperation threshold is below the canonical
+\(0.5\) of the standard Prisoner's Dilemma, and drops further to
+\(\tilde{\delta}^* \approx 0.185\) when network friction is included
 (Theorem~\ref{thm-network-adjusted-cooperation}). Defection is
 evolutionarily unstable (Theorem~\ref{thm-defection-invasion-barrier}),
 self-extinguishing (Corollary~\ref{cor-defection-self-extinction}), and
 unprofitable even from a single deviation
-(Theorem~\ref{thm-defection-profit-erasure}). These results hold for
-arbitrarily large populations
+(Theorem~\ref{thm-defection-profit-erasure}). The result extends to
+arbitrarily large populations: without friction the threshold rises
+toward the ceiling \(1/\alpha\), approaching \(1\) as cooperation
+becomes marginally beneficial and recovering the canonical large-group
+free-rider collapse, whereas non-zero background friction holds it
+strictly below \(1\) for every group size
 (Corollary~\ref{cor-cooperation-strengthens-scale}).
 
 \emph{Necessary Constraints} \citep{TC-I}, \emph{Strategic Entropy
@@ -1727,6 +2008,161 @@ Injection} \citep{TC-II}, and \emph{Thermodynamic Friction}
 structure derives, and \emph{Value Dynamics} \citep{TC-VI} analyzes the
 dynamical stability of the resulting cooperative configurations.
 
+\section*{Declaration of competing
+interest}\label{declaration-of-competing-interest}
+\addcontentsline{toc}{section}{Declaration of competing interest}
+
+The author declares that he has no known competing financial interests
+or personal relationships that could have appeared to influence the work
+reported in this paper.
+
+\section*{Funding}\label{funding}
+\addcontentsline{toc}{section}{Funding}
+
+This research received no external funding.
+
+\section*{Data availability}\label{data-availability}
+\addcontentsline{toc}{section}{Data availability}
+
+No datasets were generated or analyzed in this study; the numerical
+results reported in the text are computed directly from the closed-form
+expressions derived in the paper. The verification code for the
+\emph{Thermodynamics of Cooperation} series is openly available at
+\url{https://github.com/keithlostracco/Mathematics-of-Coexistence}.
+
+\section*{Declaration of generative AI and AI-assisted technologies in
+the manuscript preparation
+process}\label{declaration-of-generative-ai-and-ai-assisted-technologies-in-the-manuscript-preparation-process}
+\addcontentsline{toc}{section}{Declaration of generative AI and
+AI-assisted technologies in the manuscript preparation process}
+
+During the preparation of this work, the author used GitHub Copilot to
+assist with background research and prose refinement. After using this
+tool, the author reviewed and edited the content as needed and takes
+full responsibility for the content of the published article.
+
+\appendix
+
+\section{\texorpdfstring{Appendix: Recalled Results from the
+\emph{Thermodynamics of Cooperation}
+Series}{Appendix: Recalled Results from the Thermodynamics of Cooperation Series}}\label{appendix-recalled-results-from-the-thermodynamics-of-cooperation-series}
+
+This appendix collects, for the reader's convenience, the results that
+\emph{Cooperative Equilibrium} imports from earlier papers in the
+\emph{Thermodynamics of Cooperation} series: \emph{Necessary
+Constraints} \citep{TC-I}, \emph{Strategic Entropy Injection}
+\citep{TC-II}, and \emph{Thermodynamic Friction} \citep{TC-IV}. Each
+statement is recalled without proof; the proof appears in the cited
+source. Nothing here is original to the present paper, and nothing in
+the main text depends on this appendix beyond the results stated below.
+
+\subsection{Setup and the cooperative allocation (from Necessary
+Constraints)}\label{setup-and-the-cooperative-allocation-from-necessary-constraints}
+
+We consider \(N \geq 2\) self-maintaining agents that persist by
+importing free energy and exporting entropy while sharing a
+finite-resource environment. All utilities, costs, and payoffs are
+denominated in energy units (Joules), following the ecological-economics
+convention \citep{Lotka1922, GeorgescuRoegen1971, GeorgescuRoegen1979}.
+Each agent \(i\) has a utility \(U_i\) satisfying the regularity
+assumption of \citep{TC-I} (Assumption 1 \citep{TC-I}:
+twice-differentiable, strictly concave, monotone-increasing at the
+origin, coercive) and a boundary of integrity \(B_i > 0\) in energy
+units.
+
+\textbf{Variational equilibrium and the cooperative split}
+(\citep{TC-I}, Theorem 7 \citep{TC-I}). When all agents optimize
+simultaneously under shared resource constraints, the solution concept
+is the variational (Normalized Nash) equilibrium, at which every agent
+faces the same per-unit shadow price on each scarce resource. For
+symmetric agents contesting a resource of energy value \(E_R > 0\), the
+equilibrium allocates the resource equally. Net of a coordination cost
+\(c \ll E_R\), this equal split is the cooperative payoff used in the
+main text, \(R = E_R/2 - c\).
+
+\textbf{Welfare dominance} (\citep{TC-I}, Theorem 9 \citep{TC-I},
+Corollary 10 \citep{TC-I}). The variational equilibrium uniquely
+maximizes total welfare over the feasible set, strictly dominating
+greedy, equal-split, and every other feasible allocation. This is the
+basis for the cooperative multiplier exceeding unity in the \(N\)-player
+public goods game.
+
+\subsection{Conflict costs and the friction multiplier (from
+Thermodynamic
+Friction)}\label{conflict-costs-and-the-friction-multiplier-from-thermodynamic-friction}
+
+When an agent violates a boundary constraint, the resulting contest and
+boundary damage are governed by the following quantities recalled from
+\citep{TC-IV}: the offensive and defensive damage fractions
+\(\psi^{\text{off}}, \psi^{\text{def}} \in [0,1]\), the boundary damage
+inflicted on attacker and victim respectively (with combined boundary
+damage \(\psi = \psi^{\text{off}} + \psi^{\text{def}}\)); the repair
+multiplier \(\kappa \geq 1\), with \(\kappa > 1\) whenever the Second
+Law applies, because reconstructing a damaged boundary requires both
+entropy clearing and negentropy import where maintenance requires only
+the latter; and the friction multiplier \(\Phi = 1 + \kappa\psi\). The
+main text additionally uses the exploitation efficiency
+\(\theta \in (0,1)\), the fraction of a resource's value an attacker
+must spend to seize it from an unprepared cooperator; this quantity is
+defined in the present paper, not recalled from the series.
+
+\textbf{Symmetric contest} (\citep{TC-IV}, Proposition 1 \citep{TC-IV}).
+In the symmetric two-agent Tullock contest over \(E_R\), each agent
+invests \(e^* = E_R/4\) at the Nash equilibrium, and total contest
+dissipation is \(E_R/2\).
+
+\textbf{Net-negative conflict} (\citep{TC-IV}, Theorem 6 \citep{TC-IV}).
+Mutual defection dissipates more energy than the contested resource is
+worth whenever \(\Phi\) exceeds the population-dependent threshold
+\(N/(N-1)\); for two agents this is \(\Phi > 2\). The condition
+\(\Phi > 2\) is equivalent to \(\kappa\psi > 1\), i.e.~combined boundary
+damage exceeding \(1/\kappa\) (one half at \(\kappa = 2\));
+\(\kappa > 1\) and strictly positive damage alone do not force it. For
+three or more contestants the threshold falls to \(\Phi > N/(N-1)\),
+equivalently \(\kappa\psi > 1/(N-1)\) --- a threshold that shrinks as
+contestants are added and vanishes only in the large-\(N\) limit, where
+any positive damage suffices. This result is what drives the
+mutual-defection payoff net-negative in the destructive regime of the
+main text.
+
+\subsection{Friction dynamics (from Thermodynamic
+Friction)}\label{friction-dynamics-from-thermodynamic-friction}
+
+Boundary violations degrade not only the immediate interaction but all
+subsequent cooperative transactions, through a network friction
+coefficient \(\phi \geq 0\) that taxes per-transaction overhead
+(monitoring, verification, precautionary defense). A violation of
+severity \(v\) injects \(\Delta\phi = \eta v\) into \(\phi\), where
+\(\eta > 0\) is the friction sensitivity; absent new violations,
+\(\phi\) decays geometrically at rate \(\epsilon \in (0,1)\) per period;
+and the combined law of motion is
+\(\phi_{t+1} = (1-\epsilon)\phi_t + \eta v_t \cdot \mathds{1}_{\{\text{violation at } t\}}\).
+The injection is additive and instantaneous while recovery is
+multiplicative and gradual, the thermodynamic asymmetry between
+increasing and decreasing entropy.
+
+\textbf{Cascading friction} (\citep{TC-IV}, Theorem 10 \citep{TC-IV}). A
+single violation of severity \(v\) produces total cascading cost
+\(\eta v M \bar{E} / \epsilon\) over the full recovery horizon, where
+\(M\) is the number of cooperative transactions per period and
+\(\bar{E}\) their average value; the amplification ratio
+\(\eta M \bar{E}/\epsilon\) spans \(10^3\) to \(10^4\) for modest
+network parameters. In the main text this cost enters the repeated game
+through the punishment branch of the equilibrium condition.
+
+\subsection{The deception channel (from Strategic Entropy
+Injection)}\label{the-deception-channel-from-strategic-entropy-injection}
+
+Defection may also take the form of strategic entropy injection into a
+communication channel \citep{TC-II} rather than overt contest. This
+carries its own strictly positive energy costs: a decision cost on the
+deceived receiver (Theorem 1 \citep{TC-II}), a verification-energy
+burden on a defender (Theorem 2 \citep{TC-II}), and a mapped
+contribution to the friction coefficient \(\phi\) (Definition 6
+\citep{TC-II}). These costs enter the punishment payoff analogously to
+physical friction and are recalled in the main text only at the point of
+use.
+
 \addcontentsline{toc}{section}{References}
-\bibliography{../../shared/main}
+\bibliography{main}
 \end{document}

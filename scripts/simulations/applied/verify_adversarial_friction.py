@@ -7,6 +7,12 @@ Theorems 4-7, Propositions 2-3.
 Validates all numerical claims in case-studies/adversarial-friction.md
 using both symbolic (SymPy) and numerical (NumPy) computation.
 
+NOTE: this script encodes the corrected TC-IV ledger Phi = 1 + kappa*psi.
+Its companion case-study doc survives only as a dated archive snapshot
+(internal/archive/april-06-2026/case-studies/adversarial-friction.md), which
+still carries the superseded Phi = 1 + (1+kappa)*psi numbers. The archive is
+deliberately not edited, so the doc and this script now diverge.
+
 Run:  python scripts/simulations/applied/verify_adversarial_friction.py
 """
 
@@ -28,9 +34,14 @@ from modules.verify import reset, section, check, close, summary
 # ---------------------------------------------------------------------------
 # Scenario Parameters (from README §3.1)
 # ---------------------------------------------------------------------------
+# psi_off = psi_def = 0.3 (psi = 0.6 > 1/kappa = 0.5) is the DESTRUCTIVE regime
+# named explicitly in TC-IV cor-two-agent-threshold: Phi = 1 + 2*0.6 = 2.2 > 2,
+# so the two-agent contest is net-negative. This case study's narrative (regime
+# suppression destroys more than it captures) depends on that regime, and it
+# survives the ledger correction unchanged.
 E_j       = 100.0    # Contested resource value (energy units)
-delta_off = 0.3      # Offensive damage coefficient
-delta_def = 0.3      # Defensive damage coefficient
+psi_off   = 0.3      # Offensive boundary damage fraction
+psi_def   = 0.3      # Defensive boundary damage fraction
 kappa     = 2.0      # Repair multiplier
 eta       = 0.05     # Friction sensitivity
 epsilon   = 0.1      # Trust recovery rate per period
@@ -123,16 +134,20 @@ def verify_n_agent_dissipation() -> None:
 def verify_friction_multiplier() -> None:
     section("3. Friction Multiplier Φ")
 
-    Phi = 1 + (1 + kappa) * (delta_off + delta_def)
-    check("Φ = 1 + (1+κ)(δ_off + δ_def) = 2.80",
-          abs(Phi - 2.80) < TOL, f"Φ = {Phi:.4f}")
+    # The repair term kappa*ΔB already re-supplies the destroyed ΔB, so a
+    # standalone ΔB is NOT charged again: the ledger is contest effort plus
+    # repair (TC-IV def-repair-multiplier). Charging both would inflate the
+    # multiplier to the superseded 1 + (1+κ)ψ.
+    Phi = 1 + kappa * (psi_off + psi_def)
+    check("Φ = 1 + κ(ψ_off + ψ_def) = 2.20",
+          abs(Phi - 2.20) < TOL, f"Φ = {Phi:.4f}")
 
     # Symbolic verification
-    k, do, dd = sp.symbols("kappa delta_off delta_def", positive=True)
-    Phi_sym = 1 + (1 + k) * (do + dd)
-    Phi_num = float(Phi_sym.subs({k: kappa, do: delta_off, dd: delta_def}))
+    k, po, pd = sp.symbols("kappa psi_off psi_def", positive=True)
+    Phi_sym = 1 + k * (po + pd)
+    Phi_num = float(Phi_sym.subs({k: kappa, po: psi_off, pd: psi_def}))
     check("Symbolic Φ matches numerical",
-          abs(Phi_num - 2.80) < TOL, f"Φ_sym = {Phi_num:.4f}")
+          abs(Phi_num - 2.20) < TOL, f"Φ_sym = {Phi_num:.4f}")
 
 
 # ---------------------------------------------------------------------------
@@ -142,16 +157,16 @@ def verify_friction_multiplier() -> None:
 def verify_net_negative() -> None:
     section("4. Theorem 5 — Net-Negative Conflict")
 
-    Phi = 1 + (1 + kappa) * (delta_off + delta_def)
+    Phi = 1 + kappa * (psi_off + psi_def)
     N = 2
 
     L_system = Phi * (N - 1) / N * E_j
     V_net = E_j - L_system
 
-    check("System loss L = Φ·(N-1)/N·E_j = 140",
-          abs(L_system - 140.0) < TOL, f"L = {L_system:.2f}")
-    check("Net value V_net = E_j - L = -40",
-          abs(V_net - (-40.0)) < TOL, f"V_net = {V_net:.2f}")
+    check("System loss L = Φ·(N-1)/N·E_j = 110",
+          abs(L_system - 110.0) < TOL, f"L = {L_system:.2f}")
+    check("Net value V_net = E_j - L = -10",
+          abs(V_net - (-10.0)) < TOL, f"V_net = {V_net:.2f}")
     check("Conflict is net-negative (V_net < 0)",
           V_net < 0, f"V_net = {V_net:.2f}")
 
@@ -174,25 +189,51 @@ def verify_net_negative() -> None:
 def verify_profit_erasure() -> None:
     section("5. Profit Erasure — Individual Irrationality")
 
-    damage_factor = (1 + kappa) * (delta_off + delta_def)
-    check("(1+κ)(δ_off + δ_def) = 1.80 > 1 (individually irrational)",
-          damage_factor > 1.0, f"(1+κ)(δ_off+δ_def) = {damage_factor:.2f}")
+    # Individual ledger: each agent invests e* = E_j/4 for a gross payoff
+    # E_j/2 - e* = E_j/4, then bears its own repair burden κ·ψ·e*. So
+    #   Π_hack = (E_j/4)·(1 - κψ)
+    damage_factor = kappa * (psi_off + psi_def)
+    check("κ(ψ_off + ψ_def) = 1.20 > 1 (individually irrational)",
+          damage_factor > 1.0, f"κ(ψ_off+ψ_def) = {damage_factor:.2f}")
 
     # Individual net payoff from hacking
     Pi_hack = (E_j / 4) * (1 - damage_factor)
     check("Individual profit from exploitation < 0",
           Pi_hack < 0, f"Π_hack = {Pi_hack:.2f}")
 
-    # Find the critical δ_total where profit = 0
-    # (1+κ) · δ_total = 1 => δ_total = 1/(1+κ)
-    delta_crit = 1.0 / (1 + kappa)
-    check(f"Critical δ_total = 1/(1+κ) = {delta_crit:.4f}",
-          abs(delta_crit - 1/3) < TOL, f"δ_crit = {delta_crit:.4f}")
+    # Find the critical ψ_total where profit = 0
+    # κ · ψ_total = 1 => ψ_total = 1/κ
+    psi_crit = 1.0 / kappa
+    check(f"Critical ψ_total = 1/κ = {psi_crit:.4f}",
+          abs(psi_crit - 0.5) < TOL, f"ψ_crit = {psi_crit:.4f}")
 
-    # Our δ_total = 0.6 > 1/3, confirming irrationality
-    delta_actual = delta_off + delta_def
-    check(f"Actual δ_total ({delta_actual:.2f}) > critical ({delta_crit:.4f})",
-          delta_actual > delta_crit, "exploitation individually irrational")
+    # Our ψ_total = 0.6 > 1/2, confirming irrationality
+    psi_actual = psi_off + psi_def
+    check(f"Actual ψ_total ({psi_actual:.2f}) > critical ({psi_crit:.4f})",
+          psi_actual > psi_crit, "exploitation individually irrational")
+
+    # The individual and system thresholds COINCIDE — this is an accounting
+    # identity, not a coincidence. The symmetric Tullock contest is a closed
+    # ledger: E_j is fully distributed among the N contestants, so the system's
+    # net value is exactly the sum of individual net payoffs, V_net = N·Π_net,
+    # and both cross zero at κψ(N-1) = 1. TC-V rmk-admissibility states the same
+    # equivalence for N=2: P = (E_R/2)(1 - Φ/2) < 0 exactly when Φ > 2, i.e.
+    # ψ > 1/κ. Asserted here so the two can never silently drift apart again.
+    for N_test in [2, 3, 5, 10]:
+        e_star_N = (N_test - 1) / N_test**2 * E_j
+        Pi_net_N = E_j / N_test**2 - damage_factor * e_star_N
+        Phi_N = 1 + damage_factor
+        V_net_N = E_j * (1 - Phi_N * (N_test - 1) / N_test)
+        check(f"N={N_test}: V_net = N·Π_net (closed-ledger identity)",
+              abs(V_net_N - N_test * Pi_net_N) < TOL,
+              f"V_net={V_net_N:.4f}, N·Π_net={N_test * Pi_net_N:.4f}")
+
+    # N=2: the system net-negative threshold Φ > 2 and the individual profit
+    # erasure threshold are the SAME number, 1/κ.
+    psi_sys_crit_N2 = 1.0 / kappa  # from Φ = 1 + κψ > 2
+    check("N=2: system (Φ>2) and individual thresholds coincide at ψ = 1/κ = 0.5",
+          abs(psi_sys_crit_N2 - psi_crit) < TOL,
+          f"ψ_sys = {psi_sys_crit_N2:.4f}, ψ_indiv = {psi_crit:.4f}")
 
 
 # ---------------------------------------------------------------------------
@@ -276,7 +317,7 @@ def verify_trust_dynamics() -> None:
 def verify_cooperation_dominance() -> None:
     section("8. Theorem 6 — Cooperation Dominance")
 
-    Phi = 1 + (1 + kappa) * (delta_off + delta_def)
+    Phi = 1 + kappa * (psi_off + psi_def)
     N = 2
 
     coop_premium = Phi * (N - 1) / N * E_j
@@ -291,7 +332,7 @@ def verify_cooperation_dominance() -> None:
           f"N=2:{premiums[0]:.0f}, N=5:{premiums[1]:.0f}, N=10:{premiums[2]:.0f}, N=100:{premiums[3]:.0f}")
 
     # Premium increases with Φ
-    premiums_phi = [(1 + (1 + k) * 0.6) * 0.5 * E_j for k in [1.0, 2.0, 3.0, 5.0]]
+    premiums_phi = [(1 + k * 0.6) * 0.5 * E_j for k in [1.0, 2.0, 3.0, 5.0]]
     is_increasing_phi = all(premiums_phi[i] < premiums_phi[i + 1] for i in range(len(premiums_phi) - 1))
     check("Premium increasing in Φ (via κ)",
           is_increasing_phi,
@@ -305,35 +346,35 @@ def verify_cooperation_dominance() -> None:
 def verify_parametric_sweep() -> None:
     section("9. Parametric Sweep — Hacking Effort vs. Net Payoff")
 
-    # Vary δ_off from 0 to 1, with δ_def = δ_off (symmetric damage)
+    # Vary ψ_off from 0 to 1, with ψ_def = ψ_off (symmetric damage)
     n_points = 50
-    delta_range = np.linspace(0.01, 0.5, n_points)
+    psi_range = np.linspace(0.01, 0.5, n_points)
 
-    # For each total damage δ_total = 2*δ, compute:
-    #   Φ = 1 + (1+κ)·2δ
+    # For each total damage ψ_total = 2*ψ, compute:
+    #   Φ = 1 + κ·2ψ
     #   V_net = E_j(1 - Φ/2)  [for N=2]
-    #   Π_hack = E_j/4 · (1 - (1+κ)·2δ)
+    #   Π_hack = E_j/4 · (1 - κ·2ψ)
 
     found_crossover = False
-    for d in delta_range:
-        delta_total = 2 * d
-        Phi = 1 + (1 + kappa) * delta_total
+    for d in psi_range:
+        psi_total = 2 * d
+        Phi = 1 + kappa * psi_total
         V_net = E_j * (1 - Phi / 2)
-        Pi_hack = (E_j / 4) * (1 - (1 + kappa) * delta_total)
+        Pi_hack = (E_j / 4) * (1 - kappa * psi_total)
 
         if V_net < 0 and not found_crossover:
-            check(f"System net-negative crossover at δ_total ≈ {delta_total:.3f}",
+            check(f"System net-negative crossover at ψ_total ≈ {psi_total:.3f}",
                   True, f"Φ = {Phi:.3f}")
             found_crossover = True
 
     check("Net-negative crossover found in sweep",
           found_crossover, "Parametric sweep validates Theorem 5")
 
-    # Verify the analytical crossover: Φ = 2 => (1+κ)·δ_total = 1 => δ_total = 1/(1+κ) = 1/3
-    analytical_crossover = 1 / (1 + kappa)
-    check(f"Analytical system-negative crossover: δ_total = 1/(1+κ) = {analytical_crossover:.4f}",
-          abs(analytical_crossover - 1/3) < TOL,
-          f"δ_total_crit = {analytical_crossover:.4f}")
+    # Verify the analytical crossover: Φ = 2 => κ·ψ_total = 1 => ψ_total = 1/κ = 1/2
+    analytical_crossover = 1 / kappa
+    check(f"Analytical system-negative crossover: ψ_total = 1/κ = {analytical_crossover:.4f}",
+          abs(analytical_crossover - 1/2) < TOL,
+          f"ψ_total_crit = {analytical_crossover:.4f}")
 
 
 # ---------------------------------------------------------------------------
@@ -347,41 +388,57 @@ def generate_figure_data() -> None:
     section("FIGURE DATA — Adversarial Friction")
 
     n_pts = 300
-    delta_total = np.linspace(0.001, 1.0, n_pts)
+    psi_total = np.linspace(0.001, 1.0, n_pts)
     N = 2
 
-    Phi_sweep = 1 + (1 + kappa) * delta_total
+    Phi_sweep = 1 + kappa * psi_total
     L_system = Phi_sweep * (N - 1) / N * E_j
     V_net = E_j - L_system
-    Pi_hack = (E_j / 4) * (1 - kappa * delta_total)
+    Pi_hack = (E_j / 4) * (1 - kappa * psi_total)
     coop_payoff = E_j / 2
 
-    delta_sys_crossover = 1 / (1 + kappa)
-    delta_indiv_crossover = 1 / kappa
+    # SINGLE crossover. The individual profit-erasure threshold and the N=2
+    # system net-negative threshold (Φ > 2) are the same number, ψ = 1/κ,
+    # because V_net = N·Π_net identically (closed ledger — see
+    # verify_profit_erasure). Previously exported as two separate values
+    # (1/(1+κ) and 1/κ); that gap was an artifact of the superseded Φ formula
+    # being applied to the system ledger but not the individual one, not a
+    # real distinction. Exported once so the panels cannot disagree.
+    psi_crossover = 1 / kappa
 
     # Panel (c): N-agent scaling with multiple Phi values
     N_range = np.arange(2, 51)
-    Phi_examples = np.array([1.5, 2.0, 2.8, 4.0])
+    Phi_examples = np.array([1.5, 2.0, 2.2, 4.0])
     # V_net for each (Phi, N) pair — shape (len(Phi_examples), len(N_range))
     V_net_by_phi = np.array([
         E_j - phi * (N_range - 1) / N_range * E_j
         for phi in Phi_examples
     ])
 
-    # Worked example point
+    # Worked example point: ψ = 0.6 (destructive regime) → Φ = 2.2
     d_example = 0.6
     pi_example = (E_j / 4) * (1 - kappa * d_example)
-    V_example_phi28_N2 = E_j - 2.8 * (2 - 1) / 2 * E_j
+    Phi_example = 1 + kappa * d_example
+    V_example_phi22_N2 = E_j - Phi_example * (2 - 1) / 2 * E_j
+
+    check("Worked example Φ(ψ=0.6) = 2.2",
+          abs(Phi_example - 2.2) < TOL, f"Φ = {Phi_example:.4f}")
+    check("Worked example V_net(Φ=2.2, N=2) = -10",
+          abs(V_example_phi22_N2 - (-10.0)) < TOL,
+          f"V_net = {V_example_phi22_N2:.2f}")
+    check("Worked example Π_hack(ψ=0.6) = -5 = V_net/2",
+          abs(pi_example - (-5.0)) < TOL and
+          abs(pi_example - V_example_phi22_N2 / 2) < TOL,
+          f"Π_hack = {pi_example:.2f}")
 
     save_figure_data(
         "adversarial_friction",
-        delta_total=delta_total,
+        psi_total=psi_total,
         Pi_hack=Pi_hack,
         L_system=L_system,
         V_net=V_net,
         coop_payoff=np.array(coop_payoff),
-        delta_sys_crossover=np.array(delta_sys_crossover),
-        delta_indiv_crossover=np.array(delta_indiv_crossover),
+        psi_crossover=np.array(psi_crossover),
         E_j=np.array(E_j),
         kappa=np.array(kappa),
         N_range=N_range,
@@ -389,7 +446,7 @@ def generate_figure_data() -> None:
         V_net_by_phi=V_net_by_phi,
         d_example=np.array(d_example),
         pi_example=np.array(pi_example),
-        V_example_phi28_N2=np.array(V_example_phi28_N2),
+        V_example_phi22_N2=np.array(V_example_phi22_N2),
     )
     check("Figure data saved", True)
 

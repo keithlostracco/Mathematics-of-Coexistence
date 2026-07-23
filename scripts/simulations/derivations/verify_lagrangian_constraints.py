@@ -570,6 +570,66 @@ def verify_symmetric_scarcity() -> None:
           all(a <= b for a, b in zip(advantages, advantages[1:])),
           f"advantages = {[f'{a:.1f}%' for a in advantages]}")
 
+    # -----------------------------------------------------------------------
+    # Extreme-scarcity branch (R < α/β) — capped defection
+    #
+    # cor-constraint-scarcity-scaling has THREE branches for the ABSOLUTE
+    # welfare gap V(R) := W_VE(R) − W_defect(R):
+    #
+    #   R < α/β          :  V(R) = (β/4)·R²                 strictly INCREASING
+    #   α/β ≤ R < 2α/β   :  V(R) = (β/4)·(2α/β − R)²        strictly DECREASING
+    #   R ≥ 2α/β         :  V(R) = 0                        (slack)
+    #
+    # Below α/β the defector is capped at x_A = R and the victim gets x_B = 0,
+    # so the gap shrinks again as R → 0. The sweep above stops at R = α/β = 10,
+    # so this branch is otherwise never exercised. Note the percentage
+    # advantage used above is NOT a valid probe here: it divides by
+    # SW(defect), which stays positive for R < α/β, and its monotonicity in
+    # scarcity reverses on this branch.
+    # -----------------------------------------------------------------------
+    def welfare_gap(R: float) -> float:
+        """V(R) = W_VE(R) − W_defect(R), from primitives (no closed form)."""
+        sw_ve = 2 * agent.U(R / 2)
+        x_def = min(agent.x_unc(), R)
+        x_other = R - x_def
+        sw_def = agent.U(x_def) + (agent.U(x_other) if x_other > 0 else 0.0)
+        return sw_ve - sw_def
+
+    R_cap = alpha / beta  # = 10: boundary between capped and collision branches
+    for R, exp_V in [(4.0, 4.0), (6.0, 9.0), (8.0, 16.0)]:
+        V_actual = welfare_gap(R)
+        check(f"R={R:4.0f}: V(R) = (β/4)·R² = {exp_V:.0f} (capped defection)",
+              np.isclose(V_actual, exp_V) and R < R_cap,
+              f"V={V_actual:.2f}")
+
+    # Strictly increasing in R on the capped branch (reverse of the window)
+    gaps_capped = [welfare_gap(R) for R in [4.0, 6.0, 8.0, 10.0]]
+    check("V(R) strictly increasing in R for R < α/β",
+          all(a < b for a, b in zip(gaps_capped, gaps_capped[1:])),
+          f"V = {[f'{g:.1f}' for g in gaps_capped]}")
+
+    # Continuity at R = α/β: both branches agree, and equal α²/(4β)
+    V_boundary = alpha**2 / (4 * beta)
+    V_from_capped = beta / 4 * R_cap**2
+    V_from_window = beta / 4 * (2 * alpha / beta - R_cap) ** 2
+    check(f"R={R_cap:4.0f}: V = α²/(4β) = {V_boundary:.0f} (from primitives)",
+          np.isclose(welfare_gap(R_cap), V_boundary),
+          f"V={welfare_gap(R_cap):.2f}")
+    check(f"R={R_cap:4.0f}: capped branch (β/4)·R² = {V_boundary:.0f}",
+          np.isclose(V_from_capped, V_boundary),
+          f"V={V_from_capped:.2f}")
+    check(f"R={R_cap:4.0f}: window branch (β/4)·(2α/β−R)² = {V_boundary:.0f}",
+          np.isclose(V_from_window, V_boundary),
+          f"V={V_from_window:.2f}")
+    check("V(R) continuous at R = α/β (both branches agree)",
+          np.isclose(V_from_capped, V_from_window),
+          f"capped={V_from_capped:.2f} = window={V_from_window:.2f}")
+
+    # Abundance branch: V(R) = 0 for R ≥ 2α/β (no collision, no gap)
+    check("R= 20: V(R) = 0 (slack, R ≥ 2α/β)",
+          np.isclose(welfare_gap(2 * alpha / beta), 0.0),
+          f"V={welfare_gap(2 * alpha / beta):.2f}")
+
 
 # ---------------------------------------------------------------------------
 # 12. Theorem 4 — Welfare Optimality of the VE (N-agent)

@@ -2,7 +2,7 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{hyperref}
 \usepackage{graphicx}
-\graphicspath{{../../shared/figures/}}
+\graphicspath{{./}}
 \usepackage{natbib}
 \bibliographystyle{unsrtnat}
 \usepackage{doi}
@@ -20,24 +20,32 @@
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{dsfont} % double-struck numerals (\mathds{1} for indicator functions)
-\usepackage{thmtools}
-\declaretheorem[name=Theorem]{theorem}
-\declaretheorem[name=Proposition,sibling=theorem]{proposition}
-\declaretheorem[name=Lemma,sibling=theorem]{lemma}
-\declaretheorem[name=Corollary,sibling=theorem]{corollary}
-\declaretheorem[name=Conjecture,sibling=theorem]{conjecture}
+% thmtools is only needed for the optional \listoftheorems feature. Loading it
+% patches \newtheorem, and thmtools 0.76's patch is incompatible with recent
+% LaTeX kernels (>= 2025) for shared-counter theorems (every sibling raises
+% "Command \c@... already defined"). We therefore load it only when the
+% list-of-theorems feature is actually requested.
+% Theorem-like environments defined with amsthm's native shared-counter syntax
+% (\newtheorem{child}[parent]{Name}). Numbering is grouped by counter without
+% relying on thmtools' sibling mechanism.
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{conjecture}[theorem]{Conjecture}
 
 \theoremstyle{definition}
-\declaretheorem[name=Definition,style=definition]{definition}
-\declaretheorem[name=Axiom,style=definition,sibling=definition]{axiom}
-\declaretheorem[name=Assumption,style=definition,sibling=definition]{assumption}
-\declaretheorem[name=Criterion,style=definition,sibling=definition]{criterion}
-\declaretheorem[name=Example,style=definition,sibling=definition]{example}
+\newtheorem{definition}{Definition}
+\newtheorem{axiom}[definition]{Axiom}
+\newtheorem{assumption}[definition]{Assumption}
+\newtheorem{criterion}[definition]{Criterion}
+\newtheorem{example}[definition]{Example}
 
 \theoremstyle{remark}
-\declaretheorem[name=Remark,style=remark]{remark}
-\declaretheorem[name=Observation,style=remark,sibling=remark]{observation}
-\declaretheorem[name=Property,style=remark,sibling=remark]{property}
+\newtheorem{remark}{Remark}
+\newtheorem{observation}[remark]{Observation}
+\newtheorem{property}[remark]{Property}
 
 % Prevent theorem-like environments from starting near the page bottom.
 \usepackage{etoolbox}
@@ -56,6 +64,10 @@
 \usepackage{array}
 \usepackage{calc}
 \usepackage{caption}
+% General table note: small font, flush-left, below the table (used by some papers).
+\newenvironment{tablenote}
+  {\par\addvspace{2pt}\footnotesize\noindent}
+  {\par\addvspace{4pt}}
 % Pandoc 3.x wraps uncaptioned longtables in \def\LTcaptype{none};
 % this requires a 'none' counter to exist.
 \newcounter{none}
@@ -194,9 +206,6 @@ as partial captures of a single formal structure, derives the social
 contract as a consequence, and reframes rights as the result of
 constraint boundaries rather than entitlements.
 \end{abstract}
-\newpage
-\tableofcontents
-\newpage
 \section{Introduction}\label{introduction}
 
 \subsection{The Open Problem}\label{the-open-problem}
@@ -405,7 +414,7 @@ deriving the payoff matrix from energy budgets
 Theorem's equilibrium selection problem: cooperation emerges as the
 unique efficient Nash Equilibrium (Corollary~\ref{ethics-cor-unique-ne})
 with a numerically computable cooperation threshold
-(\(\delta^* = 0.363\), Theorem~\ref{ethics-thm-cooperation}). The
+(\(\delta^* = 0.431\), Theorem~\ref{ethics-thm-cooperation}). The
 \(N\)-player generalization \citep{TC-V} provides the formal result that
 Ostrom's fieldwork documented empirically.
 
@@ -428,7 +437,7 @@ theory's unconstrained-conflict result \citep{TC-I} establishes that no
 stable allocation for the resource dimension exists under unconstrained
 optimization; where Hobbes required an external sovereign,
 Theorem~\ref{ethics-thm-cooperation} shows cooperation is self-enforcing
-for \(\delta \geq 0.363\). Structural analogues exist in Locke's
+for \(\delta \geq 0.431\). Structural analogues exist in Locke's
 rights-emergence \citep{Locke1689}, Rousseau's welfare-maximizing
 general will \citep{Rousseau1762}, and Rawls's veil of ignorance
 \citep{Rawls1971}, which corresponds here to the Variational Equilibrium
@@ -760,9 +769,9 @@ agents contest a resource (in the broad sense of the scarcity framework,
 §\ref{scarcity-and-collision}) of energy value \(E_R > 0\), each
 choosing to Cooperate (\(C\): accept the constrained allocation) or
 Defect (\(D\): violate the constraint, triggering friction and deception
-costs). Under baseline parameters (\(E_R = 100\), \(\Phi = 2.2\), and
-standard exploitation parameters from \citep{TC-V}), the payoffs (in
-Joules) are:
+costs). Under the destructive-regime parameters (\(\kappa\psi > 1\)) of
+\citep{TC-V} (\(E_R = 100\), \(\Phi = 2.2\)), the payoffs (in Joules)
+are:
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}lll@{}}
@@ -772,22 +781,27 @@ Joules) are:
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-\(A: C\) & \textbf{(48, 48)} & (\(-11.25\), \(78.25\)) \\
-\(A: D\) & (\(78.25\), \(-11.25\)) & \textbf{(\(-5\), \(-5\))} \\
+\(A: C\) & \textbf{(48, 48)} & (\(-10.5\), \(77.5\)) \\
+\(A: D\) & (\(77.5\), \(-10.5\)) & \textbf{(\(-5\), \(-5\))} \\
 \end{longtable}
 }
 
 Mutual defection is net-negative (\(P = -5 < 0\)). Both agents
 \emph{lose} energy; the conflict destroys more value than the resource
-provides. In the abstract Prisoner's Dilemma, \(P > 0\) and mutual
-defection is merely suboptimal. Under physical constraints, mutual
-defection is value-destroying, a thermodynamic form of the condition
-Hobbes \citep{Hobbes1651} described on different grounds.
+provides. Net-negativity is a property of the regime rather than of the
+game form: it holds in the destructive regime (\(\kappa\psi > 1\)), and
+it holds for multi-agent conflict quite generally, since for
+\(N \geq 3\) contestants the net-negativity threshold falls to
+\(\Phi > N/(N-1)\), i.e.~\(\kappa\psi > 1/(N-1)\). In the abstract
+Prisoner's Dilemma, \(P > 0\) and mutual defection is merely suboptimal.
+In the destructive regime, mutual defection is value-destroying, a
+thermodynamic form of the condition Hobbes \citep{Hobbes1651} described
+on different grounds.
 
 \begin{proposition}[Physical Prisoner's Dilemma]
 \label{ethics-prop-physical-pd}
 
-Under the energy-based payoff model with physical constraints, the single-round game satisfies $T > R > P > S$ with $P < 0$, where $T$ is the temptation to defect, $R$ the reward for mutual cooperation, $P$ the penalty for mutual defection, and $S$ the (suckers) payoff for cooperating against a defector. Defection is the unique Nash Equilibrium of the one-shot game, even though mutual cooperation is Pareto-superior. \citep{TC-V}
+Under the energy-based payoff model with physical constraints, the single-round game satisfies $T > R > P > S$, where $T$ is the temptation to defect, $R$ the reward for mutual cooperation, $P$ the penalty for mutual defection, and $S$ the (suckers) payoff for cooperating against a defector; in the destructive regime ($\kappa\psi > 1$), additionally $P < 0$. Defection is the unique Nash Equilibrium of the one-shot game, even though mutual cooperation is Pareto-superior. \citep{TC-V}
 \end{proposition}
 
 The one-shot result is a trap. Each agent's best-response calculation
@@ -796,7 +810,7 @@ other cooperates; \(P > S\) if the other defects). Both agents follow
 this logic, and both arrive at \((D, D)\) with payoff \(P = -5\): every
 participant loses energy in absolute terms. Neither agent can
 unilaterally escape, since switching to \(C\) while the opponent defects
-yields the sucker's payoff \(S = -11.25\). Resolution requires the
+yields the sucker's payoff \(S = -10.5\). Resolution requires the
 repeated interaction structure that follows.
 
 In the repeated game, agents interact over indefinite horizons. The
@@ -809,19 +823,20 @@ observable quantities: survival probability and time-preference rate
 \begin{theorem}[Cooperation as Nash Equilibrium]
 \label{ethics-thm-cooperation}
 
-In the infinitely repeated energy-based game, cooperation is sustainable as a Nash Equilibrium if and only if the discount factor exceeds a critical threshold: $\delta \geq \delta^* = 0.363$. \citep{TC-V}
+In the infinitely repeated energy-based game, cooperation is sustainable as a Nash Equilibrium if and only if the discount factor exceeds a critical threshold: $\delta \geq \delta^*$, where $\delta^*$ is the energy-denominated cooperation threshold derived in \citep{TC-V}.
 \end{theorem}
 
-A discount factor above 0.363 is sufficient to sustain cooperation. The
-threshold is low because mutual defection is self-destructive
-(\(P < 0\)), making the cost of short-horizon behavior large relative to
-any single-round gain. No assumption of altruism or far-sightedness is
-required; any agent whose time-horizon satisfies
-\(\delta \geq \delta^*\) cooperates at equilibrium. Moreover, 0.363 is
-the baseline under idealized pairwise conditions. Incorporating network
-friction effects, multi-agent dynamics, and stochastic environmental
-costs each introduces additional penalties for defection, lowering the
-threshold further \citep{TC-V}.
+This threshold sits well below the canonical value of the abstract
+Prisoner's Dilemma. It is low because energy-denominated payoffs make
+the punishment for defection physically costly --- contest dissipation
+and boundary damage erode the mutual-defection payoff --- so the cost of
+short-horizon behavior is large relative to any single-round gain. No
+assumption of altruism or far-sightedness is required; any agent whose
+time-horizon satisfies \(\delta \geq \delta^*\) cooperates at
+equilibrium. The threshold is computed under idealized pairwise
+conditions; incorporating network friction, multi-agent dynamics, and
+stochastic environmental costs each introduces additional penalties for
+defection, lowering the threshold further \citep{TC-V}.
 
 \begin{corollary}[Cooperation as the Unique Efficient Nash Equilibrium]
 \label{ethics-cor-unique-ne}
@@ -833,14 +848,18 @@ This resolves the Folk Theorem's indeterminacy \citep{Fudenberg1986}.
 When payoffs are denominated in energy with thermodynamic friction,
 cooperation is not merely one equilibrium among many; it is the only
 stable, efficient one. Physics selects the equilibrium that abstract
-game theory cannot. The result scales: in the \(N\)-player public goods
-formulation, cooperation remains a Nash Equilibrium as the number of
-agents grows without bound, with the critical threshold converging to
-\(\delta_N^* \to 0.4\) as \(N \to \infty\) under the baseline parameters
-of \citep{TC-V}. Ostrom \citep{Ostrom1990} documented empirically that
-large-group cooperation persists without central authority; the
-\(N\)-player theorem provides the formal proof that this observation is
-not anomalous but expected.
+game theory cannot. The general result of \citep{TC-V} is the
+\(N\)-player public-goods formulation, of which the pairwise matrix
+above is the calibration illustration: there the cooperation threshold
+\(\delta_N^* = c(N-\alpha)/[\alpha(N-1)c + N\phi_0\bar{E}]\) and the
+cooperative welfare \(SW^{CC} = N(\alpha-1)c\) are independent of the
+friction parameters \(\Phi\), \(\kappa\), and \(\psi\), cooperation
+remains a Nash Equilibrium as the number of agents grows without bound,
+and the critical threshold converges to \(\delta_N^* \to 0.4\) as
+\(N \to \infty\) under the baseline parameters of \citep{TC-V}. Ostrom
+\citep{Ostrom1990} documented empirically that large-group cooperation
+persists without central authority; the \(N\)-player theorem provides
+the formal proof that this observation is not anomalous but expected.
 
 Additional results reinforce the stability of the cooperative
 equilibrium:
@@ -858,13 +877,13 @@ At sufficient network friction, even a single defection's short-term profit is c
 \end{theorem}
 
 Defection in the physical game is not merely suboptimal but strictly
-loss-making at every scale: mutual defection yields negative absolute
-returns for both agents (\(P = -5 < 0\)), a single defector in a
-cooperative population earns less than cooperators, and even a one-time
-defection followed by return to cooperation is net-negative over the
-agent's lifetime. Unlike the abstract Prisoner's Dilemma, where
-defection at least yields a positive payoff, defection here has no
-sustainable form.
+loss-making at every scale: in the destructive regime mutual defection
+yields negative absolute returns for both agents (\(P = -5 < 0\)), a
+single defector in a cooperative population earns less than cooperators,
+and even a one-time defection followed by return to cooperation is
+net-negative over the agent's lifetime. Whereas milder-regime Prisoner's
+Dilemmas retain a positive mutual-defection payoff (\(P > 0\)), in the
+destructive regime defection has no sustainable form.
 
 \subsection{The Irreplaceability of Accumulated
 Negentropy}\label{the-irreplaceability-of-accumulated-negentropy}
@@ -943,7 +962,7 @@ energy is maximized.
 \begin{theorem}[Stability of the Coexistence Attractor]
 \label{ethics-thm-coexistence}
 
-The coexistence attractor is globally stable. Agents displaced in either direction experience restoring forces that return them to the equilibrium. \citep{TC-VI}
+For agents above the critical integrity $B_c$, the coexistence attractor is stable: agents displaced in either direction experience restoring forces that return them to the equilibrium. In the coupled system with health-dependent mobility, the healthy equilibrium is locally stable; below $B_c$, no restoring force exists. \citep{TC-VI}
 \end{theorem}
 
 \begin{theorem}[Freedom Bandwidth]
@@ -961,19 +980,24 @@ to friction costs that erode its boundaries.
 \begin{theorem}[Irreversibility of Dissolution]
 \label{ethics-thm-dissolution}
 
-An agent pushed below the boundary dissolution threshold experiences strictly declining boundary integrity, reaching zero in finite time. Crossing the dissolution threshold is irreversible. \citep{TC-VI}
+Below a critical integrity $B_c$ (the basin of no return, `thm-basin-of-no-return` in \citep{TC-VI}), collapse is unconditional along every trajectory, regardless of the path: boundary integrity declines to the collapse floor $B_{\min} > 0$, which is absorbing; reaching it is dissolution, and the agent ceases to exist. Crossing the dissolution radius $r_d$ drives the agent into this basin under the stated conditions: unconditionally if $r_d \geq r^*$, and otherwise once penetration is sufficiently deep or prolonged. \citep{TC-VI}
 \end{theorem}
 
 Dissolution is the formal analogue of the poverty trap, the failed
-state, and ecological collapse in human and biological systems: a point
-beyond which recovery requires external intervention. The
-irreversibility is what gives the cooperative equilibrium its structural
-significance; the consequences of crossing this threshold are permanent.
+state, and ecological collapse in human and biological systems. Below
+the critical integrity \(B_c\), no restoring force exists: mobility
+itself dies with health (\(\mu(B_i) = \mu_0 \zeta(B_i) \to 0\)), so the
+agent cannot generate the movement that recovery would require, and
+collapse to \(B_{\min}\) follows along every trajectory
+(\texttt{thm-basin-of-no-return} in \citep{TC-VI}). Recovery is possible
+only above \(B_c\). This irreversibility is what gives the cooperative
+equilibrium its structural significance; the consequences of entering
+the basin of no return are permanent.
 
 \begin{corollary}[Cascade Collapse]
 \label{ethics-cor-cascade}
 
-If a high-energy center is destroyed, all agents within its Coexistence Band simultaneously lose viability. \citep{TC-VI}
+If a high-energy center is destroyed, all agents within its Coexistence Band simultaneously lose viability with respect to that center. \citep{TC-VI}
 \end{corollary}
 
 Excessive concentration in a single center therefore makes the entire
@@ -1682,9 +1706,12 @@ integrity) and no entitlements to any resource; its access depends
 entirely on the structure of the surrounding population. Without mutual
 constraints, there is no stable allocation
 (§\ref{constraints-and-rights}); the unconstrained state is Hobbes's
-war, and it is net-negative for everyone (\(P < 0\),
-§\ref{cooperation-as-the-unique-efficient-equilibrium}). Constraints are
-not impositions on pre-existing freedoms; they are the structural
+war, and whenever friction exceeds the net-negativity threshold
+\(\Phi > N/(N-1)\) (satisfied for \(N \geq 3\) conflict even at mild
+damage, and for two agents in the destructive regime \(\kappa\psi > 1\))
+it is net-negative for everyone
+(§\ref{cooperation-as-the-unique-efficient-equilibrium}). Constraints
+are not impositions on pre-existing freedoms; they are the structural
 features that \emph{create} the feasible region. For agents in a shared
 finite-resource environment, freedom is not an inherent property but an
 emergent consequence of the mutual constraints that all agents impose on
@@ -1893,10 +1920,10 @@ Falsified If\ldots{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-Cooperation is sustainable for agents with \(\delta \geq 0.363\) in
+Cooperation is sustainable for agents with \(\delta \geq \delta^*\) in
 energy-denominated games & Theorem~\ref{ethics-thm-cooperation} &
 Cooperation in physically costly repeated interactions consistently
-requires discount factors above 0.5 \\
+requires discount factors well above 0.6 \\
 A single defection's net gain is erased by accumulated friction within
 $\sim$20 periods & Theorem~\ref{ethics-thm-profit-erasure} & Defectors
 in cost-coupled groups sustain net-positive long-run payoffs despite
@@ -2341,10 +2368,11 @@ scalar \(G \in (-\infty, 1]\) with the following properties:
   \(G < 1\) for all \(\mathbf{x} \neq \mathbf{x}^*\): every departure
   from the equilibrium reduces goodness.
 \item
-  \(G\) can be negative: configurations involving mutual defection
-  destroy more value than they produce (\(P < 0\),
-  Proposition~\ref{ethics-prop-physical-pd}), yielding \(W < 0\) and
-  therefore \(G < 0\).
+  \(G\) can be negative: in the destructive regime (\(\kappa\psi > 1\)),
+  and in \(N \geq 3\) conflict (\(\Phi > N/(N-1)\)), configurations
+  involving mutual defection destroy more value than they produce
+  (\(P < 0\), Proposition~\ref{ethics-prop-physical-pd}), yielding
+  \(W < 0\) and therefore \(G < 0\).
 \end{enumerate}
 
 Good is therefore a gradable, measurable, context-dependent scalar. The
@@ -2479,5 +2507,5 @@ active boundary constraints, and both are computable in principle from
 the physical quantities the framework tracks.
 
 \addcontentsline{toc}{section}{References}
-\bibliography{../../shared/main}
+\bibliography{main}
 \end{document}

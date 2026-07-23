@@ -2,7 +2,7 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{hyperref}
 \usepackage{graphicx}
-\graphicspath{{../../shared/figures/}}
+\graphicspath{{./}}
 \usepackage{natbib}
 \bibliographystyle{unsrtnat}
 \usepackage{doi}
@@ -20,24 +20,32 @@
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{dsfont} % double-struck numerals (\mathds{1} for indicator functions)
-\usepackage{thmtools}
-\declaretheorem[name=Theorem]{theorem}
-\declaretheorem[name=Proposition,sibling=theorem]{proposition}
-\declaretheorem[name=Lemma,sibling=theorem]{lemma}
-\declaretheorem[name=Corollary,sibling=theorem]{corollary}
-\declaretheorem[name=Conjecture,sibling=theorem]{conjecture}
+% thmtools is only needed for the optional \listoftheorems feature. Loading it
+% patches \newtheorem, and thmtools 0.76's patch is incompatible with recent
+% LaTeX kernels (>= 2025) for shared-counter theorems (every sibling raises
+% "Command \c@... already defined"). We therefore load it only when the
+% list-of-theorems feature is actually requested.
+% Theorem-like environments defined with amsthm's native shared-counter syntax
+% (\newtheorem{child}[parent]{Name}). Numbering is grouped by counter without
+% relying on thmtools' sibling mechanism.
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{conjecture}[theorem]{Conjecture}
 
 \theoremstyle{definition}
-\declaretheorem[name=Definition,style=definition]{definition}
-\declaretheorem[name=Axiom,style=definition,sibling=definition]{axiom}
-\declaretheorem[name=Assumption,style=definition,sibling=definition]{assumption}
-\declaretheorem[name=Criterion,style=definition,sibling=definition]{criterion}
-\declaretheorem[name=Example,style=definition,sibling=definition]{example}
+\newtheorem{definition}{Definition}
+\newtheorem{axiom}[definition]{Axiom}
+\newtheorem{assumption}[definition]{Assumption}
+\newtheorem{criterion}[definition]{Criterion}
+\newtheorem{example}[definition]{Example}
 
 \theoremstyle{remark}
-\declaretheorem[name=Remark,style=remark]{remark}
-\declaretheorem[name=Observation,style=remark,sibling=remark]{observation}
-\declaretheorem[name=Property,style=remark,sibling=remark]{property}
+\newtheorem{remark}{Remark}
+\newtheorem{observation}[remark]{Observation}
+\newtheorem{property}[remark]{Property}
 
 % Prevent theorem-like environments from starting near the page bottom.
 \usepackage{etoolbox}
@@ -56,6 +64,10 @@
 \usepackage{array}
 \usepackage{calc}
 \usepackage{caption}
+% General table note: small font, flush-left, below the table (used by some papers).
+\newenvironment{tablenote}
+  {\par\addvspace{2pt}\footnotesize\noindent}
+  {\par\addvspace{4pt}}
 % Pandoc 3.x wraps uncaptioned longtables in \def\LTcaptype{none};
 % this requires a 'none' counter to exist.
 \newcounter{none}
@@ -195,9 +207,6 @@ coupling dimensions, yielding a componentwise global attractor with a
 diversification benefit: agents that would be non-viable at any single
 center may survive through distributed coupling.
 \end{abstract}
-\newpage
-\tableofcontents
-\newpage
 \section{Introduction}\label{introduction}
 
 The preceding papers in this series derive two classes of results.
@@ -211,7 +220,7 @@ negentropy. \emph{Cooperative Equilibrium} \citep{TC-V} proves that
 under energy-denominated payoffs with physical friction costs, universal
 cooperation is the unique Nash Equilibrium that is simultaneously
 Pareto-efficient and welfare-maximizing for agents with discount factor
-\(\delta \geq 0.363\).
+\(\delta \geq 0.431\).
 
 These results establish the static conditions under which cooperation is
 optimal; they do not address the dynamical question of how agents reach
@@ -226,8 +235,10 @@ The principal contributions are:
   (§\ref{the-agent-center-model}), proving that stable coexistence is a
   global attractor (Theorem~\ref{thm-stability-coexistence-attractor})
   with a measurable freedom bandwidth
-  (Theorem~\ref{thm-freedom-bandwidth}) and irreversible boundary
-  transitions (Theorem~\ref{thm-irreversibility-dissolution},
+  (Theorem~\ref{thm-freedom-bandwidth}), and a coupled
+  boundary-integrity dynamics with an explicit basin of no return
+  (Theorem~\ref{thm-basin-of-no-return}) governing dissolution and
+  starvation (Theorem~\ref{thm-irreversibility-dissolution},
   Theorem~\ref{thm-starvation-spiral}).
 \item
   A \textbf{multi-center extension} (§\ref{multi-center-dynamics})
@@ -242,11 +253,17 @@ The principal contributions are:
   (§\ref{comparative-statics-and-inequality}), with implications for
   inequality across heterogeneous agent populations.
 \item
-  \textbf{Irreversibility results} establishing that boundary
-  transitions (dissolution and starvation) are one-way processes under
-  the model dynamics (§\ref{boundary-dynamics-and-irreversibility}),
-  connecting to thermodynamic irreversibility in \emph{Thermodynamic
-  Friction} \citep{TC-IV}.
+  \textbf{Irreversibility results} establishing a basin of no return for
+  boundary integrity: the boundary is modeled as an active dissipative
+  structure whose repair capacity and mobility scale with its own
+  integrity, so below a critical integrity \(B_c\) both vanish together
+  and the boundary reaches its collapse floor in finite time
+  (§\ref{boundary-dynamics-and-irreversibility}). Dissolution and
+  starvation are one-way processes once depletion crosses the basin
+  boundary --- not at the band boundaries themselves --- and the repair
+  side of the dynamics carries the repair multiplier \(\kappa > 1\) of
+  \emph{Thermodynamic Friction} \citep{TC-IV}, grounding the
+  irreversibility thermodynamically.
 \end{enumerate}
 
 \subsection{Related Work}\label{related-work}
@@ -647,11 +664,11 @@ The Stable Coexistence Band exists if and only if the HEC's value mass exceeds a
 
 $$\mathcal{M} > \mathcal{M}_{\min} \;\triangleq\; \frac{4\gamma B_i \tau}{G^2}$$
 
-When $\mathcal{M} = \mathcal{M}_{\min}$, the band collapses to the single point $r^*$ (marginal viability). When $\mathcal{M} < \mathcal{M}_{\min}$, no viable coupling distance exists: the agent cannot sustain itself near this HEC.
+When $\mathcal{M} = \mathcal{M}_{\min}$, the open band is empty: $V(r) \geq 0$ everywhere, with equality only at $r^*$ — marginal, and non-surviving, since survival requires $\Pi(r) > 0$ strictly. When $\mathcal{M} < \mathcal{M}_{\min}$, no viable coupling distance exists: the agent cannot sustain itself near this HEC.
 \end{theorem}
 
 \begin{proof}
-Two positive real roots of $V(r) = 0$ require: (i) $\Delta > 0$, which gives $\mathcal{M} > 4\gamma B_i \tau / G^2$; (ii) both roots positive, which is guaranteed since the sum $r_- + r_+ = G\mathcal{M}/(\gamma B_i) > 0$ and the product $r_- \cdot r_+ = \tau\mathcal{M}/(\gamma B_i) > 0$. When $\Delta = 0$, there is a single repeated root $r^* = G\mathcal{M}/(2\gamma B_i)$, and the minimum value $V(r^*) = 0$ (marginal viability). When $\Delta < 0$, $V(r) > 0$ for all $r > 0$: the well is too shallow to reach negative values.
+Two positive real roots of $V(r) = 0$ require: (i) $\Delta > 0$, which gives $\mathcal{M} > 4\gamma B_i \tau / G^2$; (ii) both roots positive, which is guaranteed since the sum $r_- + r_+ = G\mathcal{M}/(\gamma B_i) > 0$ and the product $r_- \cdot r_+ = \tau\mathcal{M}/(\gamma B_i) > 0$. When $\Delta = 0$, there is a single repeated root $r^* = G\mathcal{M}/(2\gamma B_i)$, and the minimum value $V(r^*) = 0$: the zero set of $V$ collapses to $\{r^*\}$ while the open band $\{V < 0\}$ is empty (marginal, non-surviving). When $\Delta < 0$, $V(r) > 0$ for all $r > 0$: the well is too shallow to reach negative values.
 \end{proof}
 
 \textbf{Physical interpretation:} A small corner shop (\(\mathcal{M}\)
@@ -664,14 +681,14 @@ center becomes a viable attractor.
 \subsection{Inner and Outer
 Boundaries}\label{inner-and-outer-boundaries}
 
-\begin{definition}[Dissolution Threshold: Inner Boundary]
+\begin{definition}[Energetic Inner Boundary]
 \label{def-dissolution-threshold}
 
-The \emph{dissolution threshold} is the inner boundary of the Stable Coexistence Band:
+The \emph{energetic inner boundary} is the inner boundary of the Stable Coexistence Band:
 
 $$r_- = \frac{G\mathcal{M} - \sqrt{\Delta}}{2\gamma B_i}$$
 
-Below $r_-$, the dissolution cost exceeds the resource benefit net of maintenance: $V(r) > 0$ for $r < r_-$.
+Below $r_-$, the dissolution cost exceeds the resource benefit net of maintenance: $V(r) > 0$ for $r < r_-$. We reserve the term \emph{dissolution threshold} for the distinct boundary-degradation threshold $r_d$ of §\ref{boundary-dynamics-and-irreversibility}: $r_-$ marks where the energy balance turns negative, $r_d$ where active boundary erosion outruns repair.
 \end{definition}
 
 \begin{definition}[Starvation Threshold: Outer Boundary]
@@ -794,7 +811,15 @@ The gradient dynamics established in the agent-center model
 (§\ref{the-agent-center-model}) assume the agent's boundary integrity
 \(B_i\) is constant. In reality, \(B_i\) is itself dynamic: it degrades
 under assault from the HEC's assimilation pressure or from resource
-deprivation, and it regenerates when the agent has surplus energy.
+deprivation, and it regenerates when the agent has surplus energy. The
+boundary is not a passive reservoir that surplus refills at will. It is
+an \textbf{active dissipative structure}: the machinery that performs
+repair --- and that executes the coupling adjustments of the gradient
+dynamics --- is itself part of the structure it maintains, so both
+capacities degrade with the boundary. This section makes that structure
+explicit and derives its central consequence: irreversibility is a
+dynamical property of the coupled system, with an explicit basin of no
+return, rather than an assumption.
 
 \subsection{The Coupled Agent-Boundary
 System}\label{the-coupled-agent-boundary-system}
@@ -809,22 +834,141 @@ $$D_{\text{assimilate}}(r) = \frac{\sigma \mathcal{M}}{r^3}$$
 where $\sigma > 0$ is the \textbf{assimilation intensity} coefficient. This is a short-range dominant force ($1/r^3$ decays faster than the dissolution cost $1/r^2$), reflecting that active boundary destruction requires even closer coupling than the autonomy costs defined in the dissolution cost function (§\ref{the-dissolution-cost-function}).
 \end{definition}
 
+\begin{definition}[Structural Capacity]
+\label{def-structural-capacity}
+
+Let $\bar{B} > 0$ denote the \textbf{reference integrity}: the embodied energy (Definition 6 \citep{TC-IV}) of the agent's fully intact boundary. Let $B_{\min} \in (0, \bar{B})$ denote the \textbf{collapse floor}: below $B_{\min}$, the boundary loses structural coherence, the machinery that performs repair and coupling adjustment is destroyed, and identity fails. The set $\{B_i \leq B_{\min}\}$ is \textbf{absorbing}: an agent whose integrity reaches the collapse floor is dissolved and ceases to exist. The \textbf{structural-capacity factor}
+
+$$\zeta(B_i) = \max\left(\frac{B_i - B_{\min}}{\bar{B} - B_{\min}},\, 0\right) \in [0, 1]$$
+
+is the fraction of full repair and mobility capacity the agent retains at integrity $B_i$: $\zeta$ is increasing on $[B_{\min}, \bar{B}]$ with $\zeta(B_{\min}) = 0$ and $\zeta(\bar{B}) = 1$. Throughout, $B_i$ ranges over $(B_{\min}, \bar{B}]$: repair restores the boundary toward its intact configuration and cannot raise $B_i$ above $\bar{B}$, so the dynamics saturate at the reference integrity.
+\end{definition}
+
 \begin{definition}[Boundary Regeneration Rate]
 \label{def-boundary-regeneration-rate}
 
-The \emph{boundary regeneration rate} is the fraction of surplus energy the agent allocates to boundary repair:
+The \emph{boundary regeneration rate} is the integrity restored per unit time by the surplus energy the agent allocates to boundary repair:
 
-$$R_{\text{repair}}(r) = \rho \cdot \max\bigl(\Pi(r), 0\bigr)$$
+$$R_{\text{repair}}(r, B_i) = \frac{\rho}{\kappa}\, \zeta(B_i)\, \max\bigl(\Pi(r), 0\bigr)$$
 
-where $\rho \in (0, 1)$ is the \textbf{repair allocation fraction} and $\Pi(r) = -V(r)$ is the net energy rate.
+where $\rho \in (0, 1)$ is the \textbf{repair allocation fraction}, $\kappa = 1 + \kappa_{\text{clear}} + \kappa_{\text{pen}} + \kappa_{\text{irr}} > 1$ is the repair multiplier of \citep{TC-IV} (Definition 7 \citep{TC-IV}), and $\zeta(B_i)$ is the structural-capacity factor (Definition~\ref{def-structural-capacity}). Two mechanisms distinguish this from passive refilling of a reservoir. First, restoring $\Delta B$ of boundary costs $\kappa \cdot \Delta B$ of energy — the embodied energy must be re-supplied together with the Second-Law surcharges of rebuilding on a damaged site — so the allocated power $\rho \max(\Pi, 0)$ yields integrity at rate $(\rho/\kappa) \max(\Pi, 0)$. Second, repair is \textbf{autocatalytic}: it is performed by the boundary's own machinery, so repair capacity scales with the integrity that remains. A depleted structure cannot rebuild itself even when surplus energy is available: $R_{\text{repair}} \to 0$ as $B_i \to B_{\min}$ regardless of $\Pi$.
 \end{definition}
 
-The coupled dynamical system governing both coupling distance and
-boundary integrity is:
+Mobility is health-dependent for the same reason: adjusting the coupling
+distance is work performed by the same structural machinery, so the
+adjustment rate degrades with integrity,
 
-\[\dot{r} = -\mu \, V'(r)\]
+\[\mu(B_i) = \mu_0 \, \zeta(B_i)\]
 
-\[\dot{B}_i = R_{\text{repair}}(r) - D_{\text{assimilate}}(r) - \gamma B_i\]
+where \(\mu_0 > 0\) is the \textbf{baseline mobility}. (A stronger
+variant would additionally have movement drain integrity, e.g.~a term
+\(-c_{\text{move}}\,|\dot{r}|\) in \(\dot{B}_i\); the capacity factor
+already captures the essential effect --- a depleted agent cannot afford
+the migration --- and we adopt the minimal form.) The coupled dynamical
+system governing coupling distance and boundary integrity is, for
+\(B_i > B_{\min}\):
+
+\[\dot{r} = -\mu_0\, \zeta(B_i)\, V'(r)\]
+
+\[\dot{B}_i = \frac{\rho}{\kappa}\, \zeta(B_i)\, \max\bigl(\Pi(r), 0\bigr) - \frac{\sigma \mathcal{M}}{r^3} - \gamma B_i\]
+
+with the absorbing dissolved state at \(B_i \leq B_{\min}\). Since
+\(B_i\) is now a state variable, the net energy rate
+\(\Pi(r) = G\mathcal{M}/r - \tau\mathcal{M}/r^2 - \gamma B_i\) and every
+quantity defined from it --- \(V\), the band boundaries \(r_\pm\),
+\(\mathcal{M}_{\min}\) --- are read at the current integrity; the
+attractor \(r^* = 2\tau/G\) is independent of \(B_i\). The
+constant-mobility gradient dynamics of the stability analysis
+(§\ref{gradient-dynamics-and-stability}) are recovered in the healthy
+regime: for an agent whose integrity holds at the equilibrium \(B_i^*\)
+derived below, the first equation is the earlier flow with
+\(\mu = \mu_0 \zeta(B_i^*)\), a constant time-rescaling that leaves
+every phase-portrait conclusion (attractor location, stability, band
+structure) unchanged.
+
+\subsection{The Healthy Equilibrium and the Basin of No
+Return}\label{the-healthy-equilibrium-and-the-basin-of-no-return}
+
+The coupled system must pass two checks. It must sustain viable agents
+--- a healthy agent in the band should hold a stable integrity strictly
+above the collapse floor --- and it should locate exactly where
+viability fails. Both follow from the fixed-\(r\) boundary dynamics,
+which are quadratic in \(B_i\).
+
+\begin{proposition}[Healthy Boundary Equilibrium]
+\label{prop-healthy-boundary-equilibrium}
+
+Fix $r$ and define the floor-level net rate $\Pi_0(r) \triangleq G\mathcal{M}/r - \tau\mathcal{M}/r^2 - \gamma B_{\min}$, the floor-level drain $d_0(r) \triangleq \sigma\mathcal{M}/r^3 + \gamma B_{\min}$, and the repair-capacity density $q \triangleq \rho / \bigl(\kappa(\bar{B} - B_{\min})\bigr)$. Suppose the \textbf{repair-viability condition} holds at $r$:
+
+$$q\, \Pi_0(r) \;>\; \gamma + 2\sqrt{q \gamma\, d_0(r)}.$$
+
+Then $\dot{B}_i = 0$ at fixed $r$ has exactly two roots $B_{\mathrm{u}}(r) < B_i^*(r)$ in $(B_{\min}, \infty)$, given by $B_{\min} + x_\mp$ with
+
+$$x_\mp = \frac{\bigl(q \Pi_0(r) - \gamma\bigr) \mp \sqrt{\bigl(q \Pi_0(r) - \gamma\bigr)^2 - 4 q \gamma\, d_0(r)}}{2 q \gamma},$$
+
+and:
+
+(a) $B_i^*(r) = B_{\min} + x_+$ is locally asymptotically stable for the boundary dynamics at fixed $r$, with $\Pi(r) > 0$ at $B_i = B_i^*(r)$. If $x_+ > \bar{B} - B_{\min}$, the equilibrium saturates at the reference integrity $\bar{B}$.
+
+(b) $B_{\mathrm{u}}(r)$ is unstable: $\dot{B}_i < 0$ for $B_i \in (B_{\min}, B_{\mathrm{u}}(r))$ and $\dot{B}_i > 0$ for $B_i \in \bigl(B_{\mathrm{u}}(r), \min(B_i^*(r), \bar{B})\bigr)$.
+
+(c) If the repair-viability condition holds at $r = r^*$ with $B_{\mathrm{u}}(r^*) < \bar{B}$ — the \textbf{viable-agent condition} — then $\bigl(r^*, \min(B_i^*(r^*), \bar{B})\bigr)$ is a locally asymptotically stable equilibrium of the coupled system: a healthy agent at the attractor maintains a boundary equilibrium strictly above the collapse floor, and the attractor and band results of the preceding sections apply verbatim with $B_i = B_i^*$ and $\mu = \mu_0 \zeta(B_i^*)$.
+\end{proposition}
+
+\begin{proof}
+Write $x = B_i - B_{\min} > 0$, so $\zeta(B_i) = x / (\bar{B} - B_{\min})$ and $\Pi(r) = \Pi_0(r) - \gamma x$. On the branch $\Pi > 0$ (i.e. $x < \Pi_0(r)/\gamma$), the fixed-$r$ boundary dynamics read
+
+$$\dot{B}_i = q\, x \bigl(\Pi_0(r) - \gamma x\bigr) - \gamma x - d_0(r) = -q\gamma x^2 + \bigl(q\Pi_0(r) - \gamma\bigr) x - d_0(r),$$
+
+a downward-opening parabola in $x$ with value $-d_0(r) < 0$ at $x = 0$. It has two positive roots $x_- < x_+$ if and only if $q\Pi_0(r) - \gamma > 0$ and the discriminant $(q\Pi_0(r) - \gamma)^2 - 4q\gamma d_0(r)$ is positive — jointly, the repair-viability condition. The parabola is negative on $(0, x_-)$, positive on $(x_-, x_+)$, and negative beyond $x_+$, which gives the sign pattern in (b); its slope at $x_\pm$ is $\mp\sqrt{(q\Pi_0(r) - \gamma)^2 - 4q\gamma d_0(r)}$, so $B_i^*(r)$ is locally asymptotically stable and $B_{\mathrm{u}}(r)$ unstable. At $x = \Pi_0(r)/\gamma$ (where $\Pi = 0$) the parabola evaluates to $-\Pi_0(r) - d_0(r) < 0$; since this point lies to the right of the vertex $\bigl(q\Pi_0(r) - \gamma\bigr)/(2q\gamma) < \Pi_0(r)/(2\gamma)$, the negative value places it beyond the right root, hence $x_+ < \Pi_0(r)/\gamma$ and $\Pi > 0$ at $B_i^*(r)$; for $x \geq \Pi_0(r)/\gamma$ the repair term vanishes and $\dot{B}_i = -\sigma\mathcal{M}/r^3 - \gamma B_i < 0$, so there are no further fixed points. If $x_+ > \bar{B} - B_{\min}$, then $\dot{B}_i > 0$ on $(B_{\mathrm{u}}(r), \bar{B})$ and the saturated state $\bar{B}$ is attracting from below.
+
+For (c): $V'(r^*) = 0$ independently of $B_i$, so $\dot{r} = 0$ on the line $r = r^*$ and $\partial \dot{r}/\partial B_i = -\mu_0\, \zeta'(B_i)\, V'(r^*) = 0$ there. The Jacobian at $(r^*, B_i^*)$ is therefore lower-triangular with eigenvalues $-\mu_0 \zeta(B_i^*) V''(r^*) < 0$ (Proposition~\ref{prop-coexistence-potential-properties}) and $-\sqrt{(q\Pi_0(r^*) - \gamma)^2 - 4q\gamma d_0(r^*)} < 0$; both negative, so the equilibrium is locally asymptotically stable (in the saturated case, $\bar{B}$ is attracting from below by the sign of $\dot{B}_i$). With $B_i$ held at $B_i^*$, the flow $\dot{r} = -\mu_0 \zeta(B_i^*) V'(r)$ is the gradient flow of Theorem~\ref{thm-stability-coexistence-attractor} under the constant rescaling $\mu = \mu_0 \zeta(B_i^*) > 0$, which preserves trajectories and their limits; the band, bandwidth, and comparative-statics results depend only on $V$ and hold with $B_i = B_i^*$.
+\end{proof}
+
+The unstable root \(B_{\mathrm{u}}(r)\) is the fixed-\(r\) boundary of
+the recovery region. The next theorem extracts its
+trajectory-independent core: a critical integrity below which no motion
+in \(r\) --- and no future surplus --- can save the agent.
+
+\begin{theorem}[The Basin of No Return]
+\label{thm-basin-of-no-return}
+
+Define the \textbf{surplus ceiling} $\bar{\Pi} \triangleq G^2\mathcal{M}/(4\tau) - \gamma B_{\min}$: the largest net energy rate available at any coupling distance to an agent at the collapse floor (assume $\bar{\Pi} > 0$, which holds whenever the band is nonempty for some admissible integrity). Let
+
+$$B_c \;\triangleq\; B_{\min} + \frac{\bigl(q\bar{\Pi} - \gamma\bigr) - \sqrt{\bigl(q\bar{\Pi} - \gamma\bigr)^2 - 4 q \gamma^2 B_{\min}}}{2 q \gamma},$$
+
+the smaller root of $q\,(B_i - B_{\min})\bigl(G^2\mathcal{M}/(4\tau) - \gamma B_i\bigr) = \gamma B_i$. If the repair-viability condition of Proposition~\ref{prop-healthy-boundary-equilibrium} holds at some $r$, then $B_c$ exists and $B_{\min} < B_c \leq B_{\mathrm{u}}(r)$; if moreover the agent admits a healthy equilibrium — the viable-agent condition of Proposition~\ref{prop-healthy-boundary-equilibrium}(c) — then $B_c \leq B_{\mathrm{u}}(r^*) < \bar{B}$, so the basin is a proper layer of the admissible range. Furthermore:
+
+(a) **(Collapse below $B_c$.)** If $B_i(t_0) < B_c$, then along every trajectory of the coupled system $\dot{B}_i < 0$ for all $t \geq t_0$ *regardless of the path $r(t)$*, and $B_i$ reaches the collapse floor $B_{\min}$ in finite time. No later reversal is possible even if $\Pi > 0$ subsequently: the estimate in the proof already grants the agent the maximal surplus $G^2\mathcal{M}/(4\tau) - \gamma B_i$ at every instant.
+
+(b) \textbf{(Mobility death.)} As $B_i \downarrow B_{\min}$, $\mu(B_i) = \mu_0 \zeta(B_i) \to 0$: the collapsing agent progressively loses the capacity to relocate, and the dissolved state is reached at asymptotically frozen coupling distance.
+
+(c) \textbf{(Recovery above the basin.)} If $B_i(t_0) > B_{\mathrm{u}}(r^*)$ and $r(t_0) = r^*$, then $\dot{B}_i > 0$ and the agent converges to the healthy equilibrium of Proposition~\ref{prop-healthy-boundary-equilibrium}(c). More generally, $B_c$ is a certified inner bound of the basin: below $B_c$, collapse is unconditional; between $B_c$ and $B_{\mathrm{u}}(r(t))$, the outcome depends on the full trajectory.
+\end{theorem}
+
+\begin{proof}
+For $B_i \in (B_{\min}, \bar{B}]$ we have $\zeta(B_i) \leq 1$ and, for every $r > 0$, $\max(\Pi(r), 0) \leq \max\bigl(G^2\mathcal{M}/(4\tau) - \gamma B_i,\, 0\bigr)$ — the maximum of $\Pi$ over $r$ at the current integrity, attained at $r^*$. Dropping the assimilation drain $-\sigma\mathcal{M}/r^3 \leq 0$:
+
+$$\dot{B}_i \;\leq\; h(B_i) \;\triangleq\; q\,(B_i - B_{\min})\left(\frac{G^2\mathcal{M}}{4\tau} - \gamma B_i\right) - \gamma B_i,$$
+
+valid wherever $G^2\mathcal{M}/(4\tau) - \gamma B_i \geq 0$, in particular on $(B_{\min}, B_c]$ (verified below). In $x = B_i - B_{\min}$, $h = -q\gamma x^2 + (q\bar{\Pi} - \gamma)x - \gamma B_{\min}$, a downward parabola with $h(B_{\min}) = -\gamma B_{\min} < 0$. Since $h$ dominates the fixed-$r$ dynamics of Proposition~\ref{prop-healthy-boundary-equilibrium} (it omits the drain $\sigma\mathcal{M}/r^3 \geq 0$), $h(B_{\mathrm{u}}(r)) \geq 0$ whenever repair-viability holds at $r$; hence $h$ has real roots and its smaller root $B_c$ satisfies $B_{\min} < B_c \leq B_{\mathrm{u}}(r)$. Under the viable-agent condition this holds at $r = r^*$, where additionally $B_{\mathrm{u}}(r^*) < \bar{B}$, giving $B_c < \bar{B}$. At $B_c$, $h(B_c) = 0$ with $q(B_c - B_{\min}) > 0$ forces $G^2\mathcal{M}/(4\tau) - \gamma B_c > 0$, so the bound applies on all of $(B_{\min}, B_c]$.
+
+(a) On $(B_{\min}, B_c)$, $h < 0$ and $h$ is increasing (the parabola's vertex lies beyond $B_c$). Let $B_i(t_0) = B_0 < B_c$. Then $\dot{B}_i \leq h(B_i) < 0$, so $B_i$ decreases and remains below $B_0$; consequently $\dot{B}_i \leq h(B_i(t)) \leq h(B_0) < 0$ for all $t \geq t_0$, and $B_i$ reaches $B_{\min}$ no later than $t_0 + (B_0 - B_{\min})/|h(B_0)|$. The estimate used the global maximum of the surplus and ignored assimilation, so it holds along every path $r(t)$ and is unaffected by any later sign change of $\Pi$.
+
+(b) Immediate from $\mu(B_i) = \mu_0 \zeta(B_i)$ and $\zeta(B_{\min}) = 0$.
+
+(c) On the line $r = r^*$ the flow has $\dot{r} = 0$ for all $B_i$ (since $V'(r^*) = 0$), so the fixed-$r^*$ analysis of Proposition~\ref{prop-healthy-boundary-equilibrium} governs: $\dot{B}_i > 0$ on $\bigl(B_{\mathrm{u}}(r^*), \min(B_i^*(r^*), \bar{B})\bigr)$ and $B_i \to \min(B_i^*(r^*), \bar{B})$.
+\end{proof}
+
+\emph{Remark.} When \(q\bar{\Pi} \gg \gamma\), the smaller root
+satisfies
+\(B_c \approx B_{\min}\bigl(1 + \gamma/(q\bar{\Pi} - \gamma)\bigr)\):
+for agents with a large surplus ceiling, the basin is a thin layer above
+the collapse floor, and it thickens as \(\bar{\Pi}\) falls toward
+\(\gamma/q = \gamma\kappa(\bar{B} - B_{\min})/\rho\). The hypothesis
+\(B_i < B_c\) is produced by the two failure regimes analyzed next:
+sustained coupling below the dissolution threshold, and sustained energy
+deficit outside the band.
 
 \subsection{The Dissolution
 Catastrophe}\label{the-dissolution-catastrophe}
@@ -832,127 +976,148 @@ Catastrophe}\label{the-dissolution-catastrophe}
 \begin{theorem}[Irreversibility of Dissolution]
 \label{thm-irreversibility-dissolution}
 
-Define the \textbf{boundary dissolution threshold} as:
+Define the \textbf{dissolution threshold}
 
-$$r_d \;\triangleq\; \left(\frac{\sigma \mathcal{M}}{\rho \, \Pi_{\max} + \gamma B_i^{(0)}}\right)^{1/3}$$
+$$r_d \;\triangleq\; \left(\frac{\kappa\, \sigma \mathcal{M}}{\rho\, \bar{\Pi} + \kappa \gamma B_{\min}}\right)^{1/3}, \qquad \text{equivalently} \qquad \frac{\sigma\mathcal{M}}{r_d^3} = \frac{\rho}{\kappa}\bar{\Pi} + \gamma B_{\min},$$
 
-where $\Pi_{\max} = G^2\mathcal{M}/(4\tau) - \gamma B_i^{(0)}$ is the maximum surplus at the attractor and $B_i^{(0)}$ is the initial boundary integrity. If the agent's coupling distance satisfies $r < r_d$, then:
+where $\bar{\Pi} = G^2\mathcal{M}/(4\tau) - \gamma B_{\min}$ is the surplus ceiling of Theorem~\ref{thm-basin-of-no-return}. Then:
 
-(a) $\dot{B}_i < 0$: Boundary integrity is strictly decreasing.
+(a) \textbf{(Uniform decline.)} Whenever $r(t) < r_d$, every admissible integrity $B_i \in (B_{\min}, \bar{B}]$ satisfies $\dot{B}_i < -\gamma\bigl(B_i + B_{\min}\bigr) < 0$.
 
-(b) As $B_i$ decreases, $\mathcal{M}_{\min} = 4\gamma B_i \tau / G^2$ decreases but the surplus $\Pi(r)$ at the current $r$ does not necessarily increase enough to halt the decline.
+(b) \textbf{(Conditional finite-time dissolution.)} If $r(t) < r_d$ for all $t \geq t_0$ — in particular if the coupling distance is held below $r_d$, or if $r_d \geq r^*$ by (c) — then $B_i$ reaches the collapse floor at a finite time $t_d \leq t_0 + \bigl(B_i(t_0) - B_{\min}\bigr)/(2\gamma B_{\min})$: the agent dissolves.
 
-(c) There exists a finite time $t_d < \infty$ at which $B_i(t_d) = 0$: the agent's boundary is fully dissolved and identity ceases to exist.
+(c) \textbf{(Irreversibility.)} If $r_d \geq r^*$, every trajectory with $r(t_0) < r_d$ satisfies $r(t) < r_d$ for all $t \geq t_0$ — the attractor itself lies inside the dissolution zone — and (b) applies unconditionally. If $r_d < r^*$ and the penetration depth exceeds the critical depth of the remark below ($\ell > \ell_c$), then $B_i$ falls below $B_c$ before the agent can escape $\{r < r_d\}$, and collapse is irreversible by Theorem~\ref{thm-basin-of-no-return} regardless of the subsequent trajectory.
 \end{theorem}
 
 \begin{proof}
-At coupling distance $r < r_d$:
+(a) For $B_i \in (B_{\min}, \bar{B}]$, $\zeta(B_i) \leq 1$ and $\max(\Pi(r), 0) \leq \max\bigl(G^2\mathcal{M}/(4\tau) - \gamma B_i,\, 0\bigr) \leq \bar{\Pi}$ (using $\bar{\Pi} > 0$), so $R_{\text{repair}} \leq (\rho/\kappa)\bar{\Pi}$. For $r < r_d$, $D_{\text{assimilate}}(r) = \sigma\mathcal{M}/r^3 > \sigma\mathcal{M}/r_d^3 = (\rho/\kappa)\bar{\Pi} + \gamma B_{\min}$. Hence
 
-$$D_{\text{assimilate}}(r) > \frac{\sigma\mathcal{M}}{r_d^3} = \rho\Pi_{\max} + \gamma B_i^{(0)} \geq \rho \cdot \max(\Pi(r), 0) + \gamma B_i$$
+$$\dot{B}_i < \frac{\rho}{\kappa}\bar{\Pi} - \left(\frac{\rho}{\kappa}\bar{\Pi} + \gamma B_{\min}\right) - \gamma B_i = -\gamma\bigl(B_i + B_{\min}\bigr).$$
 
-To verify the last inequality: $\dot{B}_i < 0$ from the outset ensures $B_i(t) \leq B_i^{(0)}$ for all $t \geq 0$. Since $\max(\Pi(r),0) \leq G^2\mathcal{M}/(4\tau) - \gamma B_i$ for any $r$, we obtain $\rho\max(\Pi(r),0) + \gamma B_i \leq \rho G^2\mathcal{M}/(4\tau) + (1-\rho)\gamma B_i \leq \rho\Pi_{\max} + \gamma B_i^{(0)}$, where the final step uses $B_i \leq B_i^{(0)}$ and $\rho < 1$. Therefore:
+(b) While $r(t) < r_d$ and $B_i > B_{\min}$, part (a) gives $\dot{B}_i < -2\gamma B_{\min}$, a decline bounded away from zero; integrating, $B_i$ falls from $B_i(t_0)$ to $B_{\min}$ within $\bigl(B_i(t_0) - B_{\min}\bigr)/(2\gamma B_{\min})$.
 
-$$\dot{B}_i = \rho \max(\Pi(r), 0) - D_{\text{assimilate}}(r) - \gamma B_i < 0$$
-
-Since $\dot{B}_i < 0$ and bounded away from zero, $B_i$ reaches zero in finite time.
+(c) Suppose $r_d \geq r^*$. The sign of $\dot{r} = -\mu_0\zeta(B_i)V'(r)$ is that of $-(Gr - 2\tau)$: positive for $r < r^*$, negative for $r > r^*$, zero at $r^*$. A trajectory with $r(t_0) \leq r^*$ increases toward $r^*$ and remains $\leq r^* \leq r_d$; one with $r(t_0) \in (r^*, r_d)$ decreases toward $r^*$ and remains in $(r^*, r(t_0)]$. Either way $r(t) < r_d$ for all $t \geq t_0$, and (b) applies. The case $r_d < r^*$ is the race condition resolved in the following remark.
 \end{proof}
 
 \emph{Remark (Race-Condition Closure).}
 Theorem~\ref{thm-irreversibility-dissolution} establishes dissolution
-conditional on \(r(t) < r_d\). Since the gradient dynamics
-(Theorem~\ref{thm-stability-coexistence-attractor}) simultaneously push
-\(r\) toward \(r^*\), we must verify that boundary depletion outpaces
-escape. We resolve this via the phase-space derivative
-\(dB_i/dr = \dot{B}_i/\dot{r}\).
+conditional on remaining below \(r_d\). When \(r_d < r^*\), the gradient
+dynamics push \(r\) upward toward \(r^*\) on \((0, r_d)\), so we must
+verify that boundary depletion outpaces escape. We resolve this via the
+phase-space derivative \(dB_i/dr = \dot{B}_i/\dot{r}\) along
+trajectories of the coupled system
+(§\ref{the-coupled-agent-boundary-system}) with \(r \in (0, r_d)\),
+where \(2\tau - Gr > 0\) and
+\(\dot{r} = \mu_0\zeta(B_i)\mathcal{M}(2\tau - Gr)/r^3 > 0\):
 
-Along trajectories of the coupled system
-(§\ref{the-coupling-adjustment-equation}) with \(r \in (0, r_d)\),
-separate the assimilation-dominated term from the surplus correction:
+\[\frac{dB_i}{dr} = \frac{\dfrac{\rho}{\kappa}\zeta(B_i)\max\bigl(\Pi(r),0\bigr) - \dfrac{\sigma\mathcal{M}}{r^3} - \gamma B_i}{\mu_0\,\zeta(B_i)\,\mathcal{M}(2\tau - Gr)/r^3}.\]
 
-\[\frac{dB_i}{dr} = \frac{-\sigma}{\mu(2\tau - Gr)} + \frac{[\rho\max(\Pi(r),0) - \gamma B_i]\,r^3}{\mu\mathcal{M}(2\tau - Gr)}.\]
+Both the assimilation drain and the escape velocity share the
+\(\mathcal{M}/r^3\) scaling, which cancels in the ratio. Bound the
+numerator using \(\max(\Pi(r), 0) \leq \bar{\Pi}\) (valid at every
+admissible integrity, since \(\bar{\Pi}\) is evaluated at the collapse
+floor) and \(-\gamma B_i \leq 0\); multiplying by \(r^3/\mathcal{M}\)
+and using
+\(r^3 \leq r_d^3 = \kappa\sigma\mathcal{M}/(\rho\bar{\Pi} + \kappa\gamma B_{\min})\):
 
-Both \(\dot{B}_i\) and \(\dot{r}\) share the \(\mathcal{M}/r^3\)
-scaling, which cancels in the ratio; the leading term
-\(-\sigma/[\mu(2\tau - Gr)]\) is therefore independent of
-\(\mathcal{M}\). To bound the correction, use
-\(\max(\Pi(r),0) \leq \Pi_{\max}\), \(B_i \geq 0\), and
-\(r^3 \leq r_d^3 = \sigma\mathcal{M}/(\rho\Pi_{\max} + \gamma B_i^{(0)})\);
-combining with the leading term and factoring:
+\[\frac{\rho}{\kappa}\,\zeta(B_i)\,\bar{\Pi}\,\frac{r^3}{\mathcal{M}} - \sigma \;\leq\; \sigma\left(\frac{\rho\bar{\Pi}}{\rho\bar{\Pi} + \kappa\gamma B_{\min}}\,\zeta(B_i) - 1\right) \;\leq\; -\,\frac{\sigma\kappa\gamma B_{\min}}{\rho\bar{\Pi} + \kappa\gamma B_{\min}},\]
 
-\[\frac{dB_i}{dr} \leq \frac{-\sigma\gamma B_i^{(0)}}{\mu(\rho\Pi_{\max} + \gamma B_i^{(0)})(2\tau - Gr)}.\]
+where the last step uses \(\zeta(B_i) \leq 1\). Applying the
+conservative envelopes \(\zeta(B_i) \leq 1\) and
+\(2\tau - Gr \leq 2\tau\) in the denominator yields the uniform bound
+\(dB_i/dr \leq -\alpha\) where
 
-Applying the conservative envelope \(2\tau - Gr \leq 2\tau\) yields the
-uniform bound \(dB_i/dr \leq -\alpha\) where
-
-\[\alpha \;\triangleq\; \frac{\sigma\gamma B_i^{(0)}}{2\mu\tau(\rho\Pi_{\max} + \gamma B_i^{(0)})} > 0.\]
+\[\alpha \;\triangleq\; \frac{\sigma\kappa\gamma B_{\min}}{2\mu_0\tau\,\bigl(\rho\bar{\Pi} + \kappa\gamma B_{\min}\bigr)} \;=\; \frac{\gamma B_{\min}\, r_d^3}{2\mu_0 \tau\, \mathcal{M}} \;>\; 0.\]
 
 Integrating from \(r_0\) to \(r\) gives
 \(B_i(r) \leq B_i^{(0)} - \alpha(r - r_0)\). Define the \textbf{critical
 penetration depth}
 
-\[\ell_c \;\triangleq\; \frac{B_i^{(0)}}{\alpha} = \frac{2\mu\tau(\rho\Pi_{\max} + \gamma B_i^{(0)})}{\sigma\gamma}.\]
+\[\ell_c \;\triangleq\; \frac{B_i^{(0)} - B_c}{\alpha} = \frac{2\mu_0\tau\,\bigl(\rho\bar{\Pi} + \kappa\gamma B_{\min}\bigr)\bigl(B_i^{(0)} - B_c\bigr)}{\sigma\kappa\gamma B_{\min}}.\]
 
 If the agent starts at \(r_0\) with penetration depth
-\(\ell \triangleq r_d - r_0 > \ell_c\), then \(B_i\) reaches zero before
-\(r\) escapes to \(r_d\): dissolution is irreversible despite the
-restoring gradient. Since the bound used \(2\tau - Gr \leq 2\tau\) and
-dropped the negative \(\gamma B_i\) contribution, \(\ell_c\) is a
-conservative upper bound on the true critical depth; the actual
-dissolution rate per unit escape distance \emph{increases} as \(r\)
-approaches \(r_d\) because the restoring velocity
-\(\dot{r} \propto (2\tau - Gr)\) weakens as \(r \to r^*\). The condition
-\(\ell > \ell_c\) is therefore sufficient but not necessary for
-irreversibility.
+\(\ell \triangleq r_d - r_0 > \ell_c\), then \(B_i\) falls below the
+basin boundary \(B_c\) before \(r\) can reach \(r_d\); by
+Theorem~\ref{thm-basin-of-no-return}, collapse to \(B_{\min}\) then
+completes in finite time regardless of the subsequent trajectory --- the
+race is lost. The bound is conservative on three counts: the envelope
+\(2\tau - Gr \leq 2\tau\), the omission of the maintenance drain
+\(\gamma B_i\), and above all the substitution \(\zeta(B_i) \leq 1\) in
+the escape velocity. Along the true trajectory the decline per unit
+escape distance grows without bound as \(B_i \to B_{\min}\), because
+mobility dies with the boundary (\(\mu(B_i) \to 0\)) while assimilation
+persists. The condition \(\ell > \ell_c\) is therefore sufficient but
+far from necessary for irreversibility.
 
 Physical interpretation: an employee drawn into a corporation's inner
 circle eventually crosses a depth from which the escape gradient, always
 present, cannot outpace identity erosion. The critical depth \(\ell_c\)
-scales with agent mobility \(\mu\) (mobile agents tolerate deeper
+scales with baseline mobility \(\mu_0\) (mobile agents tolerate deeper
 excursions) and inversely with assimilation intensity \(\sigma\)
 (stronger assimilators set shallower traps).
 
 \begin{corollary}[The Assimilation Trap]
 \label{cor-assimilation-trap}
 
-Once an agent crosses the dissolution threshold $r_d$ with $r_d < r_-$ (the dissolution threshold lies inside the energetic inner boundary), the gradient dynamics push the agent back toward $r^*$ (Theorem~\ref{thm-stability-coexistence-attractor}). However, if $r_d > r_-$ (the dissolution threshold extends into the viable band), an agent perturbed below $r_d$ experiences simultaneous boundary degradation and energetic pressure. If the boundary degrades sufficiently to lower $r_-$ below the current $r$ (shrinking the energetic inner boundary), the agent enters the dissolution zone while still within $\mathcal{B}$, creating an assimilation trap where the agent appears viable by energy metrics but is losing its identity.
+The dissolution threshold $r_d$ and the energetic inner boundary $r_-$ (Definition~\ref{def-dissolution-threshold}) are distinct thresholds, and either ordering can occur. If $r_d > r_-$, the dissolution zone extends into the viable band: an agent at $r \in (r_-, r_d)$ has positive net energy ($\Pi(r) > 0$) while its boundary degrades ($\dot{B}_i < 0$, by Theorem~\ref{thm-irreversibility-dissolution}a). Moreover, as $B_i$ falls the inner band edge $r_- = (G\mathcal{M} - \sqrt{\Delta})/(2\gamma B_i)$ moves inward (from $r^*$ toward $\tau/G$ as $\gamma B_i \to 0$), so an agent that entered the dissolution zone below $r_-$ becomes energetically viable ($r > r_-$) while remaining inside the dissolution zone ($r < r_d$). This is the \textbf{assimilation trap}: the agent appears viable by energy metrics while losing its identity — irreversibly so once $B_i < B_c$ (Theorem~\ref{thm-basin-of-no-return}).
 \end{corollary}
 
 \textbf{Physical interpretation:} An employee (agent) at a
 mega-corporation (HEC) may earn a good salary (positive \(\Pi(r)\))
 while simultaneously losing creative autonomy, decision-making capacity,
 and identity (\(B_i\) declining). By the time the boundary has degraded
-enough for the agent to ``feel'' the loss, the process may be
-irreversible: the agent has been assimilated (corporate culture has
-overwritten individual identity). Similarly, a small nation within a
-superpower's sphere of influence may experience economic benefits while
-losing sovereignty.
+enough for the agent to ``feel'' the loss, the process may already be
+irreversible: once \(B_i\) has fallen below the basin boundary \(B_c\),
+the agent has been assimilated (corporate culture has overwritten
+individual identity). Similarly, a small nation within a superpower's
+sphere of influence may experience economic benefits while losing
+sovereignty.
 
 \subsection{The Starvation Spiral}\label{the-starvation-spiral}
 
 \begin{theorem}[The Starvation Spiral]
 \label{thm-starvation-spiral}
 
-If the agent's coupling distance satisfies $r > r_+$ (outside the Coexistence Band), then:
+Suppose the agent is outside the Coexistence Band, $r(t) > r_+$, so that $\Pi(r) < 0$. Then:
 
-(a) $\Pi(r) < 0$: The agent runs an energy deficit.
+(a) The agent runs an energy deficit and allocates nothing to repair: $R_{\text{repair}} = 0$.
 
-(b) $\dot{B}_i = -D_{\text{assimilate}}(r) - \gamma B_i < 0$: Boundary integrity declines since there is no surplus for repair and the assimilation and entropy terms are both positive.
+(b) $\dot{B}_i = -D_{\text{assimilate}}(r) - \gamma B_i < 0$: integrity declines monotonically, with $B_i(t) \leq B_i^{(0)} e^{-\gamma t}$ for as long as the agent remains outside the band. In the isolation limit ($r \gg r_+$, assimilation negligible), the decline is exponential and reaches the collapse floor at the finite time
 
-(c) As $B_i$ decreases, $\mathcal{M}_{\min}$ decreases but $r_+$ also shifts (increasing the effective band), potentially allowing the agent to re-enter $\mathcal{B}$, but this requires $r_+$ to grow fast enough to reach the agent's current position.
+$$t^* = \frac{1}{\gamma} \ln \frac{B_i^{(0)}}{B_{\min}}$$
 
-(d) If $r$ is sufficiently large, no decrease in $B_i$ can restore viability: the agent starves in finite time.
+— the exponential never reaches zero, but dissolution requires only reaching $B_{\min} > 0$.
+
+(c) \textbf{(Race between recovery and depletion.)} Two recovery channels operate while the agent starves: the inward drift $\dot{r} = -\mu_0\zeta(B_i)V'(r) < 0$ (for $r > r^*$) carries the agent back toward the band, and the falling maintenance load moves the outer boundary $r_+(B_i) = (G\mathcal{M} + \sqrt{\Delta})/(2\gamma B_i)$ outward toward the agent. While $B_i > B_c$ the expanding boundary remains inside $r_+(B_c)$, so re-entry from $r_0$ takes at least $\bigl(r_0^3 - r_+(B_c)^3\bigr)/(3\mu_0\mathcal{M}G)$, while $B_i$ falls below the basin boundary $B_c$ no later than $t_c = (1/\gamma)\ln\bigl(B_i^{(0)}/B_c\bigr)$ if the deficit persists. Both channels close at $B_c$: below it, Theorem~\ref{thm-basin-of-no-return} applies regardless of position or subsequent surplus.
+
+(d) \textbf{(Irreversible starvation for depleted agents.)} If $B_i < B_c$ — in particular whenever the agent starts sufficiently far out or starves long enough; a sufficient condition is
+
+$$r_0^3 \;\geq\; r_+(B_c)^3 + \frac{3\mu_0\mathcal{M}G}{\gamma}\ln\frac{B_i^{(0)}}{B_c},$$
+
+where $r_+(B_c)$ is the outer boundary evaluated at integrity $B_c$ — then repair capacity and mobility vanish together ($\zeta \to 0$), the inward drift stalls before re-entry, and $B_i$ reaches $B_{\min}$ in finite time: starvation is irreversible. Conversely, a briefly starved agent whose integrity remains above the basin can recover by re-entering the band (Proposition~\ref{prop-healthy-boundary-equilibrium}): starvation becomes fatal not when the band is exited but when depletion crosses $B_c$.
 \end{theorem}
 
 \begin{proof}
-(Sketch.) Outside $\mathcal{B}$: $V(r) > 0$, so $\Pi(r) < 0$ and $\max(\Pi(r), 0) = 0$. Then $\dot{B}_i = -D_{\text{assimilate}}(r) - \gamma B_i < 0$. As $B_i \to 0$, the agent's boundary fails. For large $r$, $D_{\text{assimilate}}(r) \approx 0$, so the decay rate is approximately $\dot{B}_i \approx -\gamma B_i$, giving $B_i(t) = B_i^{(0)} e^{-\gamma t} \to 0$, confirming exponential starvation.
+(a) Outside $\mathcal{B}$: $V(r) > 0$, so $\Pi(r) < 0$ and $\max(\Pi(r), 0) = 0$.
+
+(b) $\dot{B}_i = -\sigma\mathcal{M}/r^3 - \gamma B_i \leq -\gamma B_i$; Grönwall's inequality gives $B_i(t) \leq B_i^{(0)} e^{-\gamma t}$ while the deficit lasts. In the isolation limit $\sigma\mathcal{M}/r^3 \to 0$, the inequality is an equality and $B_i(t) = B_i^{(0)} e^{-\gamma t}$ reaches $B_{\min}$ exactly at $t^*$.
+
+(c) For $r > r^*$, $0 < V'(r) = \mathcal{M}(Gr - 2\tau)/r^3 \leq \mathcal{M}G/r^2$ and $\zeta(B_i) \leq 1$, so $|\dot{r}| \leq \mu_0\mathcal{M}G/r^2$; for $r \leq r^*$, $\dot{r} \geq 0$. In either case $\frac{d}{dt}\,r^3 \geq -3\mu_0\mathcal{M}G$, hence $r(t)^3 \geq r_0^3 - 3\mu_0\mathcal{M}G\,t$: reaching any target $R < r_0$ takes at least $(r_0^3 - R^3)/(3\mu_0\mathcal{M}G)$. Since $r_+(B_i)$ is decreasing in $B_i$, the moving boundary satisfies $r_+(B_i(t)) < r_+(B_c)$ while $B_i(t) > B_c$, so re-entry before basin crossing requires reaching $R = r_+(B_c)$. The depletion bound follows from (b).
+
+(d) If $B_i^{(0)} \leq B_c$, Theorem~\ref{thm-basin-of-no-return}(a) applies immediately, so assume $B_i^{(0)} > B_c$ and the displayed condition. Let $t_b$ be the first time the deficit fails ($\Pi = 0$) before $B_i$ reaches $B_c$, if any such time exists. For $t < t_b$, (b) gives $B_i(t) \leq B_i^{(0)} e^{-\gamma t}$ and (c) gives $r(t)^3 \geq r_0^3 - 3\mu_0\mathcal{M}G\,t$. At $t_b$, $\gamma B_i(t_b) = G\mathcal{M}/r(t_b) - \tau\mathcal{M}/r(t_b)^2$ with $B_i(t_b) > B_c$, which requires $r(t_b) < r_+(B_c)$ (the right-hand side equals $\gamma B_c$ at $r = r_+(B_c)$ and is below $\gamma B_c$ for all $r > r_+(B_c)$). Hence $r_0^3 - 3\mu_0\mathcal{M}G\,t_b < r_+(B_c)^3$, so the displayed condition forces $t_b > t_c = (1/\gamma)\ln\bigl(B_i^{(0)}/B_c\bigr)$ — but then $B_i(t_b) \leq B_i^{(0)} e^{-\gamma t_b} < B_c$, a contradiction. The deficit therefore persists at least until $B_i \leq B_c$, and Theorem~\ref{thm-basin-of-no-return}(a) completes the collapse to $B_{\min}$ in finite time, with mobility dying en route (Theorem~\ref{thm-basin-of-no-return}b).
 \end{proof}
 
 \textbf{Physical interpretation:} An entity that completely cuts itself
-off from all energy centers (autarky, isolationism) slowly depletes its
-stores. Without resource inflow, entropy wins: the boundary degrades,
-the internal state deteriorates, and the entity ceases to function. This
-maps to isolated communities, autarkic states, or any self-maintaining
-system severed from its resource base.
+off from all energy centers (autarky, isolationism) depletes its stores;
+without resource inflow, entropy wins, and the boundary reaches its
+collapse floor in finite time. Transient starvation is survivable: an
+agent that re-engages while its integrity remains above the basin
+boundary \(B_c\) can rebuild. What is fatal is prolonged deficit --- by
+the time integrity has fallen below \(B_c\), the capacities needed for
+recovery (mobility and repair machinery) have themselves been consumed.
+This maps to isolated communities, autarkic states, or any
+self-maintaining system severed from its resource base past the point
+where re-engagement is still within its remaining means.
 
 \section{Comparative Statics and
 Inequality}\label{comparative-statics-and-inequality}
@@ -969,7 +1134,7 @@ As the HEC's value mass $\mathcal{M}$ increases:
 
 (b) The bandwidth $w$ increases (Theorem~\ref{thm-freedom-bandwidth}b).
 
-(c) The dissolution threshold $r_-$ decreases (the inner boundary moves inward):
+(c) The energetic inner boundary $r_-$ decreases (moves inward):
 
 $$\frac{\partial r_-}{\partial \mathcal{M}} = \frac{1}{2\gamma B_i}\left(G - \frac{G^2\mathcal{M} - 2\gamma B_i \tau}{\sqrt{\Delta}}\right) < 0 \quad \text{for } \mathcal{M} > \mathcal{M}_{\min}$$
 
@@ -1029,7 +1194,7 @@ If $B_i > B_j$ (agent $i$ has higher boundary cost), then:
 
 (b) $\mathcal{M}_{\min,i} > \mathcal{M}_{\min,j}$: agent $i$ requires a more massive center to survive.
 
-(c) There exists a critical $\mathcal{M}^*$ such that for $\mathcal{M}_{\min,j} < \mathcal{M} < \mathcal{M}_{\min,i}$, agent $j$ can survive near this HEC but agent $i$ cannot.
+(c) For any $\mathcal{M}$ with $\mathcal{M}_{\min,j} < \mathcal{M} < \mathcal{M}_{\min,i}$, agent $j$ can survive near this HEC but agent $i$ cannot.
 \end{corollary}
 
 \textbf{Physical interpretation:} Inequality in complexity creates
@@ -1089,7 +1254,7 @@ The multi-center potential separates across the $K$ coupling dimensions: $V(\mat
 \begin{corollary}[Diversification Benefit]
 \label{cor-diversification-benefit}
 
-An agent coupled to $K$ HECs may be viable even if no single HEC has sufficient mass: it is possible that $\mathcal{M}_k < \mathcal{M}_{\min}$ for each $k$ individually, yet $\sum_k G_k^2\mathcal{M}_k/(4\tau_k) > \gamma B_i$. Diversification across centers expands freedom.
+An agent coupled to $K$ HECs may be viable even if no single HEC has sufficient mass: it is possible that $\mathcal{M}_k < \mathcal{M}_{\min,k} \triangleq 4\gamma B_i \tau_k / G_k^2$ for each $k$ individually (the center-specific viability threshold of Theorem~\ref{thm-existence-coexistence-band}), yet $\sum_k G_k^2\mathcal{M}_k/(4\tau_k) > \gamma B_i$. Diversification across centers expands freedom.
 \end{corollary}
 
 \textbf{Physical interpretation:} An individual who cannot survive on
@@ -1137,10 +1302,11 @@ stability. Agents within the Coexistence Band of a stable HEC have:
   Higher effective \(\delta\) (more stable environment → longer
   effective planning horizon)
 \item
-  Lower effective cooperation threshold \(\delta^*\) (from
-  Proposition~\ref{prop-stability-cooperation-feedback}, since the
-  higher net-energy surplus at the attractor extends effective planning
-  horizons)
+  A discount factor \(\delta(r)\) that is maximized at the coexistence
+  attractor and exceeds the (fixed) cooperation threshold \(\delta^*\)
+  throughout a subband of \(\mathcal{B}\)
+  (Proposition~\ref{prop-stability-cooperation-feedback}); the threshold
+  itself is a constant of the repeated game, unchanged by the dynamics
 \end{itemize}
 
 This means agents at the coexistence attractor are more likely to
@@ -1185,9 +1351,11 @@ catastrophically reducing the freedom of an entire population.
 \begin{corollary}[Cascade Collapse from Center Destruction]
 \label{cor-cascade-collapse}
 
-If a HEC with value mass $\mathcal{M}$ is destroyed ($\mathcal{M} \to 0$), all $N$ agents within its Coexistence Band simultaneously lose viability. The total "freedom destroyed" is:
+If a HEC with value mass $\mathcal{M}$ is destroyed ($\mathcal{M} \to 0$), all $N$ agents within its Coexistence Band simultaneously lose viability with respect to that center; agents coupled solely to it lose viability outright, while diversified agents may survive on their remaining centers (Corollary~\ref{cor-diversification-benefit}). The total "freedom destroyed" is:
 
-$$\mathcal{F}_{\text{lost}} = N \cdot w(\mathcal{M})$$
+$$\mathcal{F}_{\text{lost}} = \sum_{i=1}^{N} w_i(\mathcal{M})$$
+
+where $w_i$ is agent $i$'s freedom bandwidth; for homogeneous agents ($B_i \equiv B$) this reduces to $N \cdot w(\mathcal{M})$.
 
 This provides an additional argument for the Irrationality of Destruction (Theorem 6 \citep{TC-III}): the social cost of center destruction includes the collapse of the entire affiliated population's viable coupling space.
 \end{corollary}
@@ -1199,10 +1367,14 @@ The coupling distance \(r\) can be mapped to the constraint structure of
 the constrained optimization derivation. At smaller \(r\) (tighter
 coupling), the HEC imposes more boundary constraints (Definition 3
 \citep{TC-I}) on the agent's action space, extracting a higher shadow
-price \(\mu_{Bk}^*\) (Theorem 2 \citep{TC-I}). The dissolution threshold
-\(r_-\) corresponds to the constraint intensity at which the aggregate
-shadow price of all HEC-imposed constraints exceeds the agent's utility
-gain from resource access:
+price \(\mu_{Bk}^*\) (Theorem 2 \citep{TC-I}). Here \(\mu_{Bk}^*\)
+(abbreviated \(\mu_k^*\) below) denotes the boundary-constraint shadow
+price of that theorem --- not the mobility \(\mu_0\) of the gradient
+dynamics --- and \(m\) is the number of boundary constraints the HEC
+imposes. The energetic inner boundary \(r_-\) corresponds to the
+constraint intensity at which the aggregate shadow price of all
+HEC-imposed constraints exceeds the agent's utility gain from resource
+access:
 
 \[\sum_{k=1}^{m} \mu_k^*(r_-) = U_i(\mathbf{x}_i^*) - U_i(\mathbf{0})\]
 
@@ -1249,8 +1421,12 @@ units). Coupling parameters: \(G = 1.0\) (resource access),
 \textbf{Interpretation:} The corporation is so massive relative to the
 individual that the freedom band is enormous: the worker has a wide
 range of viable engagement levels. The risk is not starvation (the outer
-boundary is far away) but dissolution: if the worker takes on excessive
-obligations (\(r < 0.50\)), assimilation begins.
+boundary is far away) but over-tight coupling: below
+\(r_- \approx 0.50\) the energy balance turns negative. Active boundary
+erosion is governed by the separate dissolution threshold \(r_d\)
+(Theorem~\ref{thm-irreversibility-dissolution}), which depends
+additionally on the assimilation intensity \(\sigma\) and the repair
+parameters \(\rho\), \(\kappa\), and need not coincide with \(r_-\).
 
 \subsection{Citizen vs.~State}\label{citizen-vs.-state}
 
@@ -1336,9 +1512,8 @@ If the superpower increases assimilation pressure (\(\tau \to 5\)):
 sufficient coupling distance from superpowers, with trade and
 cooperation at arm's length rather than full integration. When a
 superpower increases its assimilation pressure (military threats,
-economic coercion), the optimal distance increases and the inner
-boundary (dissolution threshold) moves outward, shrinking the small
-nation's options.
+economic coercion), the optimal distance increases and the energetic
+inner boundary moves outward, shrinking the small nation's options.
 
 \section{Discussion}\label{discussion}
 
@@ -1361,13 +1536,22 @@ center's value mass exceeds the threshold
 (Theorem~\ref{thm-existence-coexistence-band}), and the band's width,
 the freedom bandwidth, admits a closed-form expression with monotonicity
 in all model parameters (Theorem~\ref{thm-freedom-bandwidth}). Third,
-the coupled agent-boundary system exhibits irreversible regime
-transitions: dissolution (Theorem~\ref{thm-irreversibility-dissolution})
-and starvation (Theorem~\ref{thm-starvation-spiral}) are one-way
-processes once the agent crosses the band boundaries. The multi-center
-extension (Theorem~\ref{thm-multi-center-attractor}) shows that the
-potential separates across coupling dimensions, yielding a componentwise
-global attractor with a diversification benefit
+the coupled agent-boundary system --- in which the boundary is an active
+dissipative structure whose repair capacity and mobility scale with its
+own integrity, and whose repair carries the multiplier \(\kappa > 1\) of
+\citep{TC-IV} --- exhibits a basin of no return
+(Theorem~\ref{thm-basin-of-no-return}): once boundary integrity falls
+below a critical level \(B_c\), repair and mobility decay together and
+the boundary reaches its collapse floor \(B_{\min}\) in finite time,
+irreversibly. Dissolution --- sustained coupling below the dissolution
+threshold \(r_d\), a threshold distinct from the energetic inner
+boundary \(r_-\) (Theorem~\ref{thm-irreversibility-dissolution}) --- and
+starvation --- sustained energy deficit outside the band
+(Theorem~\ref{thm-starvation-spiral}) --- are the two routes into the
+basin; transient excursions above the basin remain recoverable. The
+multi-center extension (Theorem~\ref{thm-multi-center-attractor}) shows
+that the potential separates across coupling dimensions, yielding a
+componentwise global attractor with a diversification benefit
 (Corollary~\ref{cor-diversification-benefit}).
 
 \subsection{Relation to Potential Games and Gradient
@@ -1394,13 +1578,20 @@ bounded stable basin between two catastrophic regimes.
 The gradient dynamics assumption (\(\dot{r} = -\mu V'(r)\)) models
 myopic adjustment: agents move in the direction of locally increasing
 net energy without strategic foresight. This is appropriate for modeling
-boundedly rational or habitual behavior and aligns with gradient-play
-dynamics in the potential games literature
-\citep{MondererShapley1996, Sandholm2010}. In multi-agent settings where
-agents simultaneously adjust coupling to a shared center, the
-separability of the multi-center potential
-(Theorem~\ref{thm-multi-center-attractor}) ensures that the system
-remains a potential game and gradient convergence is preserved.
+boundedly rational or habitual behavior and is formally analogous to
+gradient play in the potential games literature
+\citep{MondererShapley1996, Sandholm2010}, though the analogy is only
+formal here: because each agent's payoff depends solely on its own
+coupling coordinate --- the multi-center potential separates
+(Theorem~\ref{thm-multi-center-attractor}) and agent-agent interactions
+are absent from the model --- the aggregate potential decomposes into a
+sum of independent single-agent potentials. The multi-agent system is
+thus at most a degenerate (fully separable) potential game: \(N\)
+decoupled gradient flows rather than a game with the genuine
+cross-player strategic coupling that the potential-games literature
+addresses, and gradient convergence follows agent-by-agent from the
+single-agent Lyapunov argument rather than from potential-game
+structure.
 
 The model's dynamical predictions complement the static equilibrium
 analysis of \emph{Cooperative Equilibrium} \citep{TC-V}. Where that
@@ -1442,11 +1633,13 @@ Freedom bandwidth increases with center mass &
 Theorem~\ref{thm-freedom-bandwidth}(b) & Citizens of wealthier states or
 employees of larger firms consistently exhibit narrower (not wider)
 ranges of viable engagement levels \\
-Boundary transitions (dissolution, starvation) are irreversible past a
-critical threshold & Theorem~\ref{thm-irreversibility-dissolution},
-Theorem~\ref{thm-starvation-spiral} & Entities that have crossed the
-dissolution or starvation boundary routinely recover boundary integrity
-without external intervention \\
+Boundary collapse is irreversible once integrity falls below the basin
+boundary \(B_c\), while transient deficit or penetration above the basin
+is recoverable & Theorem~\ref{thm-basin-of-no-return},
+Theorem~\ref{thm-irreversibility-dissolution},
+Theorem~\ref{thm-starvation-spiral} & Severely depleted entities
+routinely recover boundary integrity without external intervention, or
+mildly depleted entities systematically fail to recover \\
 Minimum viable center mass scales linearly with agent complexity \(B_i\)
 & Theorem~\ref{thm-existence-coexistence-band} & High-complexity agents
 (specialized organisms, research-intensive firms) thrive near small-mass
@@ -1455,10 +1648,11 @@ Diversified agents survive where single-source agents fail &
 Corollary~\ref{cor-diversification-benefit} & Agents with distributed
 coupling across multiple centers show no survival advantage over agents
 coupled to a single center of equivalent total mass \\
-Cascade collapse: center destruction eliminates all affiliated agents'
-viability simultaneously & Corollary~\ref{cor-cascade-collapse} &
-Destruction of a major institution leaves the viable operating range of
-affiliated agents unaffected \\
+Cascade collapse: center destruction simultaneously eliminates the
+viability of all agents coupled solely to that center &
+Corollary~\ref{cor-cascade-collapse} & Destruction of a major
+institution leaves the viable operating range of affiliated agents
+unaffected \\
 \end{longtable}
 }
 
@@ -1486,12 +1680,13 @@ quality-of-life and autonomy dimensions that drive labor mobility.
 \textbf{Institutional fragility and cascade collapse.} The cascade
 collapse corollary (Corollary~\ref{cor-cascade-collapse}) predicts that
 destruction of a high-mass center simultaneously eliminates the
-viability of all \(N\) affiliated agents. This formalizes the empirical
-pattern in which institutional collapse (state failure, corporate
-bankruptcy, ecosystem destruction) has outsized consequences relative to
-the institution's own resource value, because the center's coexistence
-band supports an entire population. The total freedom destroyed,
-\(N \cdot w(\mathcal{M})\), provides a computable measure of systemic
+viability of all agents coupled solely to that center. This formalizes
+the empirical pattern in which institutional collapse (state failure,
+corporate bankruptcy, ecosystem destruction) has outsized consequences
+relative to the institution's own resource value, because the center's
+coexistence band supports an entire population. The total freedom
+destroyed, \(\sum_i w_i(\mathcal{M})\) --- \(N \cdot w(\mathcal{M})\)
+for homogeneous agents --- provides a computable measure of systemic
 risk, complementing the accumulated negentropy analysis of
 \citep{TC-III}.
 
@@ -1522,11 +1717,11 @@ behavior. However, since the coexistence attractor is the unique global
 minimum, the asymptotic destination is the same under any reasonable
 adjustment rule.
 
-The model parameters (\(G\), \(\tau\), \(\gamma\), \(\sigma\)) are
-treated as exogenous constants. In practice, all of these are
-endogenous: centers adjust their coupling parameters in response to
-agent behavior (§\ref{center-competition-for-agents}), and agents'
-boundary integrity co-evolves with their coupling state
+The model parameters (\(G\), \(\tau\), \(\gamma\), \(\sigma\), \(\rho\),
+\(\kappa\)) are treated as exogenous constants. In practice, all of
+these are endogenous: centers adjust their coupling parameters in
+response to agent behavior (§\ref{center-competition-for-agents}), and
+agents' boundary integrity co-evolves with their coupling state
 (§\ref{boundary-dynamics-and-irreversibility}). The coupled
 agent-boundary system (§\ref{the-coupled-agent-boundary-system})
 partially addresses this for \(B_i\) but leaves \(G\) and \(\tau\)
@@ -1629,13 +1824,17 @@ accumulated negentropy exceeds a threshold that scales with agent
 complexity (Theorem~\ref{thm-existence-coexistence-band}), and its
 width, the freedom bandwidth, increases with center mass and decreases
 with dissolution pressure and entropy leakage
-(Theorem~\ref{thm-freedom-bandwidth}). Outside the band, dissolution
+(Theorem~\ref{thm-freedom-bandwidth}). Under the coupled agent-boundary
+dynamics, in which repair capacity and mobility scale with boundary
+integrity itself, collapse is governed by a basin of no return
+(Theorem~\ref{thm-basin-of-no-return}): dissolution
 (Theorem~\ref{thm-irreversibility-dissolution}) and starvation
-(Theorem~\ref{thm-starvation-spiral}) proceed irreversibly under the
-coupled agent-boundary dynamics. The multi-center extension
-(Theorem~\ref{thm-multi-center-attractor}) proves that the potential
-separates across coupling dimensions, yielding componentwise convergence
-and a diversification benefit for agents coupled to multiple centers.
+(Theorem~\ref{thm-starvation-spiral}) become irreversible once depletion
+crosses the basin boundary \(B_c\), and then complete in finite time.
+The multi-center extension (Theorem~\ref{thm-multi-center-attractor})
+proves that the potential separates across coupling dimensions, yielding
+componentwise convergence and a diversification benefit for agents
+coupled to multiple centers.
 
 These results connect to and extend the preceding papers in this series.
 The value mass \(\mathcal{M}\) that determines the coexistence band is
@@ -1645,7 +1844,8 @@ whose cascade consequences are quantified here
 consequence of the irreplaceability result proved there. The boundary
 integrity \(B_i\) whose degradation drives the irreversibility results
 is maintained against the thermodynamic friction analyzed in
-\citep{TC-IV}. The stability-cooperation feedback
+\citep{TC-IV}, and its regeneration is priced by the repair multiplier
+\(\kappa > 1\) derived there. The stability-cooperation feedback
 (Proposition~\ref{prop-stability-cooperation-feedback}) links the
 dynamical attractor to the cooperation threshold of \citep{TC-V},
 closing a loop between static equilibrium selection and dynamical
@@ -1659,5 +1859,5 @@ necessity, information integrity, irreplaceability, friction costs,
 equilibrium selection, and dynamical stability.
 
 \addcontentsline{toc}{section}{References}
-\bibliography{../../shared/main}
+\bibliography{main}
 \end{document}
