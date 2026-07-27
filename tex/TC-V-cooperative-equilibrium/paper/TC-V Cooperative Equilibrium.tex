@@ -5,28 +5,15 @@
 \graphicspath{{./}}
 \usepackage{natbib}
 \usepackage{doi}
-% \setcitestyle{numbers,super} % Superscript citation numbers (e.g. ¹, ²⁻⁴) — does not support locator notes
-\setcitestyle{numbers,square} % Square brackets around citation numbers (e.g. [1], [2-4]) — math standard
-% ── Merge citation text into a single hyperlink ───────────────────────────────
+\setcitestyle{numbers,square} %
 \makeatletter
 \renewcommand{\hyper@natlinkbreak}[2]{#1}
 \makeatother
 \usepackage{titlesec}
-% New page before each top-level section
-% \newcommand{\sectionbreak}{\clearpage}
 
-% ── Theorem-like environments ─────────────────────────────────────────────────
 \usepackage{amsmath}
 \usepackage{amsthm}
-\usepackage{dsfont} % double-struck numerals (\mathds{1} for indicator functions)
-% thmtools is only needed for the optional \listoftheorems feature. Loading it
-% patches \newtheorem, and thmtools 0.76's patch is incompatible with recent
-% LaTeX kernels (>= 2025) for shared-counter theorems (every sibling raises
-% "Command \c@... already defined"). We therefore load it only when the
-% list-of-theorems feature is actually requested.
-% Theorem-like environments defined with amsthm's native shared-counter syntax
-% (\newtheorem{child}[parent]{Name}). Numbering is grouped by counter without
-% relying on thmtools' sibling mechanism.
+\usepackage{dsfont} %
 \theoremstyle{plain}
 \newtheorem{theorem}{Theorem}
 \newtheorem{proposition}[theorem]{Proposition}
@@ -46,7 +33,6 @@
 \newtheorem{observation}[remark]{Observation}
 \newtheorem{property}[remark]{Property}
 
-% Prevent theorem-like environments from starting near the page bottom.
 \usepackage{etoolbox}
 \BeforeBeginEnvironment{theorem}{\needspace{4\baselineskip}\addvspace{6pt}}
 \BeforeBeginEnvironment{corollary}{\needspace{4\baselineskip}\addvspace{6pt}}
@@ -57,47 +43,30 @@
 \BeforeBeginEnvironment{assumption}{\needspace{4\baselineskip}\addvspace{6pt}}
 \BeforeBeginEnvironment{remark}{\needspace{4\baselineskip}\addvspace{9pt}}
 
-% ── Pandoc-generated table support ────────────────────────────────────────────
 \usepackage{longtable}
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage{calc}
 \usepackage{caption}
-% General table note: small font, flush-left, below the table (used by some papers).
 \newenvironment{tablenote}
   {\par\addvspace{2pt}\footnotesize\noindent}
   {\par\addvspace{4pt}}
-% Pandoc 3.x wraps uncaptioned longtables in \def\LTcaptype{none};
-% this requires a 'none' counter to exist.
 \newcounter{none}
 
-% ── Paragraph spacing (matches Pandoc default) ────────────────────────────────
-% No paragraph indentation; inter-paragraph spacing instead.
 \usepackage{parskip}
 
-% ── Page-break quality ────────────────────────────────────────────────────────
-% Prevent widow/orphan lines (single line stranded at top/bottom of page).
 \widowpenalty=10000
 \clubpenalty=10000
-% Pin footnotes to the page bottom even with \raggedbottom.
 \usepackage[bottom]{footmisc}
-% Prevent page breaks immediately before or after display equations.
 \predisplaypenalty=10000
 \postdisplaypenalty=150
-% Allow uneven page bottoms rather than stretching vertical glue.
 \raggedbottom
-% Increase separation between body text and footnotes.
 \setlength{\skip\footins}{1.5\baselineskip}
-% Ensure headings don't appear at page bottom without body text following.
 \usepackage{needspace}
-% Reserve enough space for the heading itself plus at least two following
-% lines of body text (or a nested heading plus a line). This prevents a
-% heading from appearing at the bottom of a page with its content (or its
-% next-level subheading) starting on the following page.
 \let\origsection\section
-\renewcommand{\section}{\needspace{6\baselineskip}\origsection}
+\renewcommand{\section}{\needspace{12\baselineskip}\origsection}
 \let\origsubsection\subsection
-\renewcommand{\subsection}{\needspace{6\baselineskip}\origsubsection}
+\renewcommand{\subsection}{\needspace{7\baselineskip}\origsubsection}
 \let\origsubsubsection\subsubsection
 \renewcommand{\subsubsection}{\needspace{4\baselineskip}\origsubsubsection}
 \let\origparagraphcmd\paragraph
@@ -105,18 +74,10 @@
 \let\origsubparagraph\subparagraph
 \renewcommand{\subparagraph}{\needspace{3\baselineskip}\origsubparagraph}
 
-% Discourage page breaks inside multi-line math environments (align, gather, etc.)
 \interdisplaylinepenalty=10000
 
-% ── Section numbering ────────────────────────────────────────────────────────
-% Pandoc --number-sections generates \section{...} (not \section*{...}).
-% LaTeX auto-numbers to depth 3 (subsubsection) by default.
 \setcounter{secnumdepth}{3}
 
-% ── Make \paragraph and \subparagraph block-level (matches Pandoc) ───────────
-% By default LaTeX renders \paragraph as a run-in heading (text continues on
-% the same line). These commands make them free-standing headings with
-% proper spacing before and after.
 \titleformat{\paragraph}
   {\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
 \titlespacing*{\paragraph}
@@ -126,12 +87,9 @@
 \titlespacing*{\subparagraph}
   {0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
 
-% ── Pandoc-generated tightlist support ────────────────────────────────────────
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
-% ── Pandoc 3.x figure sizing ─────────────────────────────────────────────────
-% \pandocbounded constrains included graphics to text width when they exceed it
 \newcommand{\pandocbounded}[1]{%
   \sbox0{#1}%
   \ifdim\wd0>\linewidth
@@ -141,7 +99,6 @@
   \fi
 }
 
-% ── Unicode character fixes ───────────────────────────────────────────────────
 \usepackage{amssymb}
 \usepackage{newunicodechar}
 \newunicodechar{✓}{$\checkmark$}
@@ -150,9 +107,7 @@
 \newunicodechar{≈}{$\approx$}
 \newunicodechar{δ}{$\delta$}
 \newunicodechar{−}{$-$}
-% Superscript digits used in scientific notation (e.g. 10^-7, 10^29)
 \newunicodechar{⁰}{$^{0}$}
-% ¹²³ already defined by textcomp; suppress redefinition warning
 \begingroup\renewcommand\PackageWarning[2]{}%
 \newunicodechar{¹}{$^{1}$}
 \newunicodechar{²}{$^{2}$}
@@ -165,54 +120,49 @@
 \newunicodechar{⁸}{$^{8}$}
 \newunicodechar{⁹}{$^{9}$}
 \newunicodechar{⁻}{$^{-}$}
-% Fix \rightarrow for use outside math mode
 \let\mystRightarrow\rightarrow
 \renewcommand{\rightarrow}{\ensuremath{\mystRightarrow}}
-% ─────────────────────────────────────────────────────────────────────────────
 
-% Allow TeX extra stretch to resolve moderate overfull hboxes
 \emergencystretch=2em
 
 \hypersetup{colorlinks=true, allcolors=blue}
 
 \title{Thermodynamics of Cooperation: Cooperative Equilibrium}
-\author{Keith Lostracco}
+\author{%
+Keith Lostracco%
+}
 \date{}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-We prove that in a repeated multi-agent game with energy-denominated
-payoffs derived from thermodynamic first principles, universal
-cooperation is the unique Nash equilibrium that simultaneously satisfies
-Pareto efficiency and welfare maximization. Because the payoff matrix is
-constructed from physical parameters (resource energy, friction
-multipliers, exploitation efficiency, and repair costs) rather than
-stipulated, mutual defection is net-negative rather than merely
+In a repeated multi-agent game we derive the payoff matrix from
+thermodynamic first principles rather than stipulating it, denominating
+payoffs in energy. Resource energy, friction multipliers, exploitation
+efficiency, and repair costs fix the entries; a friction state variable
+encoding the cumulative memory of past violations enters the payoffs
+endogenously. Mutual defection is then net-negative rather than merely
 suboptimal whenever combined boundary damage exceeds a modest threshold
-fixed by the repair multiplier, a regime we argue is physically typical.
-This property yields a principled welfare-based selection criterion
-within the continuum of Folk Theorem equilibria, which persists:
-cooperation is singled out as the unique equilibrium that is also
-Pareto-efficient and welfare-maximizing, not the only equilibrium. Our
-central result concerns scale: in the N-player public goods extension
-the frictionless cooperation threshold rises toward a ceiling equal to
-the inverse of the cooperative multiplier, which approaches 1 as
-cooperation becomes marginally beneficial, reproducing the canonical
-large-group free-rider collapse. Non-zero background friction lowers
-that ceiling to a value bounded strictly below 1 for every group size,
-approaching 0.4 at the baseline parameters. In the two-player game the
-same mechanism places the critical discount factor near 0.43, well below
-the canonical 0.5, dropping to about 0.19 once network friction is
-included. We further prove that defection is evolutionarily unstable,
-self-extinguishing in friction-coupled networks, and unprofitable even
-from a single deviation. The friction state variable, encoding the
-cumulative memory of past violations, enters payoffs endogenously,
-making punishment self-reinforcing without external enforcement. The
-repeated-game machinery (Folk Theorem, ESS) is classical; the
-contribution is the equilibrium-selection and scale consequences that
-energy denomination yields under physically calibrated parameters.
+set by the repair multiplier, a regime we argue is physically typical.
+Our central result concerns scale: non-zero background friction holds
+the N-player public goods threshold strictly below 1 for every group
+size, approaching 0.4 at the baseline parameters. Without friction the
+threshold rises to a ceiling equal to the inverse of the cooperative
+multiplier, recovering the canonical large-group free-rider collapse in
+the marginal-surplus limit. In the two-player game the same mechanism
+places the critical discount factor near 0.43, against the canonical
+0.5, dropping to about 0.19 once network friction is included. Energy
+denomination also selects among equilibria: universal cooperation is the
+unique Nash equilibrium that is simultaneously Pareto-efficient and
+welfare-maximizing, a selection criterion within the continuum of Folk
+Theorem equilibria, which persists, so cooperation is singled out, not
+made unique. Defection is evolutionarily unstable, self-extinguishing in
+friction-coupled networks, and unprofitable even from a single
+deviation, making punishment self-reinforcing without external
+enforcement. The repeated-game machinery is classical; the contribution
+is what physically calibrated payoffs imply for equilibrium selection
+and scale.
 \end{abstract}
 \section{Introduction}\label{introduction}
 
@@ -275,7 +225,7 @@ a principled selection criterion among its equilibria. In particular:
   (Corollary~\ref{cor-cooperation-strengthens-scale}).
 \item
   The resulting two-player cooperation threshold
-  \(\delta^* \approx 0.431\) is below the canonical \(0.5\), and drops
+  \(\delta^* \approx 0.430\) is below the canonical \(0.5\), and drops
   further to \(\approx 0.185\) once network friction enters the
   punishment branch.
 \item
@@ -847,7 +797,7 @@ preserved
 (\(\Phi = 2.2 < \Phi_{\text{PD}} = 2 + 4(0.15)(2)(0.35) = 2.42\)), and
 the cooperation threshold falls to
 \(\delta^* = (77.5 - 48)/(77.5 - (-5)) = 29.5/82.5 = 0.358\), below the
-baseline \(0.431\): harsher conflict makes cooperation easier to
+baseline \(0.430\): harsher conflict makes cooperation easier to
 sustain. This destructive regime, not the mild baseline, is where the
 ``mutual defection is net-negative'' reading of the model applies.
 
@@ -981,7 +931,7 @@ Using the energy-based payoffs from
 \begin{corollary}[Low Cooperation Threshold]
 \label{cor-low-cooperation-threshold}
 
-Under the physical payoff model, the critical discount factor satisfies $\delta^* < 0.5$ if and only if $T + P < 2R$. At the baseline parameters this exact condition holds directly ($T + P = 85.5 < 96 = 2R$), giving $\delta^* = 0.431 < 0.5$: agents need only value the future at more than 43% of the present to sustain cooperation. In the destructive regime, a transparent sufficient condition for $\delta^* < 0.5$ is that both
+Under the physical payoff model, the critical discount factor satisfies $\delta^* < 0.5$ if and only if $T + P < 2R$. At the baseline parameters this exact condition holds directly ($T + P = 85.5 < 96 = 2R$), giving $\delta^* = 0.430 < 0.5$: agents need only value the future at more than 43%
 
 (i) $\Phi > 2$ (net-negative mutual defection, $P < 0$), and
 
@@ -1005,7 +955,7 @@ Condition (ii) is $R > T/2$, i.e., $1 - R/T < 0.5$: substituting the payoff expr
 
 Condition (ii) is a genuine magnitude restriction, not a consequence of the PD ordering: $c \ll E_R$ does not imply it when exploitation is very cheap (small $\theta$). For example, $(E_R, c, \theta, \kappa, \psi^{\text{off}}, \psi^{\text{def}}) = (100, 2, 0.006, 2, 0.02, 0.49)$ satisfies the full PD ordering with $\Phi = 2.02 > 2$ and $P = -0.5 < 0$, yet the right side of (ii) is $0.312 < 2 = c$ and $\delta^* = 51.376/99.876 = 0.514 > 0.5$. The claim $\delta^* < 0.5$ therefore requires (ii) and does not follow from $\Phi > 2$ alone.
 
-For the baseline values ($c = 2$, $\theta = 0.15$, $E_R = 100$, $\kappa = 2$, $\psi^{\text{off}} = 0.15$, $\psi^{\text{def}} = 0.25$), mutual defection is net-positive ($P = 5 > 0$, since $\Phi = 1.8 < 2$), so sufficient condition (i) does not apply; the exact condition certifies the threshold directly, $T + P = 80.5 + 5 = 85.5 < 96 = 2R$, giving $\delta^* = 0.431 < 0.5$. In the destructive regime ($\psi > 1/\kappa$, e.g. $\psi^{\text{off}} = 0.25$, $\psi^{\text{def}} = 0.35$) condition (i) holds and the sufficient route also applies: the right side of (ii) is $0.15 \times 100 \times 1.5 / 2 = 11.25 \gg 2 = c$, so $\delta^* < 0.5$ there as well.
+For the baseline values ($c = 2$, $\theta = 0.15$, $E_R = 100$, $\kappa = 2$, $\psi^{\text{off}} = 0.15$, $\psi^{\text{def}} = 0.25$), mutual defection is net-positive ($P = 5 > 0$, since $\Phi = 1.8 < 2$), so sufficient condition (i) does not apply; the exact condition certifies the threshold directly, $T + P = 80.5 + 5 = 85.5 < 96 = 2R$, giving $\delta^* = 0.430 < 0.5$. In the destructive regime ($\psi > 1/\kappa$, e.g. $\psi^{\text{off}} = 0.25$, $\psi^{\text{def}} = 0.35$) condition (i) holds and the sufficient route also applies: the right side of (ii) is $0.15 \times 100 \times 1.5 / 2 = 11.25 \gg 2 = c$, so $\delta^* < 0.5$ there as well.
 \end{proof}
 
 \textbf{Physical interpretation:} Because mutual defection under
@@ -1086,7 +1036,7 @@ Regime
 No repair cost & 0 & 0.15 & 1.0 & 85.00 & 48 & 25 & 0 & 0.617 \\
 Low repair & 1 & 0.15 & 1.4 & 82.75 & 48 & 15 & −3.75 & 0.513 \\
 \textbf{Baseline} & 2 & 0.15 & 1.8 & 80.50 & 48 & 5 & −7.50 &
-\textbf{0.431} \\
+\textbf{0.430} \\
 High repair & 4 & 0.15 & 2.6 & 76.00 & 48 & −15 & −15.00 & 0.308 \\
 Very high & 6 & 0.15 & 3.4 & 71.50 & 48 & −35 & −22.50 & 0.250 \\
 Cheap exploit & 2 & 0.05 & 1.8 & 93.50 & 48 & 5 & −2.50 & 0.514 \\
@@ -1117,7 +1067,7 @@ threshold forms coincide (\(\delta^* = 0.308\)). All remaining rows,
 including both exploitation-cost variants, are Prisoner's Dilemmas
 (\(\Phi < \Phi_{\text{PD}}\)), computed with
 \(\delta^* = (T - R)/(T - P)\). The friction rows fall monotonically in
-\(\kappa\) (\(0.513, 0.431, 0.308, 0.250\) for \(\kappa = 1, 2, 4, 6\)),
+\(\kappa\) (\(0.513, 0.430, 0.308, 0.250\) for \(\kappa = 1, 2, 4, 6\)),
 driven by the punishment payoffs \(P\) and \(S\) worsening as \(\kappa\)
 rises. At the calibration baseline \(\kappa = 2\) and above, these lie
 strictly below the canonical \(0.5\); at the baseline \(\theta\) and
@@ -1526,7 +1476,7 @@ The ALLD mutant is strictly dominated ($V_{\text{ALLD}} < V_{\text{TFT}}$) when:
 
 $$\delta > \frac{T - R}{T - P} = \delta^*$$
 
-Under the physical payoff model, this holds for all $\delta > 0.431$ (baseline parameters).
+Under the physical payoff model, this holds for all $\delta > 0.430$ (baseline parameters).
 \end{theorem}
 
 \begin{proof}
@@ -1773,7 +1723,7 @@ per-period survival probability \(\sigma\) and time-preference rate
 \(r\). An agent satisfying \(\delta \geq \delta^*\) is one whose
 expected continuation in the system is sufficient that future energy
 access dominates the immediate energy windfall of seizure. The threshold
-\(\delta^* \approx 0.431\) is the level of expected persistence at which
+\(\delta^* \approx 0.430\) is the level of expected persistence at which
 an agent's own thermodynamic future outweighs the one-shot temptation;
 the cooperation theorem (Theorem~\ref{thm-cooperation-theorem}) is the
 statement that an agent intending to persist will not defect on a
@@ -1881,7 +1831,7 @@ repeated-games literature:
   standard result is that cooperation remains a NE but requires a higher
   \(\delta > \delta^*_{\text{noisy}} > \delta^*\)
   \citep{GreenPorter1984, Fudenberg1991}. The model's baseline
-  \(\delta^* = 0.431\) provides substantial headroom before cooperation
+  \(\delta^* = 0.430\) provides substantial headroom before cooperation
   ceases to be sustainable.
 \end{enumerate}
 
@@ -1933,7 +1883,7 @@ partial defection is dominated.
 \textbf{Imperfect monitoring.} Incorporating noisy observation channels,
 where defection is detected with probability \(p < 1\), to bound
 \(\delta^*_{\text{noisy}}\) as a function of detection probability and
-determine when the baseline headroom (\(\delta^* = 0.431\) versus the
+determine when the baseline headroom (\(\delta^* = 0.430\) versus the
 canonical \(0.5\)) is sufficient.
 
 \textbf{Heterogeneous agents.} Agents with asymmetric endowments, time
@@ -1946,7 +1896,7 @@ pairwise interaction and universal cooperation, to characterize when and
 how stable coalitions form and how they resist internal defection.
 
 \textbf{Embeddedness-dependent cooperation threshold.} The cooperation
-threshold \(\delta^* \approx 0.431\) is derived for agents in a
+threshold \(\delta^* \approx 0.430\) is derived for agents in a
 shared-pool environment. Embedding agents in a production network, where
 each agent's output feeds other agents' inputs, would lower this
 threshold for agents with high in-degree and out-degree, because
@@ -2007,39 +1957,6 @@ Injection} \citep{TC-II}, and \emph{Thermodynamic Friction}
 structure derives, and \emph{Value Dynamics} \citep{TC-VI} analyzes the
 dynamical stability of the resulting cooperative configurations.
 
-\section*{Declaration of competing
-interest}\label{declaration-of-competing-interest}
-\addcontentsline{toc}{section}{Declaration of competing interest}
-
-The author declares that he has no known competing financial interests
-or personal relationships that could have appeared to influence the work
-reported in this paper.
-
-\section*{Funding}\label{funding}
-\addcontentsline{toc}{section}{Funding}
-
-This research received no external funding.
-
-\section*{Data availability}\label{data-availability}
-\addcontentsline{toc}{section}{Data availability}
-
-No datasets were generated or analyzed in this study; the numerical
-results reported in the text are computed directly from the closed-form
-expressions derived in the paper. The verification code for the
-\emph{Thermodynamics of Cooperation} series is openly available at
-\url{https://github.com/keithlostracco/Mathematics-of-Coexistence}.
-
-\section*{Declaration of generative AI and AI-assisted technologies in
-the manuscript preparation
-process}\label{declaration-of-generative-ai-and-ai-assisted-technologies-in-the-manuscript-preparation-process}
-\addcontentsline{toc}{section}{Declaration of generative AI and
-AI-assisted technologies in the manuscript preparation process}
-
-During the preparation of this work, the author used GitHub Copilot to
-assist with background research and prose refinement. After using this
-tool, the author reviewed and edited the content as needed and takes
-full responsibility for the content of the published article.
-
 \appendix
 
 \section{\texorpdfstring{Appendix: Recalled Results from the
@@ -2069,22 +1986,22 @@ twice-differentiable, strictly concave, monotone-increasing at the
 origin, coercive) and a boundary of integrity \(B_i > 0\) in energy
 units.
 
-\textbf{Variational equilibrium and the cooperative split}
-(\citep{TC-I}, Theorem 7 \citep{TC-I}). When all agents optimize
-simultaneously under shared resource constraints, the solution concept
-is the variational (Normalized Nash) equilibrium, at which every agent
-faces the same per-unit shadow price on each scarce resource. For
-symmetric agents contesting a resource of energy value \(E_R > 0\), the
-equilibrium allocates the resource equally. Net of a coordination cost
+\textbf{Variational equilibrium and the cooperative split} (Theorem 7
+\citep{TC-I}). When all agents optimize simultaneously under shared
+resource constraints, the solution concept is the variational
+(Normalized Nash) equilibrium, at which every agent faces the same
+per-unit shadow price on each scarce resource. For symmetric agents
+contesting a resource of energy value \(E_R > 0\), the equilibrium
+allocates the resource equally. Net of a coordination cost
 \(c \ll E_R\), this equal split is the cooperative payoff used in the
 main text, \(R = E_R/2 - c\).
 
-\textbf{Welfare dominance} (\citep{TC-I}, Theorem 9 \citep{TC-I},
-Corollary 10 \citep{TC-I}). The variational equilibrium uniquely
-maximizes total welfare over the feasible set, strictly dominating
-greedy, equal-split, and every other feasible allocation. This is the
-basis for the cooperative multiplier exceeding unity in the \(N\)-player
-public goods game.
+\textbf{Welfare dominance} (Theorem 9 \citep{TC-I}, Corollary 10
+\citep{TC-I}). The variational equilibrium uniquely maximizes total
+welfare over the feasible set, strictly dominating greedy, equal-split,
+and every other feasible allocation. This is the basis for the
+cooperative multiplier exceeding unity in the \(N\)-player public goods
+game.
 
 \subsection{Conflict costs and the friction multiplier (from
 Thermodynamic
@@ -2105,14 +2022,14 @@ main text additionally uses the exploitation efficiency
 must spend to seize it from an unprepared cooperator; this quantity is
 defined in the present paper, not recalled from the series.
 
-\textbf{Symmetric contest} (\citep{TC-IV}, Proposition 1 \citep{TC-IV}).
-In the symmetric two-agent Tullock contest over \(E_R\), each agent
-invests \(e^* = E_R/4\) at the Nash equilibrium, and total contest
-dissipation is \(E_R/2\).
+\textbf{Symmetric contest} (Proposition 1 \citep{TC-IV}). In the
+symmetric two-agent Tullock contest over \(E_R\), each agent invests
+\(e^* = E_R/4\) at the Nash equilibrium, and total contest dissipation
+is \(E_R/2\).
 
-\textbf{Net-negative conflict} (\citep{TC-IV}, Theorem 6 \citep{TC-IV}).
-Mutual defection dissipates more energy than the contested resource is
-worth whenever \(\Phi\) exceeds the population-dependent threshold
+\textbf{Net-negative conflict} (Theorem 6 \citep{TC-IV}). Mutual
+defection dissipates more energy than the contested resource is worth
+whenever \(\Phi\) exceeds the population-dependent threshold
 \(N/(N-1)\); for two agents this is \(\Phi > 2\). The condition
 \(\Phi > 2\) is equivalent to \(\kappa\psi > 1\), i.e.~combined boundary
 damage exceeding \(1/\kappa\) (one half at \(\kappa = 2\));
@@ -2140,8 +2057,8 @@ The injection is additive and instantaneous while recovery is
 multiplicative and gradual, the thermodynamic asymmetry between
 increasing and decreasing entropy.
 
-\textbf{Cascading friction} (\citep{TC-IV}, Theorem 10 \citep{TC-IV}). A
-single violation of severity \(v\) produces total cascading cost
+\textbf{Cascading friction} (Theorem 10 \citep{TC-IV}). A single
+violation of severity \(v\) produces total cascading cost
 \(\eta v M \bar{E} / \epsilon\) over the full recovery horizon, where
 \(M\) is the number of cooperative transactions per period and
 \(\bar{E}\) their average value; the amplification ratio
