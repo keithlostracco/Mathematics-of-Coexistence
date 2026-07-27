@@ -5,28 +5,15 @@
 \graphicspath{{./}}
 \usepackage{natbib}
 \usepackage{doi}
-% \setcitestyle{numbers,super} % Superscript citation numbers (e.g. ¹, ²⁻⁴) — does not support locator notes
-\setcitestyle{numbers,square} % Square brackets around citation numbers (e.g. [1], [2-4]) — math standard
-% ── Merge citation text into a single hyperlink ───────────────────────────────
+\setcitestyle{numbers,square} %
 \makeatletter
 \renewcommand{\hyper@natlinkbreak}[2]{#1}
 \makeatother
 \usepackage{titlesec}
-% New page before each top-level section
-% \newcommand{\sectionbreak}{\clearpage}
 
-% ── Theorem-like environments ─────────────────────────────────────────────────
 \usepackage{amsmath}
 \usepackage{amsthm}
-\usepackage{dsfont} % double-struck numerals (\mathds{1} for indicator functions)
-% thmtools is only needed for the optional \listoftheorems feature. Loading it
-% patches \newtheorem, and thmtools 0.76's patch is incompatible with recent
-% LaTeX kernels (>= 2025) for shared-counter theorems (every sibling raises
-% "Command \c@... already defined"). We therefore load it only when the
-% list-of-theorems feature is actually requested.
-% Theorem-like environments defined with amsthm's native shared-counter syntax
-% (\newtheorem{child}[parent]{Name}). Numbering is grouped by counter without
-% relying on thmtools' sibling mechanism.
+\usepackage{dsfont} %
 \theoremstyle{plain}
 \newtheorem{theorem}{Theorem}
 \newtheorem{proposition}[theorem]{Proposition}
@@ -46,7 +33,6 @@
 \newtheorem{observation}[remark]{Observation}
 \newtheorem{property}[remark]{Property}
 
-% Prevent theorem-like environments from starting near the page bottom.
 \usepackage{etoolbox}
 \BeforeBeginEnvironment{theorem}{\needspace{4\baselineskip}\addvspace{6pt}}
 \BeforeBeginEnvironment{corollary}{\needspace{4\baselineskip}\addvspace{6pt}}
@@ -57,47 +43,30 @@
 \BeforeBeginEnvironment{assumption}{\needspace{4\baselineskip}\addvspace{6pt}}
 \BeforeBeginEnvironment{remark}{\needspace{4\baselineskip}\addvspace{9pt}}
 
-% ── Pandoc-generated table support ────────────────────────────────────────────
 \usepackage{longtable}
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage{calc}
 \usepackage{caption}
-% General table note: small font, flush-left, below the table (used by some papers).
 \newenvironment{tablenote}
   {\par\addvspace{2pt}\footnotesize\noindent}
   {\par\addvspace{4pt}}
-% Pandoc 3.x wraps uncaptioned longtables in \def\LTcaptype{none};
-% this requires a 'none' counter to exist.
 \newcounter{none}
 
-% ── Paragraph spacing (matches Pandoc default) ────────────────────────────────
-% No paragraph indentation; inter-paragraph spacing instead.
 \usepackage{parskip}
 
-% ── Page-break quality ────────────────────────────────────────────────────────
-% Prevent widow/orphan lines (single line stranded at top/bottom of page).
 \widowpenalty=10000
 \clubpenalty=10000
-% Pin footnotes to the page bottom even with \raggedbottom.
 \usepackage[bottom]{footmisc}
-% Prevent page breaks immediately before or after display equations.
 \predisplaypenalty=10000
 \postdisplaypenalty=150
-% Allow uneven page bottoms rather than stretching vertical glue.
 \raggedbottom
-% Increase separation between body text and footnotes.
 \setlength{\skip\footins}{1.5\baselineskip}
-% Ensure headings don't appear at page bottom without body text following.
 \usepackage{needspace}
-% Reserve enough space for the heading itself plus at least two following
-% lines of body text (or a nested heading plus a line). This prevents a
-% heading from appearing at the bottom of a page with its content (or its
-% next-level subheading) starting on the following page.
 \let\origsection\section
-\renewcommand{\section}{\needspace{6\baselineskip}\origsection}
+\renewcommand{\section}{\needspace{12\baselineskip}\origsection}
 \let\origsubsection\subsection
-\renewcommand{\subsection}{\needspace{6\baselineskip}\origsubsection}
+\renewcommand{\subsection}{\needspace{7\baselineskip}\origsubsection}
 \let\origsubsubsection\subsubsection
 \renewcommand{\subsubsection}{\needspace{4\baselineskip}\origsubsubsection}
 \let\origparagraphcmd\paragraph
@@ -105,18 +74,10 @@
 \let\origsubparagraph\subparagraph
 \renewcommand{\subparagraph}{\needspace{3\baselineskip}\origsubparagraph}
 
-% Discourage page breaks inside multi-line math environments (align, gather, etc.)
 \interdisplaylinepenalty=10000
 
-% ── Section numbering ────────────────────────────────────────────────────────
-% Pandoc --number-sections generates \section{...} (not \section*{...}).
-% LaTeX auto-numbers to depth 3 (subsubsection) by default.
 \setcounter{secnumdepth}{3}
 
-% ── Make \paragraph and \subparagraph block-level (matches Pandoc) ───────────
-% By default LaTeX renders \paragraph as a run-in heading (text continues on
-% the same line). These commands make them free-standing headings with
-% proper spacing before and after.
 \titleformat{\paragraph}
   {\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
 \titlespacing*{\paragraph}
@@ -126,12 +87,9 @@
 \titlespacing*{\subparagraph}
   {0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
 
-% ── Pandoc-generated tightlist support ────────────────────────────────────────
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
-% ── Pandoc 3.x figure sizing ─────────────────────────────────────────────────
-% \pandocbounded constrains included graphics to text width when they exceed it
 \newcommand{\pandocbounded}[1]{%
   \sbox0{#1}%
   \ifdim\wd0>\linewidth
@@ -141,7 +99,6 @@
   \fi
 }
 
-% ── Unicode character fixes ───────────────────────────────────────────────────
 \usepackage{amssymb}
 \usepackage{newunicodechar}
 \newunicodechar{✓}{$\checkmark$}
@@ -150,9 +107,7 @@
 \newunicodechar{≈}{$\approx$}
 \newunicodechar{δ}{$\delta$}
 \newunicodechar{−}{$-$}
-% Superscript digits used in scientific notation (e.g. 10^-7, 10^29)
 \newunicodechar{⁰}{$^{0}$}
-% ¹²³ already defined by textcomp; suppress redefinition warning
 \begingroup\renewcommand\PackageWarning[2]{}%
 \newunicodechar{¹}{$^{1}$}
 \newunicodechar{²}{$^{2}$}
@@ -165,18 +120,18 @@
 \newunicodechar{⁸}{$^{8}$}
 \newunicodechar{⁹}{$^{9}$}
 \newunicodechar{⁻}{$^{-}$}
-% Fix \rightarrow for use outside math mode
 \let\mystRightarrow\rightarrow
 \renewcommand{\rightarrow}{\ensuremath{\mystRightarrow}}
-% ─────────────────────────────────────────────────────────────────────────────
 
-% Allow TeX extra stretch to resolve moderate overfull hboxes
 \emergencystretch=2em
 
 \hypersetup{colorlinks=true, allcolors=blue}
 
 \title{Thermodynamics of Cooperation: Accumulated Negentropy}
-\author{Keith Lostracco}
+\author{%
+Keith Lostracco%
+\\[0.25em]{\normalsize ORCID: \href{https://orcid.org/0009-0005-3106-006X}{0009-0005-3106-006X}}%
+}
 \date{}
 
 \begin{document}
@@ -805,7 +760,7 @@ Chaisson's measurements provide an independent route to estimating
 Selected values from Chaisson \citeyearpar[Table 1]{Chaisson2011}
 relevant to biological systems:
 
-{\def\LTcaptype{none} % do not increment counter
+{\def\LTcaptype{none} %
 \begin{longtable}[]{@{}lcc@{}}
 \toprule\noalign{}
 System & Appearance (Ga) & \(\Phi_m\) (W/kg) \\
@@ -935,7 +890,7 @@ That is, the rebuild cost is at least the accumulated negentropy itself.
 \begin{proof}
 The argument proceeds in three steps:
 
-1. \textbf{The information is functional, not arbitrary.} The biosphere's $\mathcal{I}_{\text{bits}}$ bits are not random; they are the \emph{specific} configurations that solve the survival problem in Earth's physical environment. A random genome is overwhelmingly likely to be non-functional \citep{Adami2004}. The fraction of functional configurations in genome-space is estimated at $f_{\text{func}} \ll 1$ (for a 640-Mbit functional genome, even if each position has 10% tolerance, $f_{\text{func}} \sim 0.1^{6.4 \times 10^8} \approx 10^{-6.4 \times 10^8}$).
+1. \textbf{The information is functional, not arbitrary.} The biosphere's $\mathcal{I}_{\text{bits}}$ bits are not random; they are the \emph{specific} configurations that solve the survival problem in Earth's physical environment. A random genome is overwhelmingly likely to be non-functional \citep{Adami2004}. The fraction of functional configurations in genome-space is estimated at $f_{\text{func}} \ll 1$ (for a 640-Mbit functional genome, even if each position has 10%
 
 2. \textbf{Search requires energy.} Each candidate configuration must be physically instantiated, tested against the environment, and either retained or discarded. By Landauer's principle, each test cycle costs at least $k_B T \ln 2$ per bit manipulated. The number of test cycles required to find a functional configuration is $\sim 1/f_{\text{func}}$.
 
@@ -953,7 +908,7 @@ For comparison, the total energy output of the Sun is $L_\odot \approx 3.828 \ti
 
 $$t_{\text{rebuild}} \geq \frac{10^{29}}{3.828 \times 10^{26}} \approx 261 \text{ seconds} \approx 4.4 \text{ minutes}$$
 
-at 100% capture efficiency. At a realistic capture efficiency of 0.1%, this becomes ~4,400 minutes ≈ 3 days of total solar output.
+at 100%
 
 However, this estimate addresses only the energy budget, not the time requirement. The evolutionary search that produced the biosphere took $4 \times 10^9$ years precisely because the search space is combinatorially vast and tested sequentially by physical instantiation. A search process with vastly greater computational throughput could potentially parallelize the search, but the energy cost remains at least $\mathcal{N}_{\text{bio}}$.
 \end{corollary}
@@ -1302,7 +1257,7 @@ At stock $\mathcal{N}_0$, $d\mathcal{N}/dt = \alpha\mathcal{N}_0^\beta - \delta\
 \begin{remark}[Comparison to empirical tipping points]
 \label{rem-empirical-tipping-points}
 
-The tipping-point fraction $\lambda^*$ is a testable prediction. @LovejoyNobre2018 estimate that the Amazon rainforest undergoes irreversible transition to savanna at approximately 20-25% deforestation. Within the present framework, $\lambda^* = 0.20$-$0.25$ implies a generative surplus ratio $R = \alpha\mathcal{N}_0^{\beta-1}/\delta$ of only 1.25-1.33: the Amazon operates just 25-33% above its maintenance threshold. The system's fragility arises not from low absolute productivity (GPP is high) but from high $\beta$: the dense mutualistic networks that drive superlinear information generation also make the generative rate acutely sensitive to stock reductions.
+The tipping-point fraction $\lambda^*$ is a testable prediction. @LovejoyNobre2018 estimate that the Amazon rainforest undergoes irreversible transition to savanna at approximately 20-25%
 
 The coupling exponent $\beta$ determines how the tipping threshold depends on the surplus ratio (Figure 7a). At the same surplus ratio $R = 1.3$, a grassland ($\beta \approx 1.2$) tolerates destruction of $\sim73\%$ of its stock before collapse, while a tropical rainforest ($\beta \approx 2$) collapses at $\sim23\%$ destruction. This is consistent with the ecological observation that grasslands recover from severe disturbance in years, while tropical forests, once pushed past their tipping fraction, undergo irreversible transition to a degraded state.
 
@@ -1463,7 +1418,7 @@ Part (c): as $\lambda \to \lambda^*$, the lower integration limit $(1-\lambda)\m
 \begin{remark}[Information debt in ecological terms]
 \label{rem-information-debt}
 
-The superlinear recovery time creates what might be called an \emph{information debt}: the gap between destruction speed and recovery speed, compounded by the rate-stock coupling. If 20% of a forest is clear-cut, the recovery time exceeds the linear prediction by a factor that depends on $\beta$. For $\beta = 2$ (moderate superlinearity), 50% destruction lengthens recovery by $\sim$2$\times$ relative to the linear baseline for well-buffered systems, rising without bound as the generative surplus ratio $R = \alpha\mathcal{N}_0^{\beta-1}/\delta$ falls toward $R = 2$ (the tipping value for 50% loss at $\beta = 2$). A moderately buffered system at $R \approx 2.25$ already incurs a $\sim$4$\times$ penalty, and the factor grows without limit as $R \to 2^+$, consistent with the divergence of $T_{\text{recover}}$ at $\lambda^*$ (Proposition~\ref{prop-superlinear-recovery-time}, part c). Near the tipping threshold, the debt becomes infinite: the system cannot recover at all. This provides a formal basis for the ecological observation that recovery from large-scale damage (mass extinctions, wholesale habitat conversion) requires geological time scales, not human ones.
+The superlinear recovery time creates what might be called an \emph{information debt}: the gap between destruction speed and recovery speed, compounded by the rate-stock coupling. If 20%
 
 The $\beta$-dependent convexity of recovery time is consistent with observed ecological recovery hierarchies. Grasslands, with low interaction density ($\beta$ near 1), recover in years to decades because their generative rate depends only weakly on standing stock. Temperate forests ($\beta$ moderate) require decades to a century. Tropical rainforests and coral reefs, whose dense mutualistic networks (pollinator webs, mycorrhizal associations, coral-algal symbioses) imply high $\beta$, show sharply nonlinear recovery: partial degradation often triggers threshold collapse rather than gradual decline, consistent with the divergence predicted at $\lambda^*$. The results predict that more complex systems recover more slowly and that the functional form of recovery time transitions from approximately linear (low $\beta$) to threshold-dominated (high $\beta$), a qualitative distinction that is independently testable.
 \end{remark}
@@ -1642,7 +1597,7 @@ compare to the scale of human economic activity?
 
 \textbf{Setup:}
 
-{\def\LTcaptype{none} % do not increment counter
+{\def\LTcaptype{none} %
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
@@ -1716,7 +1671,7 @@ energy?
 
 \textbf{Setup:}
 
-{\def\LTcaptype{none} % do not increment counter
+{\def\LTcaptype{none} %
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
@@ -1882,7 +1837,7 @@ external cost.
 
 These results generate falsifiable predictions:
 
-{\def\LTcaptype{none} % do not increment counter
+{\def\LTcaptype{none} %
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}

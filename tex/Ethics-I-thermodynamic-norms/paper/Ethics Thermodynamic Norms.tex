@@ -5,28 +5,15 @@
 \graphicspath{{./}}
 \usepackage{natbib}
 \usepackage{doi}
-% \setcitestyle{numbers,super} % Superscript citation numbers (e.g. ¹, ²⁻⁴) — does not support locator notes
-\setcitestyle{numbers,square} % Square brackets around citation numbers (e.g. [1], [2-4]) — math standard
-% ── Merge citation text into a single hyperlink ───────────────────────────────
+\setcitestyle{numbers,square} %
 \makeatletter
 \renewcommand{\hyper@natlinkbreak}[2]{#1}
 \makeatother
 \usepackage{titlesec}
-% New page before each top-level section
-% \newcommand{\sectionbreak}{\clearpage}
 
-% ── Theorem-like environments ─────────────────────────────────────────────────
 \usepackage{amsmath}
 \usepackage{amsthm}
-\usepackage{dsfont} % double-struck numerals (\mathds{1} for indicator functions)
-% thmtools is only needed for the optional \listoftheorems feature. Loading it
-% patches \newtheorem, and thmtools 0.76's patch is incompatible with recent
-% LaTeX kernels (>= 2025) for shared-counter theorems (every sibling raises
-% "Command \c@... already defined"). We therefore load it only when the
-% list-of-theorems feature is actually requested.
-% Theorem-like environments defined with amsthm's native shared-counter syntax
-% (\newtheorem{child}[parent]{Name}). Numbering is grouped by counter without
-% relying on thmtools' sibling mechanism.
+\usepackage{dsfont} %
 \theoremstyle{plain}
 \newtheorem{theorem}{Theorem}
 \newtheorem{proposition}[theorem]{Proposition}
@@ -46,7 +33,6 @@
 \newtheorem{observation}[remark]{Observation}
 \newtheorem{property}[remark]{Property}
 
-% Prevent theorem-like environments from starting near the page bottom.
 \usepackage{etoolbox}
 \BeforeBeginEnvironment{theorem}{\needspace{4\baselineskip}\addvspace{6pt}}
 \BeforeBeginEnvironment{corollary}{\needspace{4\baselineskip}\addvspace{6pt}}
@@ -57,47 +43,30 @@
 \BeforeBeginEnvironment{assumption}{\needspace{4\baselineskip}\addvspace{6pt}}
 \BeforeBeginEnvironment{remark}{\needspace{4\baselineskip}\addvspace{9pt}}
 
-% ── Pandoc-generated table support ────────────────────────────────────────────
 \usepackage{longtable}
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage{calc}
 \usepackage{caption}
-% General table note: small font, flush-left, below the table (used by some papers).
 \newenvironment{tablenote}
   {\par\addvspace{2pt}\footnotesize\noindent}
   {\par\addvspace{4pt}}
-% Pandoc 3.x wraps uncaptioned longtables in \def\LTcaptype{none};
-% this requires a 'none' counter to exist.
 \newcounter{none}
 
-% ── Paragraph spacing (matches Pandoc default) ────────────────────────────────
-% No paragraph indentation; inter-paragraph spacing instead.
 \usepackage{parskip}
 
-% ── Page-break quality ────────────────────────────────────────────────────────
-% Prevent widow/orphan lines (single line stranded at top/bottom of page).
 \widowpenalty=10000
 \clubpenalty=10000
-% Pin footnotes to the page bottom even with \raggedbottom.
 \usepackage[bottom]{footmisc}
-% Prevent page breaks immediately before or after display equations.
 \predisplaypenalty=10000
 \postdisplaypenalty=150
-% Allow uneven page bottoms rather than stretching vertical glue.
 \raggedbottom
-% Increase separation between body text and footnotes.
 \setlength{\skip\footins}{1.5\baselineskip}
-% Ensure headings don't appear at page bottom without body text following.
 \usepackage{needspace}
-% Reserve enough space for the heading itself plus at least two following
-% lines of body text (or a nested heading plus a line). This prevents a
-% heading from appearing at the bottom of a page with its content (or its
-% next-level subheading) starting on the following page.
 \let\origsection\section
-\renewcommand{\section}{\needspace{6\baselineskip}\origsection}
+\renewcommand{\section}{\needspace{12\baselineskip}\origsection}
 \let\origsubsection\subsection
-\renewcommand{\subsection}{\needspace{6\baselineskip}\origsubsection}
+\renewcommand{\subsection}{\needspace{7\baselineskip}\origsubsection}
 \let\origsubsubsection\subsubsection
 \renewcommand{\subsubsection}{\needspace{4\baselineskip}\origsubsubsection}
 \let\origparagraphcmd\paragraph
@@ -105,18 +74,10 @@
 \let\origsubparagraph\subparagraph
 \renewcommand{\subparagraph}{\needspace{3\baselineskip}\origsubparagraph}
 
-% Discourage page breaks inside multi-line math environments (align, gather, etc.)
 \interdisplaylinepenalty=10000
 
-% ── Section numbering ────────────────────────────────────────────────────────
-% Pandoc --number-sections generates \section{...} (not \section*{...}).
-% LaTeX auto-numbers to depth 3 (subsubsection) by default.
 \setcounter{secnumdepth}{3}
 
-% ── Make \paragraph and \subparagraph block-level (matches Pandoc) ───────────
-% By default LaTeX renders \paragraph as a run-in heading (text continues on
-% the same line). These commands make them free-standing headings with
-% proper spacing before and after.
 \titleformat{\paragraph}
   {\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
 \titlespacing*{\paragraph}
@@ -126,12 +87,9 @@
 \titlespacing*{\subparagraph}
   {0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
 
-% ── Pandoc-generated tightlist support ────────────────────────────────────────
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
-% ── Pandoc 3.x figure sizing ─────────────────────────────────────────────────
-% \pandocbounded constrains included graphics to text width when they exceed it
 \newcommand{\pandocbounded}[1]{%
   \sbox0{#1}%
   \ifdim\wd0>\linewidth
@@ -141,7 +99,6 @@
   \fi
 }
 
-% ── Unicode character fixes ───────────────────────────────────────────────────
 \usepackage{amssymb}
 \usepackage{newunicodechar}
 \newunicodechar{✓}{$\checkmark$}
@@ -150,9 +107,7 @@
 \newunicodechar{≈}{$\approx$}
 \newunicodechar{δ}{$\delta$}
 \newunicodechar{−}{$-$}
-% Superscript digits used in scientific notation (e.g. 10^-7, 10^29)
 \newunicodechar{⁰}{$^{0}$}
-% ¹²³ already defined by textcomp; suppress redefinition warning
 \begingroup\renewcommand\PackageWarning[2]{}%
 \newunicodechar{¹}{$^{1}$}
 \newunicodechar{²}{$^{2}$}
@@ -165,18 +120,18 @@
 \newunicodechar{⁸}{$^{8}$}
 \newunicodechar{⁹}{$^{9}$}
 \newunicodechar{⁻}{$^{-}$}
-% Fix \rightarrow for use outside math mode
 \let\mystRightarrow\rightarrow
 \renewcommand{\rightarrow}{\ensuremath{\mystRightarrow}}
-% ─────────────────────────────────────────────────────────────────────────────
 
-% Allow TeX extra stretch to resolve moderate overfull hboxes
 \emergencystretch=2em
 
 \hypersetup{colorlinks=true, allcolors=blue}
 
 \title{A Theory of Ethics from First Principles: Thermodynamic Norms}
-\author{Keith Lostracco}
+\author{%
+Keith Lostracco%
+\\[0.25em]{\normalsize ORCID: \href{https://orcid.org/0009-0005-3106-006X}{0009-0005-3106-006X}}%
+}
 \date{}
 
 \begin{document}
@@ -413,7 +368,7 @@ deriving the payoff matrix from energy budgets
 Theorem's equilibrium selection problem: cooperation emerges as the
 unique efficient Nash Equilibrium (Corollary~\ref{ethics-cor-unique-ne})
 with a numerically computable cooperation threshold
-(\(\delta^* = 0.431\), Theorem~\ref{ethics-thm-cooperation}). The
+(\(\delta^* = 0.430\), Theorem~\ref{ethics-thm-cooperation}). The
 \(N\)-player generalization \citep{TC-V} provides the formal result that
 Ostrom's fieldwork documented empirically.
 
@@ -436,7 +391,7 @@ theory's unconstrained-conflict result \citep{TC-I} establishes that no
 stable allocation for the resource dimension exists under unconstrained
 optimization; where Hobbes required an external sovereign,
 Theorem~\ref{ethics-thm-cooperation} shows cooperation is self-enforcing
-for \(\delta \geq 0.431\). Structural analogues exist in Locke's
+for \(\delta \geq 0.430\). Structural analogues exist in Locke's
 rights-emergence \citep{Locke1689}, Rousseau's welfare-maximizing
 general will \citep{Rousseau1762}, and Rawls's veil of ignorance
 \citep{Rawls1971}, which corresponds here to the Variational Equilibrium
@@ -772,7 +727,7 @@ costs). Under the destructive-regime parameters (\(\kappa\psi > 1\)) of
 \citep{TC-V} (\(E_R = 100\), \(\Phi = 2.2\)), the payoffs (in Joules)
 are:
 
-{\def\LTcaptype{none} % do not increment counter
+{\def\LTcaptype{none} %
 \begin{longtable}[]{@{}lll@{}}
 \toprule\noalign{}
 & \(B: C\) & \(B: D\) \\
@@ -1902,7 +1857,7 @@ The results generate numerically specific, falsifiable predictions:
 
 \small
 
-{\def\LTcaptype{none} % do not increment counter
+{\def\LTcaptype{none} %
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4524}}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1905}}
@@ -2263,7 +2218,7 @@ through the structures encoding its functional information.
 
 \subsection{Summary}\label{summary}
 
-{\def\LTcaptype{none} % do not increment counter
+{\def\LTcaptype{none} %
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
@@ -2464,7 +2419,7 @@ The Lagrangian of the welfare function generates two primary
 mathematical objects, one of which decomposes into two analytically
 distinct components:
 
-{\def\LTcaptype{none} % do not increment counter
+{\def\LTcaptype{none} %
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
